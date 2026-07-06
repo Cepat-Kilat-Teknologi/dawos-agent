@@ -2,7 +2,7 @@
 
 Provides REST endpoints for listing active PPPoE sessions, viewing
 session statistics and IP pool usage, finding sessions by username,
-and terminating sessions on the accel-ppp BNG.
+and terminating PPPoE sessions.
 """
 
 # pylint: disable=broad-exception-caught

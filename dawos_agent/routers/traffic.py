@@ -2,7 +2,7 @@
 
 Provides REST endpoints and SSE streams for real-time per-user and
 aggregate throughput monitoring, tc queue statistics, and runtime
-rate-limit overrides on the accel-ppp BNG.
+rate-limit overrides on the PPP router.
 """
 
 from __future__ import annotations

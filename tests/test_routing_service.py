@@ -63,10 +63,13 @@ async def test_vtysh_success():
 @pytest.mark.asyncio
 async def test_vtysh_failure():
     proc = _mock_proc("error", returncode=1)
-    with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="vtysh failed"):
+    with (
+        patch(
+            "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="vtysh failed"),
+    ):
         await routing._vtysh("bad command")
 
 

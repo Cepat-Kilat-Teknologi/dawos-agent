@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from . import accel
 
@@ -129,7 +129,7 @@ async def user_traffic_events(
                 "upload_mbps": ul,
                 "rx_bytes": curr[0],
                 "tx_bytes": curr[1],
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
         prev = curr
@@ -198,7 +198,7 @@ async def aggregate_traffic_events(interval: float = 2.0):
                 "session_count": len(samples),
                 "total_download_mbps": round(total_dl, 2),
                 "total_upload_mbps": round(total_ul, 2),
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
         await asyncio.sleep(interval)

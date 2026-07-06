@@ -181,10 +181,13 @@ async def test_user_traffic_events_session_ends():
             return (200, 400)  # second sample
         return None  # session ended
 
-    with patch(
-        "dawos_agent.services.traffic.sample_session_bytes",
-        side_effect=mock_sample,
-    ), patch("dawos_agent.services.traffic.asyncio.sleep", new_callable=AsyncMock):
+    with (
+        patch(
+            "dawos_agent.services.traffic.sample_session_bytes",
+            side_effect=mock_sample,
+        ),
+        patch("dawos_agent.services.traffic.asyncio.sleep", new_callable=AsyncMock),
+    ):
         events = []
         async for ev in traffic.user_traffic_events("user1", interval=1.0):
             events.append(ev)
@@ -237,10 +240,13 @@ async def test_aggregate_traffic_events_produces_data():
             ]
         return []  # sessions gone
 
-    with patch(
-        "dawos_agent.services.traffic.sample_all_sessions",
-        side_effect=mock_all,
-    ), patch("dawos_agent.services.traffic.asyncio.sleep", new_callable=AsyncMock):
+    with (
+        patch(
+            "dawos_agent.services.traffic.sample_all_sessions",
+            side_effect=mock_all,
+        ),
+        patch("dawos_agent.services.traffic.asyncio.sleep", new_callable=AsyncMock),
+    ):
         events = []
         async for ev in traffic.aggregate_traffic_events(interval=1.0):
             events.append(ev)
@@ -258,14 +264,17 @@ async def test_aggregate_traffic_events_produces_data():
 
 @pytest.mark.asyncio
 async def test_get_queue_stats():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value="ppp0",
-    ), patch(
-        "dawos_agent.services.traffic._tc",
-        new_callable=AsyncMock,
-        return_value="qdisc fq_codel",
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value="ppp0",
+        ),
+        patch(
+            "dawos_agent.services.traffic._tc",
+            new_callable=AsyncMock,
+            return_value="qdisc fq_codel",
+        ),
     ):
         result = await traffic.get_queue_stats("user1")
 
@@ -276,11 +285,14 @@ async def test_get_queue_stats():
 
 @pytest.mark.asyncio
 async def test_get_queue_stats_no_session():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value=None,
-    ), pytest.raises(ValueError, match="No live session"):
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        pytest.raises(ValueError, match="No live session"),
+    ):
         await traffic.get_queue_stats("offline")
 
 
@@ -291,14 +303,17 @@ async def test_get_queue_stats_no_session():
 
 @pytest.mark.asyncio
 async def test_change_ratelimit_with_slash():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value="ppp0",
-    ), patch(
-        "dawos_agent.services.traffic.accel.shaper_change",
-        new_callable=AsyncMock,
-    ) as mock_shaper:
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value="ppp0",
+        ),
+        patch(
+            "dawos_agent.services.traffic.accel.shaper_change",
+            new_callable=AsyncMock,
+        ) as mock_shaper,
+    ):
         msg = await traffic.change_ratelimit("user1", "5M/20M")
 
     # up/down → down/up for accel-cmd
@@ -308,14 +323,17 @@ async def test_change_ratelimit_with_slash():
 
 @pytest.mark.asyncio
 async def test_change_ratelimit_no_slash():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value="ppp0",
-    ), patch(
-        "dawos_agent.services.traffic.accel.shaper_change",
-        new_callable=AsyncMock,
-    ) as mock_shaper:
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value="ppp0",
+        ),
+        patch(
+            "dawos_agent.services.traffic.accel.shaper_change",
+            new_callable=AsyncMock,
+        ) as mock_shaper,
+    ):
         await traffic.change_ratelimit("user1", "10M")
 
     mock_shaper.assert_called_once_with("ppp0", "10M")
@@ -323,11 +341,14 @@ async def test_change_ratelimit_no_slash():
 
 @pytest.mark.asyncio
 async def test_change_ratelimit_no_session():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value=None,
-    ), pytest.raises(ValueError, match="No live session"):
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        pytest.raises(ValueError, match="No live session"),
+    ):
         await traffic.change_ratelimit("offline", "5M/20M")
 
 
@@ -338,13 +359,16 @@ async def test_change_ratelimit_no_session():
 
 @pytest.mark.asyncio
 async def test_restore_ratelimit():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value="ppp0",
-    ), patch(
-        "dawos_agent.services.traffic.accel.shaper_restore",
-        new_callable=AsyncMock,
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value="ppp0",
+        ),
+        patch(
+            "dawos_agent.services.traffic.accel.shaper_restore",
+            new_callable=AsyncMock,
+        ),
     ):
         msg = await traffic.restore_ratelimit("user1")
 
@@ -353,11 +377,14 @@ async def test_restore_ratelimit():
 
 @pytest.mark.asyncio
 async def test_restore_ratelimit_no_session():
-    with patch(
-        "dawos_agent.services.traffic.accel.ifname_of",
-        new_callable=AsyncMock,
-        return_value=None,
-    ), pytest.raises(ValueError, match="No live session"):
+    with (
+        patch(
+            "dawos_agent.services.traffic.accel.ifname_of",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        pytest.raises(ValueError, match="No live session"),
+    ):
         await traffic.restore_ratelimit("offline")
 
 

@@ -18,7 +18,7 @@ serialisation.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -47,7 +47,7 @@ class HealthResponse(BaseModel):
     node_name: str
     version: str
     uptime_seconds: float
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +160,7 @@ class MetricsResponse(BaseModel):
     cpu: CpuInfo
     memory: MemoryInfo
     disk: DiskInfo
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ---------------------------------------------------------------------------

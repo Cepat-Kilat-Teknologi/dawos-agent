@@ -30,8 +30,9 @@ def test_read_config(tmp_config):
 
 def test_read_config_not_found():
     fake = Path("/nonexistent/accel-ppp.conf")
-    with patch.object(config_manager, "ACCEL_CONFIG", fake), pytest.raises(
-        FileNotFoundError
+    with (
+        patch.object(config_manager, "ACCEL_CONFIG", fake),
+        pytest.raises(FileNotFoundError),
     ):
         config_manager.read_config()
 

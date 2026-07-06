@@ -234,10 +234,13 @@ async def test_check_internet_fail():
 @pytest.mark.asyncio
 async def test_check_snmp_running():
     proc = _mock_proc("active")
-    with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock:
+    with (
+        patch(
+            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock,
+    ):
         sock_inst = MagicMock()
         mock_sock.return_value.__enter__ = MagicMock(return_value=sock_inst)
         mock_sock.return_value.__exit__ = MagicMock(return_value=False)
@@ -249,12 +252,15 @@ async def test_check_snmp_running():
 @pytest.mark.asyncio
 async def test_check_snmp_not_running():
     proc = _mock_proc("inactive", returncode=3)
-    with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), patch(
-        "dawos_agent.services.diagnostics.socket.socket",
-        side_effect=OSError("bind fail"),
+    with (
+        patch(
+            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.socket.socket",
+            side_effect=OSError("bind fail"),
+        ),
     ):
         result = await diagnostics.check_snmp()
 
@@ -265,12 +271,15 @@ async def test_check_snmp_not_running():
 @pytest.mark.asyncio
 async def test_check_snmp_running_port_closed():
     proc = _mock_proc("active")
-    with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), patch(
-        "dawos_agent.services.diagnostics.socket.socket",
-        side_effect=OSError("bind fail"),
+    with (
+        patch(
+            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.socket.socket",
+            side_effect=OSError("bind fail"),
+        ),
     ):
         result = await diagnostics.check_snmp()
 
@@ -342,10 +351,13 @@ async def test_set_conntrack():
 @pytest.mark.asyncio
 async def test_snmp_status():
     proc = _mock_proc("active")
-    with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock:
+    with (
+        patch(
+            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock,
+    ):
         sock_inst = MagicMock()
         mock_sock.return_value.__enter__ = MagicMock(return_value=sock_inst)
         mock_sock.return_value.__exit__ = MagicMock(return_value=False)
@@ -361,38 +373,47 @@ async def test_snmp_status():
 
 @pytest.mark.asyncio
 async def test_run_doctor():
-    with patch(
-        "dawos_agent.services.diagnostics.check_service",
-        new_callable=AsyncMock,
-        return_value={"name": "service", "status": "ok", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_pppoe",
-        new_callable=AsyncMock,
-        return_value={"name": "pppoe", "status": "ok", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_nat",
-        new_callable=AsyncMock,
-        return_value={"name": "nat", "status": "warn", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_firewall",
-        new_callable=AsyncMock,
-        return_value={"name": "firewall", "status": "ok", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_conntrack",
-        new_callable=AsyncMock,
-        return_value={"name": "conntrack", "status": "ok", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_pool",
-        new_callable=AsyncMock,
-        return_value={"name": "pool", "status": "ok", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_internet",
-        new_callable=AsyncMock,
-        return_value={"name": "internet", "status": "fail", "detail": ""},
-    ), patch(
-        "dawos_agent.services.diagnostics.check_snmp",
-        new_callable=AsyncMock,
-        return_value={"name": "snmp", "status": "ok", "detail": ""},
+    with (
+        patch(
+            "dawos_agent.services.diagnostics.check_service",
+            new_callable=AsyncMock,
+            return_value={"name": "service", "status": "ok", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_pppoe",
+            new_callable=AsyncMock,
+            return_value={"name": "pppoe", "status": "ok", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_nat",
+            new_callable=AsyncMock,
+            return_value={"name": "nat", "status": "warn", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_firewall",
+            new_callable=AsyncMock,
+            return_value={"name": "firewall", "status": "ok", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_conntrack",
+            new_callable=AsyncMock,
+            return_value={"name": "conntrack", "status": "ok", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_pool",
+            new_callable=AsyncMock,
+            return_value={"name": "pool", "status": "ok", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_internet",
+            new_callable=AsyncMock,
+            return_value={"name": "internet", "status": "fail", "detail": ""},
+        ),
+        patch(
+            "dawos_agent.services.diagnostics.check_snmp",
+            new_callable=AsyncMock,
+            return_value={"name": "snmp", "status": "ok", "detail": ""},
+        ),
     ):
         result = await diagnostics.run_doctor()
 

@@ -49,15 +49,23 @@ async def test_get_limits_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_set_limits(client, headers):
-    with patch(
-        "dawos_agent.routers.limits_router.connection_limits.set_limits",
-        return_value="ok",
-    ), patch(
-        "dawos_agent.routers.limits_router.reload_config",
-        new_callable=AsyncMock,
-    ), patch(
-        "dawos_agent.routers.limits_router.connection_limits.get_limits",
-        return_value={"max_sessions": 1000, "max_starting": 100, "session_timeout": 0},
+    with (
+        patch(
+            "dawos_agent.routers.limits_router.connection_limits.set_limits",
+            return_value="ok",
+        ),
+        patch(
+            "dawos_agent.routers.limits_router.reload_config",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "dawos_agent.routers.limits_router.connection_limits.get_limits",
+            return_value={
+                "max_sessions": 1000,
+                "max_starting": 100,
+                "session_timeout": 0,
+            },
+        ),
     ):
         resp = await client.put(
             "/api/v1/limits",
@@ -71,16 +79,24 @@ async def test_set_limits(client, headers):
 @pytest.mark.asyncio
 async def test_set_limits_reload_failure(client, headers):
     """Cover the reload failure warning branch."""
-    with patch(
-        "dawos_agent.routers.limits_router.connection_limits.set_limits",
-        return_value="ok",
-    ), patch(
-        "dawos_agent.routers.limits_router.reload_config",
-        new_callable=AsyncMock,
-        side_effect=Exception("reload fail"),
-    ), patch(
-        "dawos_agent.routers.limits_router.connection_limits.get_limits",
-        return_value={"max_sessions": 1000, "max_starting": 0, "session_timeout": 0},
+    with (
+        patch(
+            "dawos_agent.routers.limits_router.connection_limits.set_limits",
+            return_value="ok",
+        ),
+        patch(
+            "dawos_agent.routers.limits_router.reload_config",
+            new_callable=AsyncMock,
+            side_effect=Exception("reload fail"),
+        ),
+        patch(
+            "dawos_agent.routers.limits_router.connection_limits.get_limits",
+            return_value={
+                "max_sessions": 1000,
+                "max_starting": 0,
+                "session_timeout": 0,
+            },
+        ),
     ):
         resp = await client.put(
             "/api/v1/limits",

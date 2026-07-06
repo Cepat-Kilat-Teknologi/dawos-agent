@@ -90,10 +90,13 @@ async def test_get_logs_empty():
 @pytest.mark.asyncio
 async def test_get_logs_error():
     proc = _mock_proc("error", returncode=1)
-    with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="Failed to read"):
+    with (
+        patch(
+            "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="Failed to read"),
+    ):
         await logs.get_logs()
 
 

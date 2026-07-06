@@ -80,7 +80,7 @@ async def lifespan(
 
 app = FastAPI(
     title="dawos-agent",
-    description="Lightweight REST agent for accel-ppp BNG nodes",
+    description="PPP router management agent",
     version=__version__,
     lifespan=lifespan,
     docs_url="/docs",

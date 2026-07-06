@@ -1,8 +1,8 @@
 # dawos-agent
 
-REST API daemon for managing accel-ppp BNG nodes. Wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as authenticated HTTP endpoints.
+Open source PPP router management agent. Manages PPPoE sessions, firewall, network, traffic shaping, routing, and system services on Linux-based BNG/concentrator nodes via REST API.
 
-Built for ISPs running accel-ppp as their PPPoE/BNG concentrator.
+Wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as authenticated HTTP endpoints.
 
 ## Features
 
@@ -17,16 +17,20 @@ Built for ISPs running accel-ppp as their PPPoE/BNG concentrator.
 ## Quick Start
 
 ```bash
-# install
+curl -sL https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh | sudo bash
+```
+
+Or manually:
+
+```bash
+git clone https://github.com/Cepat-Kilat-Teknologi/dawos-agent.git
+cd dawos-agent
 sudo bash install.sh
+```
 
-# configure
-sudo vim /etc/dawos-agent/agent.env
+After install, verify:
 
-# start
-sudo systemctl enable --now dawos-agent
-
-# verify
+```bash
 curl -s http://localhost:8470/health | python3 -m json.tool
 ```
 

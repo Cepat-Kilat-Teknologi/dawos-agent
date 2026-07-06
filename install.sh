@@ -2,7 +2,7 @@
 # =============================================================================
 #  dawos-agent installer v2.0
 #
-#  Interactive, modern installer for the accel-ppp BNG management daemon.
+#  Interactive installer for dawos-agent PPP router management daemon.
 #  Supports fresh install, upgrade, and non-interactive (--yes) modes.
 #
 #  Usage:
@@ -28,6 +28,14 @@ CONFIG_DIR="/etc/dawos-agent"
 ENV_FILE="${CONFIG_DIR}/agent.env"
 SYSTEMD_UNIT="/etc/systemd/system/${APP_NAME}.service"
 SUDOERS_FILE="/etc/sudoers.d/${APP_NAME}"
+
+# ── source repo ──────────────────────────────────────────────────────────────
+REPO_OWNER="Cepat-Kilat-Teknologi"
+REPO_NAME="dawos-agent"
+REPO_BRANCH="main"
+REPO_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}"
+TARBALL_URL="${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz"
+SOURCE_DIR=""
 
 DEFAULT_HOST="0.0.0.0"
 DEFAULT_PORT=8470
@@ -197,7 +205,7 @@ _banner() {
     echo "    │     ██████╔╝██║  ██║╚███╔███╔╝╚██████╔╝███████║        │"
     echo "    │     ╚═════╝ ╚═╝  ╚═╝ ╚══╝╚══╝  ╚═════╝ ╚══════╝        │"
     echo "    │                                                         │"
-    echo "    │       ${WHITE}accel-ppp BNG management agent${CYAN}                  │"
+    echo "    │       ${WHITE}PPP router management agent${CYAN}                     │"
     echo "    │       ${DIM}v${AGENT_VERSION} — installer v${INSTALLER_VERSION}${CYAN}${BOLD}                       │"
     echo "    │                                                         │"
     echo "    └─────────────────────────────────────────────────────────┘"
@@ -296,10 +304,10 @@ _uninstall() {
 }
 
 # =============================================================================
-#  PHASE 1 — PREFLIGHT CHECKS
+#  PREFLIGHT
 # =============================================================================
 _preflight() {
-    _header "1/6" "System Requirements Check"
+    _header "CHECK" "System requirements"
     local issues=0
 
     # Root check
@@ -390,7 +398,7 @@ _preflight() {
 }
 
 # =============================================================================
-#  PHASE 2 — CONFIGURATION WIZARD
+#  CONFIGURE
 # =============================================================================
 _saved_api_key=""
 _saved_port=""
@@ -402,7 +410,7 @@ _saved_accel_cmd=""
 _saved_accel_service=""
 
 _configure() {
-    _header "2/6" "Configuration"
+    _header "CONFIG" "Configuration"
 
     if $UPGRADE_MODE; then
         _ok "Upgrade mode — preserving existing configuration"
@@ -478,10 +486,10 @@ _configure() {
 }
 
 # =============================================================================
-#  PHASE 3 — SYSTEM SETUP
+#  SYSTEM SETUP
 # =============================================================================
 _setup_system() {
-    _header "3/6" "System Setup"
+    _header "SETUP" "System setup"
 
     # ── system dependencies ──
     if ! python3 -m venv --help &>/dev/null 2>&1; then
@@ -514,22 +522,61 @@ _setup_system() {
 }
 
 # =============================================================================
-#  PHASE 4 — INSTALL PACKAGE
+#  DOWNLOAD
+# =============================================================================
+_download_source() {
+    _header "DOWNLOAD" "Downloading source"
+
+    # Check if running from within the repo already
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || pwd)"
+
+    if [[ -f "${script_dir}/pyproject.toml" ]]; then
+        SOURCE_DIR="$script_dir"
+        _ok "Source found locally (${SOURCE_DIR})"
+        return
+    elif [[ -f "${script_dir}/../pyproject.toml" ]]; then
+        SOURCE_DIR="$(cd "${script_dir}/.." && pwd)"
+        _ok "Source found locally (${SOURCE_DIR})"
+        return
+    fi
+
+    # Download from GitHub
+    _step "Downloading from ${REPO_URL}..."
+
+    if ! command -v curl &>/dev/null; then
+        _fatal "curl is required to download the source. Install it: apt-get install curl"
+    fi
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d /tmp/dawos-agent-install.XXXXXX)
+    trap "_spin_stop; rm -rf '${tmp_dir}'" EXIT
+
+    _spin_start "Downloading ${REPO_NAME} (${REPO_BRANCH})..."
+    if curl -sL "$TARBALL_URL" | tar xz -C "$tmp_dir" 2>/dev/null; then
+        _spin_stop
+        SOURCE_DIR="${tmp_dir}/${REPO_NAME}-${REPO_BRANCH}"
+        if [[ -f "${SOURCE_DIR}/pyproject.toml" ]]; then
+            _ok "Downloaded and extracted to ${SOURCE_DIR}"
+        else
+            _fatal "Download succeeded but pyproject.toml not found"
+        fi
+    else
+        _spin_stop
+        _fatal "Failed to download from ${TARBALL_URL}"
+    fi
+}
+
+# =============================================================================
+#  INSTALL
 # =============================================================================
 _install_package() {
-    _header "4/6" "Installing dawos-agent"
+    _header "INSTALL" "Installing dawos-agent"
 
-    local script_dir repo_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    repo_dir="$script_dir"
+    local repo_dir="$SOURCE_DIR"
 
-    # Detect if running from repo or scripts/ subdirectory
-    if [[ -f "${repo_dir}/pyproject.toml" ]]; then
-        : # Good — running from repo root
-    elif [[ -f "${repo_dir}/../pyproject.toml" ]]; then
-        repo_dir="${repo_dir}/.."
-    else
-        _fatal "Cannot find pyproject.toml — run install.sh from the dawos-agent repository"
+    if [[ ! -f "${repo_dir}/pyproject.toml" ]]; then
+        _fatal "Source directory invalid — pyproject.toml not found in ${repo_dir}"
     fi
 
     # ── virtualenv ──
@@ -597,15 +644,12 @@ EOF
 }
 
 # =============================================================================
-#  PHASE 5 — SYSTEMD & SECURITY
+#  SERVICE
 # =============================================================================
 _install_service() {
-    _header "5/6" "Service & Security"
+    _header "SERVICE" "Service & security"
 
-    local script_dir repo_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    repo_dir="$script_dir"
-    [[ -f "${repo_dir}/../pyproject.toml" ]] && repo_dir="${repo_dir}/.."
+    local repo_dir="$SOURCE_DIR"
 
     # ── sudoers ──
     local sudoers_src="${repo_dir}/deploy/dawos-agent.sudoers"
@@ -621,7 +665,7 @@ _install_service() {
     else
         # Generate inline sudoers
         cat > "$SUDOERS_FILE" <<'SUDOERS'
-# dawos-agent — passwordless sudo for BNG management commands
+# dawos-agent — passwordless sudo for router management
 dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft
 dawos ALL=(ALL) NOPASSWD: /usr/sbin/ip
 dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
@@ -640,10 +684,12 @@ SUDOERS
     else
         cat > "$SYSTEMD_UNIT" <<'SERVICE'
 [Unit]
-Description=dawos-agent — accel-ppp BNG management daemon
-Documentation=https://github.com/Cepat-Kilat-Teknologi/accel-app
+Description=dawos-agent — PPP router management daemon
+Documentation=https://github.com/Cepat-Kilat-Teknologi/dawos-agent
 After=network-online.target accel-ppp.service
 Wants=network-online.target
+StartLimitBurst=3
+StartLimitIntervalSec=60
 
 [Service]
 Type=simple
@@ -653,13 +699,11 @@ EnvironmentFile=-/etc/dawos-agent/agent.env
 ExecStart=/opt/dawos-agent/venv/bin/dawos-agent
 Restart=on-failure
 RestartSec=5
-StartLimitBurst=3
-StartLimitIntervalSec=60
 
 NoNewPrivileges=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/etc/accel-ppp.conf /etc/accel-ppp.d /etc/accel-nat-egress.nft /etc/sysctl.d /etc/nftables.conf
+ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf
 PrivateTmp=true
 
 StandardOutput=journal
@@ -692,10 +736,10 @@ SERVICE
 }
 
 # =============================================================================
-#  PHASE 6 — HEALTH CHECK & SUMMARY
+#  VERIFY
 # =============================================================================
 _health_check() {
-    _header "6/6" "Verification"
+    _header "VERIFY" "Verification"
 
     local port
     port=$(grep -E '^DAWOS_PORT=' "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "$DEFAULT_PORT")
@@ -803,6 +847,7 @@ main() {
     _preflight
     _configure
     _setup_system
+    _download_source
     _install_package
     _install_service
     _health_check

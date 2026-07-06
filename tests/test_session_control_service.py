@@ -21,12 +21,13 @@ def _mock_run_cmd(output: str = ""):
 @pytest.mark.asyncio
 async def test_session_by_sid_found():
     table = "sid | ifname | username\nabc123 | ppp0 | user1"
-    with patch.object(
-        session_control.accel, "run_cmd", _mock_run_cmd(table)
-    ), patch.object(
-        session_control.accel,
-        "parse_table",
-        return_value=[{"sid": "abc123", "ifname": "ppp0", "username": "user1"}],
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd(table)),
+        patch.object(
+            session_control.accel,
+            "parse_table",
+            return_value=[{"sid": "abc123", "ifname": "ppp0", "username": "user1"}],
+        ),
     ):
         result = await session_control.session_by_sid("abc123")
 
@@ -50,12 +51,13 @@ async def test_session_by_sid_not_found():
 
 @pytest.mark.asyncio
 async def test_session_by_ip_found():
-    with patch.object(
-        session_control.accel, "run_cmd", _mock_run_cmd("")
-    ), patch.object(
-        session_control.accel,
-        "parse_table",
-        return_value=[{"ip": "10.0.0.5", "username": "user1"}],
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(
+            session_control.accel,
+            "parse_table",
+            return_value=[{"ip": "10.0.0.5", "username": "user1"}],
+        ),
     ):
         result = await session_control.session_by_ip("10.0.0.5")
 
@@ -79,12 +81,13 @@ async def test_session_by_ip_not_found():
 
 @pytest.mark.asyncio
 async def test_session_snapshot():
-    with patch.object(
-        session_control.accel, "run_cmd", _mock_run_cmd("")
-    ), patch.object(
-        session_control.accel,
-        "parse_table",
-        return_value=[{"username": "user1", "rx-bytes": "1000"}],
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(
+            session_control.accel,
+            "parse_table",
+            return_value=[{"username": "user1", "rx-bytes": "1000"}],
+        ),
     ):
         result = await session_control.session_snapshot("user1")
 
@@ -109,14 +112,17 @@ async def test_session_snapshot_not_found():
 
 @pytest.mark.asyncio
 async def test_restart_session_success():
-    with patch.object(
-        session_control.accel,
-        "ifname_of",
-        AsyncMock(return_value="ppp0"),
-    ), patch.object(
-        session_control.accel,
-        "terminate_session",
-        AsyncMock(return_value="ok"),
+    with (
+        patch.object(
+            session_control.accel,
+            "ifname_of",
+            AsyncMock(return_value="ppp0"),
+        ),
+        patch.object(
+            session_control.accel,
+            "terminate_session",
+            AsyncMock(return_value="ok"),
+        ),
     ):
         result = await session_control.restart_session("user1")
 

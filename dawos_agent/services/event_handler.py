@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 log = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ async def fire_event(event: str, payload: dict | None = None) -> dict:
         "payload": payload or {},
         "hooks_fired": len(results),
         "results": results,
-        "timestamp": datetime.now(UTC).isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     _event_log.append(entry)
 

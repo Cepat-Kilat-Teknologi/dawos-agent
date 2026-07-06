@@ -128,10 +128,13 @@ async def test_set_forwarders_reload_fail():
     async def fake_shell(cmd, **kw):
         return next(calls)
 
-    with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
-        side_effect=fake_shell,
-    ), pytest.raises(RuntimeError, match="Failed to reload"):
+    with (
+        patch(
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            side_effect=fake_shell,
+        ),
+        pytest.raises(RuntimeError, match="Failed to reload"),
+    ):
         await dns_forwarding.set_forwarders(["8.8.8.8"])
 
 
@@ -155,10 +158,13 @@ async def test_flush_cache():
 @pytest.mark.asyncio
 async def test_flush_cache_fail():
     proc = _mock_proc("fail", returncode=1)
-    with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="Failed to flush"):
+    with (
+        patch(
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="Failed to flush"),
+    ):
         await dns_forwarding.flush_cache()
 
 

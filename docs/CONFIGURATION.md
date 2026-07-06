@@ -1,6 +1,6 @@
 # Configuration Reference
 
-Complete configuration reference for **dawos-agent** — the lightweight REST agent daemon for accel-ppp BNG nodes.
+Complete configuration reference for **dawos-agent** — PPP router management agent.
 
 ---
 
@@ -240,7 +240,7 @@ The service unit at `/etc/systemd/system/dawos-agent.service` controls how the a
 
 | Directive | Value | Purpose |
 |-----------|-------|---------|
-| `Description` | `dawos-agent — accel-ppp BNG management daemon` | Human-readable service description shown in `systemctl status` |
+| `Description` | `dawos-agent — PPP router management daemon` | Human-readable service description shown in `systemctl status` |
 | `Documentation` | `https://github.com/...` | Link to project documentation |
 | `After` | `network-online.target accel-ppp.service` | Delays startup until networking is ready and accel-ppp has started |
 | `Wants` | `network-online.target` | Soft dependency — request network but don't fail if unavailable |

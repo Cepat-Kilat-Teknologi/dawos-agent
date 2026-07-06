@@ -49,15 +49,19 @@ async def test_get_pado_delay_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_set_pado_delay(client, headers):
-    with patch(
-        "dawos_agent.routers.pado_router.pado_delay.set_pado_delay",
-        return_value="ok",
-    ), patch(
-        "dawos_agent.routers.pado_router.reload_config",
-        new_callable=AsyncMock,
-    ), patch(
-        "dawos_agent.routers.pado_router.pado_delay.get_pado_delay",
-        return_value={"delay": 1000, "min_sessions": 50, "description": "1000ms"},
+    with (
+        patch(
+            "dawos_agent.routers.pado_router.pado_delay.set_pado_delay",
+            return_value="ok",
+        ),
+        patch(
+            "dawos_agent.routers.pado_router.reload_config",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "dawos_agent.routers.pado_router.pado_delay.get_pado_delay",
+            return_value={"delay": 1000, "min_sessions": 50, "description": "1000ms"},
+        ),
     ):
         resp = await client.put(
             "/api/v1/pppoe/pado",
@@ -70,16 +74,20 @@ async def test_set_pado_delay(client, headers):
 
 @pytest.mark.asyncio
 async def test_set_pado_delay_reload_failure(client, headers):
-    with patch(
-        "dawos_agent.routers.pado_router.pado_delay.set_pado_delay",
-        return_value="ok",
-    ), patch(
-        "dawos_agent.routers.pado_router.reload_config",
-        new_callable=AsyncMock,
-        side_effect=Exception("reload fail"),
-    ), patch(
-        "dawos_agent.routers.pado_router.pado_delay.get_pado_delay",
-        return_value={"delay": 500, "min_sessions": 0, "description": "500ms"},
+    with (
+        patch(
+            "dawos_agent.routers.pado_router.pado_delay.set_pado_delay",
+            return_value="ok",
+        ),
+        patch(
+            "dawos_agent.routers.pado_router.reload_config",
+            new_callable=AsyncMock,
+            side_effect=Exception("reload fail"),
+        ),
+        patch(
+            "dawos_agent.routers.pado_router.pado_delay.get_pado_delay",
+            return_value={"delay": 500, "min_sessions": 0, "description": "500ms"},
+        ),
     ):
         resp = await client.put(
             "/api/v1/pppoe/pado",

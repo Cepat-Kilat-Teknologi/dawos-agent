@@ -84,10 +84,13 @@ async def test_set_egress():
 @pytest.mark.asyncio
 async def test_set_egress_error():
     proc = _mock_proc("error", returncode=1)
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError),
+    ):
         await nat.set_egress("10.0.0.2", "1.2.3.4")
 
 
@@ -106,10 +109,13 @@ async def test_clear_egress():
 @pytest.mark.asyncio
 async def test_clear_egress_error():
     proc = _mock_proc("error", returncode=1)
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError),
+    ):
         await nat.clear_egress("10.0.0.2")
 
 
@@ -162,10 +168,13 @@ async def test_add_public_ip_error():
             return _mock_proc("default via 1.2.3.1 dev eth0")
         return _mock_proc("error", returncode=1)
 
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        side_effect=mock_shell,
-    ), pytest.raises(RuntimeError):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            side_effect=mock_shell,
+        ),
+        pytest.raises(RuntimeError),
+    ):
         await nat.add_public_ip("1.2.3.4")
 
 
@@ -200,10 +209,13 @@ async def test_remove_public_ip_error():
             return _mock_proc("default via 1.2.3.1 dev eth0")
         return _mock_proc("error", returncode=1)
 
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        side_effect=mock_shell,
-    ), pytest.raises(RuntimeError):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            side_effect=mock_shell,
+        ),
+        pytest.raises(RuntimeError),
+    ):
         await nat.remove_public_ip("1.2.3.4")
 
 
@@ -310,20 +322,26 @@ async def test_detect_uplink():
 @pytest.mark.asyncio
 async def test_detect_uplink_no_default():
     proc = _mock_proc("", returncode=1)
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="Cannot detect"):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="Cannot detect"),
+    ):
         await nat._detect_uplink()
 
 
 @pytest.mark.asyncio
 async def test_detect_uplink_no_dev():
     proc = _mock_proc("default via 1.2.3.1")
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="Cannot parse"):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="Cannot parse"),
+    ):
         await nat._detect_uplink()
 
 
@@ -376,8 +394,11 @@ async def test_run_sudo():
 @pytest.mark.asyncio
 async def test_run_ok_raises():
     proc = _mock_proc("error", returncode=1)
-    with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
-        return_value=proc,
-    ), pytest.raises(RuntimeError, match="Command failed"):
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="Command failed"),
+    ):
         await nat._run_ok("nft add element")

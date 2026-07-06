@@ -1,4 +1,4 @@
-"""dawos-agent — lightweight REST agent for accel-ppp BNG nodes.
+"""dawos-agent — PPP router management agent.
 
 This package provides a FastAPI-based REST API that wraps the accel-ppp
 Broadband Network Gateway (BNG) CLI and system utilities, exposing them

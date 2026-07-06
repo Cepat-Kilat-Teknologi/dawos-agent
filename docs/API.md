@@ -1,6 +1,6 @@
 # dawos-agent API Reference
 
-REST API for managing accel-ppp BNG (Broadband Network Gateway) nodes.
+REST API reference for dawos-agent.
 
 **Base URL:** `http://<node-ip>:8470`
 

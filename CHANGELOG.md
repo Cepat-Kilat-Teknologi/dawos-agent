@@ -14,7 +14,7 @@ Nothing yet.
 ### Added
 
 - Initial release of dawos-agent.
-- FastAPI REST daemon for accel-ppp BNG management.
+- PPP router management agent.
 - 128+ API endpoints across 27 router modules.
 - 28 service modules covering: sessions, config, network, firewall, NAT, PPPoE,
   traffic, routing (BGP/OSPF/RIP/BFD), conntrack, IP pools, DHCP, DNS, NTP,

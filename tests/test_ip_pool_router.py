@@ -49,12 +49,15 @@ async def test_list_pools_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_add_pool(client, headers):
-    with patch(
-        "dawos_agent.routers.ip_pool_router.ip_pool.add_pool",
-        return_value="Added pool vip",
-    ), patch(
-        "dawos_agent.routers.ip_pool_router.reload_config",
-        new_callable=AsyncMock,
+    with (
+        patch(
+            "dawos_agent.routers.ip_pool_router.ip_pool.add_pool",
+            return_value="Added pool vip",
+        ),
+        patch(
+            "dawos_agent.routers.ip_pool_router.reload_config",
+            new_callable=AsyncMock,
+        ),
     ):
         resp = await client.post(
             "/api/v1/ip-pool",
@@ -81,13 +84,16 @@ async def test_add_pool_duplicate(client, headers):
 
 @pytest.mark.asyncio
 async def test_add_pool_reload_failure(client, headers):
-    with patch(
-        "dawos_agent.routers.ip_pool_router.ip_pool.add_pool",
-        return_value="Added",
-    ), patch(
-        "dawos_agent.routers.ip_pool_router.reload_config",
-        new_callable=AsyncMock,
-        side_effect=Exception("reload fail"),
+    with (
+        patch(
+            "dawos_agent.routers.ip_pool_router.ip_pool.add_pool",
+            return_value="Added",
+        ),
+        patch(
+            "dawos_agent.routers.ip_pool_router.reload_config",
+            new_callable=AsyncMock,
+            side_effect=Exception("reload fail"),
+        ),
     ):
         resp = await client.post(
             "/api/v1/ip-pool",
@@ -132,12 +138,15 @@ async def test_add_pool_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_remove_pool(client, headers):
-    with patch(
-        "dawos_agent.routers.ip_pool_router.ip_pool.remove_pool",
-        return_value="Removed",
-    ), patch(
-        "dawos_agent.routers.ip_pool_router.reload_config",
-        new_callable=AsyncMock,
+    with (
+        patch(
+            "dawos_agent.routers.ip_pool_router.ip_pool.remove_pool",
+            return_value="Removed",
+        ),
+        patch(
+            "dawos_agent.routers.ip_pool_router.reload_config",
+            new_callable=AsyncMock,
+        ),
     ):
         resp = await client.delete("/api/v1/ip-pool/customers", headers=headers)
     assert resp.status_code == 200
@@ -156,13 +165,16 @@ async def test_remove_pool_not_found(client, headers):
 
 @pytest.mark.asyncio
 async def test_remove_pool_reload_failure(client, headers):
-    with patch(
-        "dawos_agent.routers.ip_pool_router.ip_pool.remove_pool",
-        return_value="Removed",
-    ), patch(
-        "dawos_agent.routers.ip_pool_router.reload_config",
-        new_callable=AsyncMock,
-        side_effect=Exception("reload fail"),
+    with (
+        patch(
+            "dawos_agent.routers.ip_pool_router.ip_pool.remove_pool",
+            return_value="Removed",
+        ),
+        patch(
+            "dawos_agent.routers.ip_pool_router.reload_config",
+            new_callable=AsyncMock,
+            side_effect=Exception("reload fail"),
+        ),
     ):
         resp = await client.delete("/api/v1/ip-pool/old", headers=headers)
     assert resp.status_code == 200

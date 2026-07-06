@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 log = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ async def _execute(name: str) -> dict:
     """
     job = _jobs[name]
     out, rc = await _run(job["command"])
-    now = datetime.now(UTC).isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     result = {"output": out, "returncode": rc, "timestamp": now}
     job["last_run"] = now
     job["last_result"] = result
