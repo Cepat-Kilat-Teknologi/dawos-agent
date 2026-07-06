@@ -1,0 +1,31 @@
+[Unit]
+Description=dawos-agent — accel-ppp BNG management daemon
+Documentation=https://github.com/Cepat-Kilat-Teknologi/accel-app
+After=network-online.target accel-ppp.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dawos
+Group=dawos
+EnvironmentFile=-/etc/dawos-agent/agent.env
+ExecStart=/opt/dawos-agent/venv/bin/dawos-agent
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+# Security hardening
+NoNewPrivileges=false
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/accel-ppp.conf /etc/accel-ppp.d /etc/accel-nat-egress.nft /etc/sysctl.d /etc/nftables.conf
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dawos-agent
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,188 @@
+"""Tests for services/conntrack.py — conntrack tuning."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
+from dawos_agent.services import conntrack
+
+
+def _mock_proc(stdout: str = "", returncode: int = 0):
+    proc = AsyncMock()
+    proc.communicate = AsyncMock(return_value=(stdout.encode(), b""))
+    proc.returncode = returncode
+    return proc
+
+
+# ---------------------------------------------------------------------------
+# get_config
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_config():
+    calls = iter(["262144", "50000", "65536"])
+
+    async def fake_shell(cmd, **kw):
+        return _mock_proc(next(calls))
+
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        side_effect=fake_shell,
+    ):
+        result = await conntrack.get_config()
+
+    assert result["table_size"] == 262144
+    assert result["current_count"] == 50000
+    assert result["hash_size"] == 65536
+    assert result["usage_percent"] == pytest.approx(19.1, abs=0.1)
+
+
+@pytest.mark.asyncio
+async def test_get_config_zero_max():
+    """Cover zero-division guard."""
+    calls = iter(["0", "0", "0"])
+
+    async def fake_shell(cmd, **kw):
+        return _mock_proc(next(calls))
+
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        side_effect=fake_shell,
+    ):
+        result = await conntrack.get_config()
+
+    assert result["usage_percent"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# set_table_size
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_set_table_size():
+    proc = _mock_proc("500000")
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.set_table_size(500000)
+
+    assert "table_size" in result
+
+
+# ---------------------------------------------------------------------------
+# timeouts
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_timeouts():
+    proc = _mock_proc("300")
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.get_timeouts()
+
+    assert "tcp_timeout_established" in result
+    assert result["tcp_timeout_established"] == 300
+
+
+@pytest.mark.asyncio
+async def test_set_timeout():
+    proc = _mock_proc("600")
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.set_timeout("tcp_timeout_established", 600)
+
+    assert "tcp_timeout_established" in result
+
+
+@pytest.mark.asyncio
+async def test_set_timeout_invalid_key():
+    with pytest.raises(ValueError, match="Unknown timeout key"):
+        await conntrack.set_timeout("bogus_key", 60)
+
+
+# ---------------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------------
+
+LSMOD_OUTPUT = """\
+Module                  Size  Used by
+nf_conntrack_ftp       20480  0
+nf_conntrack_sip       40960  1
+nf_conntrack          172032  5 nf_conntrack_ftp,nf_conntrack_sip
+"""
+
+
+@pytest.mark.asyncio
+async def test_list_helpers():
+    proc = _mock_proc(LSMOD_OUTPUT)
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.list_helpers()
+
+    assert len(result) == 2
+    assert result[0]["module"] == "nf_conntrack_ftp"
+
+
+@pytest.mark.asyncio
+async def test_list_helpers_error():
+    proc = _mock_proc("error", returncode=1)
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.list_helpers()
+
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# profiles
+# ---------------------------------------------------------------------------
+
+
+def test_list_profiles():
+    profiles = conntrack.list_profiles()
+    assert "default" in profiles
+    assert "gaming" in profiles
+    assert "streaming" in profiles
+
+
+@pytest.mark.asyncio
+async def test_apply_profile():
+    proc = _mock_proc("300")
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        result = await conntrack.apply_profile("gaming")
+
+    assert "tcp_timeout_established" in result
+
+
+@pytest.mark.asyncio
+async def test_apply_profile_unknown():
+    with pytest.raises(ValueError, match="Unknown profile"):
+        await conntrack.apply_profile("nonexistent")
+
+
+# ---------------------------------------------------------------------------
+# _safe_int
+# ---------------------------------------------------------------------------
+
+
+def test_safe_int():
+    assert conntrack._safe_int("42") == 42
+    assert conntrack._safe_int("abc") == 0
+    assert conntrack._safe_int("") == 0

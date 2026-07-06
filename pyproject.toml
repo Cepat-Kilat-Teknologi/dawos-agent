@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dawos-agent"
+version = "0.1.0"
+description = "Lightweight agent daemon for accel-ppp BNG nodes — exposes REST API for remote management by dawu-radius"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110,<1",
+    "uvicorn[standard]>=0.29,<1",
+    "psutil>=5.9,<7",
+    "pydantic>=2,<3",
+    "pydantic-settings>=2,<3",
+    "python-dotenv>=1,<2",
+]
+
+[project.scripts]
+dawos-agent = "dawos_agent.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.4",
+    "coverage>=7",
+]
+
+[tool.setuptools.packages.find]
+include = ["dawos_agent*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["dawos_agent"]
+omit = ["dawos_agent/__main__.py"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:"]
+
+[tool.pylint."messages_control"]
+# R0801 (duplicate-code) fires on the _run() shell helper that every
+# service module defines identically by design.
+disable = ["duplicate-code"]

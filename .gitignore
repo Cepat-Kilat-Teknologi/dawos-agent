@@ -1,0 +1,62 @@
+# =============================================================================
+#  dawos-agent .gitignore
+# =============================================================================
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ── Distribution / Packaging ─────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+*.whl
+MANIFEST
+
+# ── Virtual Environments ─────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Testing / Coverage ──────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# ── Linting / Formatting ────────────────────────────────────────────────────
+.ruff_cache/
+.mypy_cache/
+.pylint.d/
+
+# ── IDE / Editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ── OS Files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Environment / Secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Claude Code / OMC ────────────────────────────────────────────────────────
+CLAUDE.md
+.claude/
+.omc/

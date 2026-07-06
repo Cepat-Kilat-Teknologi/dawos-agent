@@ -1,0 +1,26 @@
+# /etc/sudoers.d/dawos-agent
+# Passwordless sudo for dawos-agent daemon user.
+# Install: sudo cp deploy/dawos-agent.sudoers /etc/sudoers.d/dawos-agent
+#          sudo chmod 0440 /etc/sudoers.d/dawos-agent
+#          sudo visudo -cf /etc/sudoers.d/dawos-agent
+#
+# Principle of least privilege: only commands actually invoked with
+# sudo=True in dawos_agent/services/*.py are listed here.
+
+# --- nftables (nat.py, firewall.py, diagnostics.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft
+
+# --- iproute2 networking (nat.py, network.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/ip
+
+# --- traffic control / shaper (traffic.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
+
+# --- FRR routing daemon (routing.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh
+
+# --- kernel parameters (firewall.py, diagnostics.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
+
+# --- write config files (firewall.py, nat.py, diagnostics.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/bin/tee

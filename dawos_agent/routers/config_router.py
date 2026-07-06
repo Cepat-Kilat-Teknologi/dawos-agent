@@ -1,0 +1,116 @@
+"""accel-ppp configuration file management API endpoints.
+
+Provides REST endpoints for reading, updating, and backing up the
+accel-ppp configuration file on the BNG host.  Supports atomic writes
+with optional pre-write backups and post-write service restarts.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+
+from fastapi import APIRouter, HTTPException
+
+from ..auth import ApiKey
+from ..config import settings
+from ..models.schemas import (
+    ConfigResponse,
+    ConfigUpdateRequest,
+    ConfigUpdateResponse,
+)
+from ..services import config_manager
+
+log = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/v1/config", tags=["config"])
+
+
+@router.get("", response_model=ConfigResponse)
+async def get_config(_key: str = ApiKey):
+    """Read the current accel-ppp configuration file.
+
+    Returns the full text content of the configuration file along with
+    its filesystem path and last-modified timestamp.
+
+    Returns:
+        ConfigResponse: File path, content, and last-modified timestamp.
+
+    Raises:
+        HTTPException(404): If the configuration file does not exist.
+        HTTPException(500): If the file cannot be read.
+    """
+    try:
+        content, mtime = config_manager.read_config()
+        return ConfigResponse(
+            path=str(settings.accel_config_path),
+            content=content,
+            last_modified=mtime,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.put("", response_model=ConfigUpdateResponse)
+async def update_config(req: ConfigUpdateRequest, _key: str = ApiKey):
+    """Update the accel-ppp configuration file.
+
+    Writes the provided content to the configuration file.  Optionally
+    creates a timestamped backup before writing and restarts the
+    accel-ppp systemd service after the write completes.
+
+    Args:
+        req: Request body containing new config content, backup flag,
+            and restart flag.
+
+    Returns:
+        ConfigUpdateResponse: Success status, message, and backup path.
+
+    Raises:
+        HTTPException(500): If the write or service restart fails.
+    """
+    try:
+        backup_path = config_manager.write_config(req.content, backup=req.backup)
+
+        if req.restart_service:
+            svc = settings.accel_service_name
+            proc = await asyncio.create_subprocess_exec(
+                "sudo",
+                "systemctl",
+                "restart",
+                svc,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            _, stderr = await proc.communicate()
+            if proc.returncode != 0:
+                err = stderr.decode().strip()
+                return ConfigUpdateResponse(
+                    success=False,
+                    message=f"Config saved but restart failed: {err}",
+                    backup_path=backup_path,
+                )
+
+        msg = "Config updated"
+        if req.restart_service:
+            msg += " and service restarted"
+
+        return ConfigUpdateResponse(success=True, message=msg, backup_path=backup_path)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.get("/backups")
+async def list_backups(_key: str = ApiKey):
+    """List available configuration backups.
+
+    Returns a list of all ``.bak`` and ``.checkpoint`` files in the
+    backup directory, sorted by creation time.
+
+    Returns:
+        list[dict]: Backup file metadata including name, size, and
+            creation timestamp.
+    """
+    return config_manager.list_backups()
