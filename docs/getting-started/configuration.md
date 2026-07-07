@@ -12,7 +12,7 @@ Complete configuration reference for **dawos-agent** — PPP router management a
 - [Sudoers Reference](#sudoers-reference)
 - [Systemd Unit Configuration](#systemd-unit-configuration)
 - [Logging](#logging)
-- [Network / Firewall](#network--firewall)
+- [Network and Firewall](#network-and-firewall)
 - [Production Recommendations](#production-recommendations)
 
 ---
@@ -334,7 +334,7 @@ All journal entries are tagged with `SyslogIdentifier=dawos-agent`, allowing you
 
 ---
 
-## Network / Firewall
+## Network and Firewall
 
 ### Default Listening Configuration
 
@@ -465,4 +465,4 @@ The agent is lightweight by design:
 | **Disk** | 2 GB free | 5 GB+ |
 | **OS** | Debian 11+ / Ubuntu 22.04+ | Ubuntu 24.04 LTS |
 
-See [INSTALLATION.md](INSTALLATION.md) for detailed hardware sizing guidance.
+See [Installation](installation.md) for detailed hardware sizing guidance.

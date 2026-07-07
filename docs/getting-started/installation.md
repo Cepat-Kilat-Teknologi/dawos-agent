@@ -253,7 +253,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now dawos-agent
 ```
 
-Or write it manually — see [systemd/dawos-agent.service](../systemd/dawos-agent.service) for the full unit file.
+Or write it manually — see [systemd/dawos-agent.service](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/systemd/dawos-agent.service) for the full unit file.
 
 ---
 
@@ -401,7 +401,7 @@ sudo apt update && sudo apt install python3 python3-venv
 
 ### Sudoers
 
-Only 6 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See [deploy/dawos-agent.sudoers](../deploy/dawos-agent.sudoers).
+Only 6 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See [deploy/dawos-agent.sudoers](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/deploy/dawos-agent.sudoers).
 
 ### Systemd Hardening
 

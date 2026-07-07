@@ -2,9 +2,14 @@
 
 **REST API daemon for managing PPPoE/BNG routers powered by accel-ppp.**
 
+[![CI](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/dawos-agent)](https://pypi.org/project/dawos-agent/)
+[![Python](https://img.shields.io/pypi/pyversions/dawos-agent)](https://pypi.org/project/dawos-agent/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/LICENSE)
+
 ## What is dawos-agent?
 
-`dawos-agent` is a FastAPI-based management daemon for Linux-based PPPoE BNG (Broadband Network Gateway) nodes. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as 138 authenticated HTTP endpoints.
+`dawos-agent` is a FastAPI-based management daemon for Linux-based PPPoE BNG (Broadband Network Gateway) nodes. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **138 authenticated HTTP endpoints** across **29 router modules**.
 
 ### Features
 
@@ -21,13 +26,13 @@
 ### Quick Example
 
 ```bash
-# Install
+# Install from PyPI
 pip install dawos-agent
 
 # Run with an API key
 DAWOS_API_KEY=your-secret dawos-agent
 
-# Health check
+# Health check (public)
 curl http://localhost:8470/health
 
 # List sessions (requires API key)
@@ -47,3 +52,33 @@ pip install dawos-agent
 ```
 
 See [Installation](getting-started/installation.md) for production deployment with the installer script.
+
+## Companion CLI
+
+For a rich terminal experience, use [dawos-cli](https://github.com/Cepat-Kilat-Teknologi/dawos-cli):
+
+```bash
+pip install dawos-cli
+dawos profile add prod --url http://bng-node:8470 --key YOUR_KEY
+dawos status
+dawos session list
+dawos top    # live dashboard
+```
+
+## Quality
+
+| Metric | Value |
+|--------|-------|
+| Tests | 808 passing |
+| Coverage | 100% |
+| Pylint | 10.00/10 |
+| Black | Formatted |
+| Ruff | Zero violations |
+
+## Links
+
+- [PyPI](https://pypi.org/project/dawos-agent/)
+- [GitHub](https://github.com/Cepat-Kilat-Teknologi/dawos-agent)
+- [Changelog](development/changelog.md)
+- [Contributing](development/contributing.md)
+- [Security Policy](development/security.md)
