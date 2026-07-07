@@ -535,6 +535,4 @@ def set_dns(
         )
         if result.returncode != 0:
             err = result.stderr.decode().strip()
-            raise PermissionError(
-                f"Failed to write {path}: {err}"
-            )
+            raise PermissionError(f"Failed to write {path}: {err}")

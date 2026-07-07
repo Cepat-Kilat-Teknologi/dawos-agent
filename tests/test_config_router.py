@@ -84,7 +84,11 @@ async def test_update_config_with_restart(client, headers):
         resp = await client.put(
             "/api/v1/config",
             headers=headers,
-            json={"content": "[ppp]\nkey=value\n", "restart_service": True, "backup": False},
+            json={
+                "content": "[ppp]\nkey=value\n",
+                "restart_service": True,
+                "backup": False,
+            },
         )
 
     assert resp.status_code == 200
