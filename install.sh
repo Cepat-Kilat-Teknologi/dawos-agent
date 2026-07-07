@@ -713,14 +713,16 @@ pppd_compat                 # Run ip-up/ip-down scripts on session events
 # ─────────────────────────────────────────────────────────────────────────────
 [core]
 log-error=/var/log/accel-ppp/core.log
-thread-count=4              # Match to CPU core count for best performance
+# Match to CPU core count for best performance
+thread-count=4
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # COMMON — global session parameters
 # ─────────────────────────────────────────────────────────────────────────────
 [common]
-single-session=replace      # If same user connects twice: replace | deny
+# If same user connects twice: replace | deny
+single-session=replace
 # max-sessions=0            # 0=unlimited, set to cap total sessions
 # max-starting=0            # 0=unlimited, cap concurrent session setup
 # session-timeout=0         # Max session lifetime in seconds (0=infinite)
@@ -731,18 +733,27 @@ single-session=replace      # If same user connects twice: replace | deny
 # PPP — Point-to-Point Protocol parameters
 # ─────────────────────────────────────────────────────────────────────────────
 [ppp]
-verbose=1                   # 0=quiet, 1=log PPP negotiation events
-min-mtu=1280                # Reject clients requesting MTU below this
-mtu=1400                    # Negotiated MTU (PPPoE max theoretical: 1492)
-mru=1400                    # Maximum Receive Unit
-ccp=0                       # 0=disable CCP (compression), saves CPU
-check-ip=1                  # Prevent duplicate IP assignment
-mppe=require                # MPPE encryption: require | prefer | deny | allow
-                            # require = reject clients without MPPE support
+# 0=quiet, 1=log PPP negotiation events
+verbose=1
+# Reject clients requesting MTU below this
+min-mtu=1280
+# Negotiated MTU (PPPoE max theoretical: 1492)
+mtu=1400
+# Maximum Receive Unit
+mru=1400
+# 0=disable CCP (compression), saves CPU
+ccp=0
+# Prevent duplicate IP assignment
+check-ip=1
+# MPPE encryption: require | prefer | deny | allow
+# require = reject clients without MPPE support
+mppe=require
 
 # --- LCP Echo (keepalive) ---
-lcp-echo-interval=30        # Send echo-request every N seconds (0=disable)
-lcp-echo-failure=3          # Disconnect after N missed echo-replies
+# Send echo-request every N seconds (0=disable)
+lcp-echo-interval=30
+# Disconnect after N missed echo-replies
+lcp-echo-failure=3
 # lcp-echo-timeout=120      # Alternative: disconnect on N seconds of silence
 
 # --- Advanced ---
@@ -823,8 +834,10 @@ verbose=1
 # DNS — pushed to PPP clients via IPCP
 # ─────────────────────────────────────────────────────────────────────────────
 [dns]
-dns1=8.8.8.8                # Primary DNS (Google)
-dns2=8.8.4.4                # Secondary DNS (Google)
+# Primary DNS (Google)
+dns1=8.8.8.8
+# Secondary DNS (Google)
+dns2=8.8.4.4
 # dns1=1.1.1.1              # Alternative: Cloudflare
 # dns2=1.0.0.1
 
@@ -837,7 +850,8 @@ dns2=8.8.4.4                # Secondary DNS (Google)
 # IP-POOL — subscriber address assignment
 # ─────────────────────────────────────────────────────────────────────────────
 [ip-pool]
-gw=10.0.0.1                 # Gateway address (BNG's PPP interface address)
+# Gateway address (BNG's PPP interface address)
+gw=10.0.0.1
 # shuffle=1                  # 1=randomize IP assignment order
 
 # ★ REQUIRED: define at least one pool range
@@ -865,8 +879,10 @@ gw=10.0.0.1                 # Gateway address (BNG's PPP interface address)
 log-file=/var/log/accel-ppp/accel-ppp.log
 log-emerg=/var/log/accel-ppp/emerg.log
 log-fail-file=/var/log/accel-ppp/auth-fail.log
-copy=1                      # 1=duplicate per-session logs into main log
-level=3                     # 0=off, 1=error, 2=+warn, 3=+info, 4=+full, 5=+debug
+# 1=duplicate per-session logs into main log
+copy=1
+# 0=off, 1=error, 2=+warn, 3=+info, 4=+full, 5=+debug
+level=3
 
 # --- Per-session/per-user logs (for troubleshooting) ---
 # per-user-dir=/var/log/accel-ppp/users
@@ -882,7 +898,8 @@ level=3                     # 0=off, 1=error, 2=+warn, 3=+info, 4=+full, 5=+debu
 #   when accel-cmd sends commands programmatically.
 # ─────────────────────────────────────────────────────────────────────────────
 [cli]
-tcp=127.0.0.1:2001          # TCP listener (used by accel-cmd and dawos-agent)
+# TCP listener (used by accel-cmd and dawos-agent)
+tcp=127.0.0.1:2001
 # telnet=127.0.0.1:2002     # Telnet listener (interactive admin only)
 # password=                  # Omit or comment out for no authentication
 # verbose=1                  # 1=log connection IPs, 2=also log commands
@@ -912,9 +929,12 @@ verbose=1
 # nas-ip-address=10.0.0.1                # NAS-IP-Address attribute
 
 # --- Timeouts and retries ---
-timeout=3                   # Seconds to wait for RADIUS response
-max-try=3                   # Max retries for auth/acct requests
-acct-timeout=120            # Accounting interim update timeout
+# Seconds to wait for RADIUS response
+timeout=3
+# Max retries for auth/acct requests
+max-try=3
+# Accounting interim update timeout
+acct-timeout=120
 
 # --- Accounting ---
 # acct-interim-interval=300              # Interim accounting updates (seconds)
@@ -952,12 +972,15 @@ acct-timeout=120            # Accounting interim update timeout
 # ─────────────────────────────────────────────────────────────────────────────
 [shaper]
 verbose=1
-attr=Filter-Id              # RADIUS attribute containing rate info
+# RADIUS attribute containing rate info
+attr=Filter-Id
 # attr-down=PPPD-Downstream-Speed-Limit  # Alternative: separate down attribute
 # attr-up=PPPD-Upstream-Speed-Limit      # Alternative: separate up attribute
 
-up-limiter=police            # Upstream method: police | htb
-down-limiter=tbf             # Downstream method: tbf | htb | clsact
+# Upstream method: police | htb
+up-limiter=police
+# Downstream method: tbf | htb | clsact
+down-limiter=tbf
 
 # rate-limit=100000/50000                # Default rate (Kbit/s) if not from RADIUS
 # burst-factor=0.1                       # Burst = rate × factor
@@ -975,8 +998,8 @@ down-limiter=tbf             # Downstream method: tbf | htb | clsact
 #   See pppd(8) for full list of available variables.
 # ─────────────────────────────────────────────────────────────────────────────
 [pppd-compat]
-ip-up=/etc/accel-ppp.d/ip-up            # Called when session is fully up
-ip-down=/etc/accel-ppp.d/ip-down        # Called when session terminates
+ip-up=/etc/accel-ppp.d/ip-up
+ip-down=/etc/accel-ppp.d/ip-down
 # ip-pre-up=/etc/accel-ppp.d/ip-pre-up  # Called before interface comes up
 # ip-change=/etc/accel-ppp.d/ip-change  # Called on RADIUS CoA
 # radattr-prefix=/var/run/radattr       # Write RADIUS attrs to file
@@ -1337,6 +1360,9 @@ main() {
     _configure
     _setup_system
     _install_accel_ppp
+    # Safety net: ensure accel-ppp systemd unit exists even if
+    # _install_accel_ppp took the "already installed" short path.
+    _ensure_accel_service
     _download_source
     _install_package
     _install_service
