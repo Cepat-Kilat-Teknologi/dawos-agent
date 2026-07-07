@@ -47,6 +47,8 @@ nav:
       - Installation: getting-started/installation.md
       - Configuration: getting-started/configuration.md
   - API Reference: api/reference.md
+  - Testing:
+      - API Test Report: testing/test-report.md
   - Development:
       - Contributing: development/contributing.md
       - Changelog: development/changelog.md
