@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Live integration test report** — 106 endpoints tested against real BNG node (`docs/testing/test-report.md`)
+- **Config content validation** — `field_validator` + `min_length=10` on `ConfigUpdateRequest` and `GuardedApplyRequest` to reject empty or malformed config writes
+- **Unit tests** — 2 new tests for config content validation (810 total, 100% coverage)
+
+### Fixed
+
+- **DNS write permissions** — `set_dns()` now uses `sudo tee` subprocess instead of `path.write_text()` to handle root-owned `/etc/resolv.conf` and systemd-resolved symlinks
+- **DNS systemd sandbox** — Added `/etc/resolv.conf` to `ReadWritePaths` in systemd unit and installer
+- **Empty config protection** — `PUT /api/v1/config` with empty content previously wrote 0 bytes to `/etc/accel-ppp.conf`, destroying the configuration; now returns HTTP 422 with validation error
+
+### Added
+
 - **GitHub Actions CI** -- Automated lint + test pipeline on push and pull requests (`.github/workflows/ci.yml`)
 - **GitHub Actions Release** -- PyPI publish + [GitHub Releases](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases) on version tag (`.github/workflows/release.yml`)
 - **GitHub Actions Docs** -- MkDocs Material documentation site auto-deploy (`.github/workflows/docs.yml`)

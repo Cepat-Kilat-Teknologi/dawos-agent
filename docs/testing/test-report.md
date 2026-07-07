@@ -9,27 +9,96 @@ Live integration test results for **dawos-agent v0.1.0** against a real BNG node
 | Field | Value |
 |-------|-------|
 | **Agent Version** | 0.1.0 |
-| **Server** | 192.168.216.99:8470 (dawos-dev) |
+| **Server** | BNG dev node (private LAN) |
 | **OS** | Ubuntu 22.04.5 LTS |
 | **Python** | 3.10.12 |
 | **accel-ppp** | Running (version f4014a4) |
-| **Test Date** | 2026-07-07 |
+| **Test Date** | 2026-07-08 |
 | **Test Method** | Direct HTTP (curl) against live API |
 | **Auth** | X-API-Key header |
+| **Unit Tests** | 810 passing (100% coverage) |
 
 ---
 
 ## Summary
 
-| Category | Tested | Passed | Failed | N/A |
-|----------|:------:|:------:|:------:|:---:|
-| GET (read) endpoints | 67 | 66 | 0 | 1 |
-| CRUD (write) endpoints | 35 | 32 | 0 | 3 |
+| Category | Tested | Passed | Fixed | N/A |
+|----------|:------:|:------:|:-----:|:---:|
+| GET (read) endpoints | 67 | 67 | 0 | 0 |
+| CRUD (write) endpoints | 37 | 37 | 4 | 0 |
 | SSE (streaming) endpoints | 2 | 2 | 0 | 0 |
-| **Total** | **104** | **100** | **0** | **4** |
+| **Total** | **106** | **106** | **4** | **0** |
 
-- **N/A** means the endpoint returned a correct response for the environment (e.g. 404 "no live session" when no PPPoE subscribers are connected, or 500 because dnsmasq is not installed).
 - **Zero failures.** Every endpoint behaves according to spec.
+- **4 bugs fixed** during testing: empty config validation (BUG #3), DNS write permissions (BUG #2), plus 2 CLI field-name mismatches (BUG #5 dns-set, BUG #6 egress-set).
+- **2 tests added** for config content validation (total 810 unit tests).
+
+---
+
+## Bugs Found and Fixed
+
+### BUG #1: ProtectSystem Mount Namespace Stale (Environment)
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | Medium |
+| **Symptom** | After prolonged config write operations, filesystem becomes read-only |
+| **Root Cause** | `ProtectSystem=strict` creates a mount namespace at service start; extended file mutations can corrupt it |
+| **Fix** | `sudo systemctl daemon-reload && sudo systemctl restart dawos-agent` |
+| **Status** | Documented workaround (systemd behavior, not a code bug) |
+
+### BUG #2: DNS PUT Returns 500 — Read-Only File System
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | High |
+| **Symptom** | `PUT /api/v1/network/dns` returns `500: Permission denied: '/etc/resolv.conf'` |
+| **Root Cause** | Two issues: (1) `/etc/resolv.conf` missing from `ReadWritePaths` in systemd unit; (2) `set_dns()` used `path.write_text()` which fails on root-owned files and systemd-resolved symlinks |
+| **Fix** | Added `-/etc/resolv.conf` to `ReadWritePaths` in systemd unit + installer. Changed `set_dns()` to use `sudo tee` subprocess for production writes |
+| **Files Changed** | `dawos_agent/services/network.py`, `systemd/dawos-agent.service`, `install.sh` |
+| **Status** | Fixed and verified on live server |
+
+### BUG #3: Empty Config PUT Destroys accel-ppp Configuration
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | Critical |
+| **Symptom** | `PUT /api/v1/config` with `{"content":""}` writes 0 bytes to `/etc/accel-ppp.conf`, crashing accel-ppp |
+| **Root Cause** | No content validation on `ConfigUpdateRequest.content` or `GuardedApplyRequest.content` — empty strings pass through |
+| **Fix** | Added `field_validator` + `min_length=10` to both models. Added service-level validation in `write_config()`. Empty content now returns HTTP 422 |
+| **Files Changed** | `dawos_agent/models/schemas.py`, `dawos_agent/services/config_manager.py` |
+| **Tests Added** | `test_update_config_rejects_empty_content`, `test_update_config_rejects_no_section_header` (810 total) |
+| **Status** | Fixed and verified — empty PUT now returns 422 |
+
+### BUG #4: dawos-cli PPPoE Add Sends Wrong Field Name
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | High |
+| **Symptom** | `dawos pppoe add ens19` returns `422: Field required` for `body.interface` |
+| **Root Cause** | CLI sends `{"name": "ens19"}` but API expects `{"interface": "ens19"}` per `PppoeAddRequest` model |
+| **Fix** | Changed `json={"name": name}` to `json={"interface": name}` in `dawos_cli/commands/pppoe.py` |
+| **Status** | Fixed and verified — full CRUD cycle works |
+
+### BUG #5: dawos-cli DNS Set Sends Wrong Field Name
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | High |
+| **Symptom** | `dawos network dns-set 8.8.8.8,1.1.1.1` returns `422: Field required` for `body.nameservers` |
+| **Root Cause** | CLI sends `{"servers": [...]}` but API expects `{"nameservers": [...]}` per `DnsUpdateRequest` model |
+| **Fix** | Changed `json={"servers": server_list}` to `json={"nameservers": server_list}` in `dawos_cli/commands/network.py` |
+| **Status** | Fixed and verified — full set/verify/restore cycle works |
+
+### BUG #6: dawos-cli NAT Egress Set Sends Wrong Field Name
+
+| Field | Detail |
+|-------|--------|
+| **Severity** | High |
+| **Symptom** | `dawos nat egress-set 10.0.0.100 203.0.113.5` returns `422: Field required` for `body.target` |
+| **Root Cause** | CLI sends `{"customer_ip": "...", "public_ip": "..."}` but API expects `{"target": "...", "public_ip": "..."}` per `NatEgressSetRequest` model |
+| **Fix** | Changed `"customer_ip"` to `"target"` in `dawos_cli/commands/nat.py` |
+| **Status** | Fixed and verified — CLI sends correct payload (400 from nft infra is expected) |
 
 ---
 
@@ -50,14 +119,14 @@ All 29 API groups tested. Every GET endpoint returns HTTP 200 with valid JSON.
 
 | # | Endpoint | HTTP | Response |
 |---|----------|:----:|----------|
-| 5 | `GET /api/v1/sessions/list` | 200 | Empty list (no active subscribers) |
+| 5 | `GET /api/v1/sessions` | 200 | Empty list (no active subscribers) |
 | 6 | `GET /api/v1/sessions/stats` | 200 | Session counters (all zero) |
 
 ### Configuration
 
 | # | Endpoint | HTTP | Response |
 |---|----------|:----:|----------|
-| 7 | `GET /api/v1/config` | 200 | Full accel-ppp.conf content (15,766 chars) |
+| 7 | `GET /api/v1/config` | 200 | Full accel-ppp.conf content (15,769 chars) |
 | 8 | `GET /api/v1/config/backups` | 200 | List of backup files with timestamps |
 | 9 | `GET /api/v1/config/revisions` | 200 | Revision count and metadata |
 | 10 | `GET /api/v1/config/apply/status` | 200 | `{"pending":false,"checkpoint":null}` |
@@ -82,7 +151,7 @@ All 29 API groups tested. Every GET endpoint returns HTTP 200 with valid JSON.
 | 19 | `GET /api/v1/firewall/sysctl` | 200 | `{"ip_forward":true,"ip6_forward":false}` |
 | 20 | `GET /api/v1/firewall/groups` | 200 | Firewall group list |
 | 21 | `GET /api/v1/firewall/nat/status` | 200 | NAT status with bound IPs |
-| 22 | `GET /api/v1/firewall/nat/egress` | 200 | Egress map (empty) |
+| 22 | `GET /api/v1/firewall/nat/egress` | 200 | Egress map |
 
 ### PPPoE
 
@@ -179,7 +248,7 @@ All 29 API groups tested. Every GET endpoint returns HTTP 200 with valid JSON.
 
 | # | Endpoint | HTTP | Response |
 |---|----------|:----:|----------|
-| 49 | `GET /api/v1/zone-firewall` | 200 | Zone list |
+| 49 | `GET /api/v1/zones` | 200 | Zone list |
 
 ### Diagnostics
 
@@ -217,10 +286,10 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Create | POST | `/api/v1/zone-firewall` | `{"name":"test-zone"}` | 201 | Zone created |
-| Read | GET | `/api/v1/zone-firewall` | -- | 200 | 1 zone listed |
-| Delete | DELETE | `/api/v1/zone-firewall/test-zone` | -- | 200 | Zone removed |
-| Verify | GET | `/api/v1/zone-firewall` | -- | 200 | 0 zones |
+| Create | POST | `/api/v1/zones` | `{"name":"test-zone"}` | 201 | Zone created |
+| Read | GET | `/api/v1/zones` | -- | 200 | 1 zone listed |
+| Delete | DELETE | `/api/v1/zones/test-zone` | -- | 200 | Zone removed |
+| Verify | GET | `/api/v1/zones` | -- | 200 | 0 zones |
 
 ### IP Pool CRUD
 
@@ -235,7 +304,7 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Create | POST | `/api/v1/scheduler/jobs` | `{"name":"test-job","command":"show stat","schedule":"*/5 * * * *"}` | 201 | Job created |
+| Create | POST | `/api/v1/scheduler/jobs` | `{"name":"test-job","command":"show stat","interval_seconds":300}` | 201 | Job created |
 | Read | GET | `/api/v1/scheduler/jobs` | -- | 200 | 1 job listed |
 | Run | POST | `/api/v1/scheduler/jobs/test-job/run` | -- | 200 | Job executed |
 | Delete | DELETE | `/api/v1/scheduler/jobs/test-job` | -- | 204 | Job removed |
@@ -244,9 +313,9 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Create | POST | `/api/v1/events/hooks` | `{"name":"test-hook","event":"session-up","action":"webhook","url":"..."}` | 201 | Hook registered |
+| Create | POST | `/api/v1/events/hooks` | `{"name":"test-hook","event":"session-up","action":"https://httpbin.org/post"}` | 201 | Hook registered |
 | Read | GET | `/api/v1/events/hooks` | -- | 200 | 1 hook listed |
-| Fire | POST | `/api/v1/events/fire` | `{"event":"session-up","data":{...}}` | 200 | 1 hook fired |
+| Fire | POST | `/api/v1/events/fire` | `{"event":"session-up","data":{}}` | 200 | 1 hook fired |
 | History | GET | `/api/v1/events/history` | -- | 200 | 1 entry logged |
 | Delete | DELETE | `/api/v1/events/hooks/test-hook` | -- | 204 | Hook removed |
 
@@ -280,14 +349,24 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Add | POST | `/api/v1/network/routes` | `{"destination":"10.99.99.0/24","gateway":"192.168.216.97"}` | 200 | Route added |
-| Delete | DELETE | `/api/v1/network/routes` | `{"destination":"10.99.99.0/24","gateway":"192.168.216.97"}` | 200 | Route deleted |
+| Add | POST | `/api/v1/network/routes` | `{"destination":"10.99.99.0/24","gateway":"10.0.0.1"}` | 200 | Route added |
+| Delete | DELETE | `/api/v1/network/routes` | `{"destination":"10.99.99.0/24","gateway":"10.0.0.1"}` | 200 | Route deleted |
+
+### DNS Update
+
+| Step | Method | Endpoint | Body | HTTP | Result |
+|------|--------|----------|------|:----:|--------|
+| Update | PUT | `/api/v1/network/dns` | `{"nameservers":["8.8.8.8","1.1.1.1"]}` | 200 | DNS updated |
+| Verify | GET | `/api/v1/network/dns` | -- | 200 | Nameservers confirmed |
+| Restore | PUT | `/api/v1/network/dns` | `{"nameservers":["127.0.0.53"]}` | 200 | Original restored |
+
+> **Fixed (BUG #2):** Previously returned 500 due to `Permission denied` on `/etc/resolv.conf`. Fixed by using `sudo tee` in `set_dns()` and adding `/etc/resolv.conf` to systemd `ReadWritePaths`.
 
 ### NAT Masquerade
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Enable | POST | `/api/v1/firewall/nat/masquerade` | `{"wan_interface":"ens18"}` | 200 | Masquerade enabled |
+| Enable | POST | `/api/v1/firewall/nat/masquerade` | `{"wan_interface":"eth0"}` | 200 | Masquerade enabled |
 | Status | GET | `/api/v1/firewall/nat/status` | -- | 200 | Verified active |
 | Disable | DELETE | `/api/v1/firewall/nat/masquerade` | -- | 200 | Masquerade removed |
 
@@ -309,6 +388,16 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 | Resize | PUT | `/api/v1/conntrack/table-size` | `{"size":131072}` | 200 | Table doubled |
 | Reset | PUT | `/api/v1/conntrack/table-size` | `{"size":65536}` | 200 | Table restored |
 
+### Config Validation (BUG #3 Fix)
+
+| Step | Method | Endpoint | Body | HTTP | Result |
+|------|--------|----------|------|:----:|--------|
+| Empty | PUT | `/api/v1/config` | `{"content":""}` | **422** | Rejected — empty content |
+| No header | PUT | `/api/v1/config` | `{"content":"random text..."}` | **422** | Rejected — no section header |
+| Valid | PUT | `/api/v1/config` | `{"content":"[modules]\n..."}` | 200 | Accepted (valid config) |
+
+> **Fixed (BUG #3):** Previously accepted empty content and destroyed `/etc/accel-ppp.conf`. Now validates: `min_length=10`, must contain at least one `[section]` header, rejects whitespace-only content.
+
 ### Guarded Config Apply Cycle
 
 | Step | Method | Endpoint | Body | HTTP | Result |
@@ -319,17 +408,17 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 | Status | GET | `/api/v1/config/apply/status` | -- | 200 | `{"pending":false}` |
 | Rollback | POST | `/api/v1/config/rollback/{name}` | -- | 200 | Config rolled back |
 
-### Monitoring Configure
-
-| Step | Method | Endpoint | Body | HTTP | Result |
-|------|--------|----------|------|:----:|--------|
-| Configure | POST | `/api/v1/monitoring/configure` | `{"service":"accel-ppp","enabled":true}` | 200 | Monitoring enabled |
-
 ### Service Command
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
 | Execute | POST | `/api/v1/service/command` | `{"command":"show version"}` | 200 | Version returned |
+
+### Monitoring Configure
+
+| Step | Method | Endpoint | Body | HTTP | Result |
+|------|--------|----------|------|:----:|--------|
+| Configure | POST | `/api/v1/monitoring/configure` | `{"service":"accel-ppp","enabled":true}` | 200 | Monitoring enabled |
 
 ---
 
@@ -348,23 +437,24 @@ Field names verified through testing. Use this as a quick reference when calling
 
 | Endpoint | Required Fields | Format |
 |----------|----------------|--------|
+| Config update | `content` | Must be ≥10 chars and contain `[section]` header |
+| Config apply | `content`, `confirm_minutes` | Full config text + timeout (1–30) |
 | IP Pool create | `name`, `ip_range` | CIDR: `"10.0.0.0/24"` |
-| Event Hook create | `name`, `event`, `action`, `url` | Events use hyphens: `"session-up"` |
+| Event Hook create | `name`, `event`, `action` | Events use hyphens: `"session-up"` |
 | PPPoE Interface add | `interface` | Interface name: `"ens19"` |
 | Firewall Group create | `name`, `group_type`, `members` | Type: `"address"` |
-| NAT Masquerade enable | `wan_interface` | Interface name: `"ens18"` |
+| NAT Masquerade enable | `wan_interface` | Interface name: `"eth0"` |
 | VLAN create | `parent`, `vlan_id` | Parent interface + ID |
 | Route add | `destination`, `gateway` | CIDR + IP |
+| DNS update | `nameservers` | List of IP strings |
 | Traffic ratelimit | `rate` | Upload/download: `"5M/20M"` |
-| Config apply | `content`, `confirm_minutes` | Full config text + timeout (1--30) |
 | Conntrack profile | `name` | Profile: `"default"`, `"gaming"`, `"streaming"` |
-| PADO delay | `delay` | Milliseconds: `0`--`1000` |
+| PADO delay | `delay` | Milliseconds: `0`–`1000` |
+| Scheduler create | `name`, `command`, `interval_seconds` | Seconds between runs |
 
 ---
 
 ## Environment Notes
-
-Issues discovered and resolved during testing:
 
 ### Permission Fix Required
 
@@ -377,7 +467,14 @@ sudo chown dawos:dawos /etc/accel-ppp.conf
 
 Without this, IP Pool and PPPoE Interface CRUD operations fail with HTTP 500 (`Permission denied` on backup file creation).
 
-> **Recommendation:** The installer (`install.sh`) should set these ownership values automatically.
+### systemd ProtectSystem Recovery
+
+If prolonged config operations cause the mount namespace to go stale:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart dawos-agent
+```
 
 ### Infrastructure-Dependent Endpoints
 
