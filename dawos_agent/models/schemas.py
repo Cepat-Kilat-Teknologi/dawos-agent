@@ -21,7 +21,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # ---------------------------------------------------------------------------
 # Health
@@ -350,9 +350,25 @@ class ConfigUpdateRequest(BaseModel):
             current configuration before overwriting.
     """
 
-    content: str
+    content: str = Field(
+        min_length=10,
+        description="New configuration file content to write",
+    )
     restart_service: bool = False
     backup: bool = True
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_empty(cls, value: str) -> str:
+        """Reject empty or trivially short configuration content."""
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("Config content must not be empty or whitespace-only")
+        if "[" not in stripped:
+            raise ValueError(
+                "Config content must contain at least one section header (e.g. [modules])"
+            )
+        return value
 
 
 class ConfigUpdateResponse(BaseModel):
@@ -1190,13 +1206,29 @@ class GuardedApplyRequest(BaseModel):
         confirm_minutes: Timeout in minutes (1–30) before auto-rollback.
     """
 
-    content: str = Field(description="New config content to apply")
+    content: str = Field(
+        min_length=10,
+        description="New config content to apply",
+    )
     confirm_minutes: int = Field(
         default=5,
         ge=1,
         le=30,
         description="Auto-rollback timeout in minutes (1-30)",
     )
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_empty(cls, value: str) -> str:
+        """Reject empty or trivially short configuration content."""
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("Config content must not be empty or whitespace-only")
+        if "[" not in stripped:
+            raise ValueError(
+                "Config content must contain at least one section header (e.g. [modules])"
+            )
+        return value
 
 
 class GuardedApplyResponse(BaseModel):

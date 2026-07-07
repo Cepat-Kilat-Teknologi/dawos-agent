@@ -66,7 +66,18 @@ def write_config(content: str, *, backup: bool = True) -> str | None:
 
     Returns:
         The backup file path if a backup was created, otherwise ``None``.
+
+    Raises:
+        ValueError: If *content* is empty or does not look like a valid
+            accel-ppp configuration file.
     """
+    stripped = content.strip()
+    if not stripped:
+        raise ValueError("Refusing to write empty configuration — would destroy config")
+    if "[" not in stripped:
+        raise ValueError(
+            "Configuration must contain at least one section header (e.g. [modules])"
+        )
     backup_path = None
 
     if backup and ACCEL_CONFIG.exists():
