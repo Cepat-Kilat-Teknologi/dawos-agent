@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -501,6 +502,10 @@ def set_dns(
 ) -> None:
     """Write ``/etc/resolv.conf`` with the given nameservers.
 
+    Uses ``sudo tee`` to write the file, since ``/etc/resolv.conf`` is
+    typically owned by root (or is a symlink to a systemd-resolved
+    managed file).
+
     Args:
         nameservers: List of DNS server IP addresses.
         search_domains: Optional list of DNS search domains.
@@ -515,4 +520,21 @@ def set_dns(
     for ns in nameservers:
         lines.append(f"nameserver {ns}\n")
 
-    path.write_text("".join(lines), encoding="utf-8")
+    content = "".join(lines)
+
+    if resolv_path:
+        # Testing path — write directly without sudo
+        path.write_text(content, encoding="utf-8")
+    else:
+        # Production — use sudo tee for root-owned files
+        result = subprocess.run(  # pylint: disable=subprocess-run-check
+            ["sudo", "tee", str(path)],
+            input=content.encode(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+        )
+        if result.returncode != 0:
+            err = result.stderr.decode().strip()
+            raise PermissionError(
+                f"Failed to write {path}: {err}"
+            )
