@@ -44,9 +44,8 @@ async def test_run_cmd_failure():
 
     with patch(
         "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
-    ):
-        with pytest.raises(RuntimeError, match="connection refused"):
-            await run_cmd("show stat")
+    ), pytest.raises(RuntimeError, match="connection refused"):
+        await run_cmd("show stat")
 
 
 @pytest.mark.asyncio
@@ -55,9 +54,8 @@ async def test_run_cmd_failure_stdout_fallback():
 
     with patch(
         "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
-    ):
-        with pytest.raises(RuntimeError, match="error in stdout"):
-            await run_cmd("bad cmd")
+    ), pytest.raises(RuntimeError, match="error in stdout"):
+        await run_cmd("bad cmd")
 
 
 @pytest.mark.asyncio

@@ -108,7 +108,8 @@ async def test_dhcp_leases_empty():
 async def test_relay_status_active():
     proc_active = _mock_proc("active")
     proc_config = _mock_proc(
-        "ExecStart={ path=/usr/sbin/dhcrelay ; argv[]=/usr/sbin/dhcrelay -i eth0 10.0.0.1 10.0.0.2 }"
+        "ExecStart={ path=/usr/sbin/dhcrelay ; "
+        "argv[]=/usr/sbin/dhcrelay -i eth0 10.0.0.1 10.0.0.2 }"
     )
 
     with patch(

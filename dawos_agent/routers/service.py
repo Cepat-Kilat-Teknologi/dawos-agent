@@ -10,6 +10,7 @@ commands on the BNG host.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -66,9 +67,7 @@ def _is_allowed_command(cmd: str) -> bool:
     if cmd.startswith("shaper "):
         return True
     # Allow 'pppoe mac-filter' commands
-    if cmd.startswith("pppoe mac-filter "):
-        return True
-    return False
+    return bool(cmd.startswith("pppoe mac-filter "))
 
 
 @router.get("/status", response_model=ServiceStatusResponse)
@@ -116,10 +115,8 @@ async def service_status(_key: str = ApiKey):
             except Exception:
                 pass
 
-            try:
+            with contextlib.suppress(Exception):
                 version = await accel.show_version()
-            except Exception:
-                pass
 
             try:
                 stat = await accel.show_stat()

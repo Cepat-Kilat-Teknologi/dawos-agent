@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **GitHub Actions CI** -- Automated lint + test pipeline on push and pull requests (`.github/workflows/ci.yml`)
+- **GitHub Actions Release** -- PyPI publish + [GitHub Releases](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases) on version tag (`.github/workflows/release.yml`)
+- **GitHub Actions Docs** -- MkDocs Material documentation site auto-deploy (`.github/workflows/docs.yml`)
+- **Pre-commit hooks** -- Black, Ruff, and Pylint run automatically on `git commit` (`.pre-commit-config.yaml`)
+- **MkDocs Material documentation** -- Full documentation site at [cepat-kilat-teknologi.github.io/dawos-agent](https://cepat-kilat-teknologi.github.io/dawos-agent/) (`docs/`, `mkdocs.yml`)
+
 ### Fixed
 
+- Fix 32 Ruff lint violations (SIM103, SIM105, SIM117, E501, F841 across source and test files)
 - Remove inline `#` comments from accel-ppp config template that caused
   `pppd_compat` path errors at startup (accel-ppp parser treats inline
   comments as part of the value string).
@@ -21,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resource usage (CPU, RAM, disk).
 - Update endpoint count to 138 across 29 API groups.
 - Add accel-ppp build-from-source documentation and troubleshooting tips.
+- README updated with PyPI install, badges, and docs URL.
 
 ## [0.1.0] - 2026-07-06
 

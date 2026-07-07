@@ -190,9 +190,8 @@ async def test_list_interfaces_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Failed to list"):
-            await network.list_interfaces()
+    ), pytest.raises(RuntimeError, match="Failed to list"):
+        await network.list_interfaces()
 
 
 # ---------------------------------------------------------------------------
@@ -220,9 +219,8 @@ async def test_get_interface_not_found():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Interface not found"):
-            await network.get_interface("eth99")
+    ), pytest.raises(RuntimeError, match="Interface not found"):
+        await network.get_interface("eth99")
 
 
 @pytest.mark.asyncio
@@ -231,9 +229,8 @@ async def test_get_interface_empty_json():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="No data for"):
-            await network.get_interface("eth99")
+    ), pytest.raises(RuntimeError, match="No data for"):
+        await network.get_interface("eth99")
 
 
 # ---------------------------------------------------------------------------
@@ -327,9 +324,8 @@ async def test_configure_interface_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Command failed"):
-            await network.configure_interface("eth0", address="10.0.0.5/24")
+    ), pytest.raises(RuntimeError, match="Command failed"):
+        await network.configure_interface("eth0", address="10.0.0.5/24")
 
 
 # ---------------------------------------------------------------------------
@@ -367,9 +363,8 @@ async def test_create_vlan_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError):
-            await network.create_vlan("eth0", 100)
+    ), pytest.raises(RuntimeError):
+        await network.create_vlan("eth0", 100)
 
 
 @pytest.mark.asyncio
@@ -411,9 +406,8 @@ async def test_list_routes_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Failed to list routes"):
-            await network.list_routes()
+    ), pytest.raises(RuntimeError, match="Failed to list routes"):
+        await network.list_routes()
 
 
 @pytest.mark.asyncio
@@ -545,9 +539,8 @@ async def test_run_ok_raises():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Command failed"):
-            await network._run_ok("ip link show")
+    ), pytest.raises(RuntimeError, match="Command failed"):
+        await network._run_ok("ip link show")
 
 
 # ---------------------------------------------------------------------------
@@ -650,9 +643,8 @@ async def test_list_vlans_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Failed to list VLANs"):
-            await network.list_vlans()
+    ), pytest.raises(RuntimeError, match="Failed to list VLANs"):
+        await network.list_vlans()
 
 
 # ---------------------------------------------------------------------------
@@ -697,6 +689,5 @@ async def test_set_vlan_state_error():
     with patch(
         "dawos_agent.services.network.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Command failed"):
-            await network.set_vlan_state("eth0.999", "up")
+    ), pytest.raises(RuntimeError, match="Command failed"):
+        await network.set_vlan_state("eth0.999", "up")

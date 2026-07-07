@@ -92,9 +92,8 @@ async def test_set_sysctl_error():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Command failed"):
-            await firewall.set_sysctl(ip_forward=True)
+    ), pytest.raises(RuntimeError, match="Command failed"):
+        await firewall.set_sysctl(ip_forward=True)
 
 
 # ---------------------------------------------------------------------------
@@ -178,9 +177,8 @@ async def test_list_ruleset_error():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Failed to list"):
-            await firewall.list_ruleset()
+    ), pytest.raises(RuntimeError, match="Failed to list"):
+        await firewall.list_ruleset()
 
 
 # ---------------------------------------------------------------------------
@@ -219,9 +217,8 @@ async def test_setup_masquerade_error():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         side_effect=mock_shell,
-    ):
-        with pytest.raises(RuntimeError):
-            await firewall.setup_masquerade("eth0")
+    ), pytest.raises(RuntimeError):
+        await firewall.setup_masquerade("eth0")
 
 
 @pytest.mark.asyncio
@@ -242,9 +239,8 @@ async def test_remove_masquerade_error():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError):
-            await firewall.remove_masquerade()
+    ), pytest.raises(RuntimeError):
+        await firewall.remove_masquerade()
 
 
 # ---------------------------------------------------------------------------
@@ -278,9 +274,8 @@ async def test_save_ruleset_list_fails():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Failed to list"):
-            await firewall.save_ruleset()
+    ), pytest.raises(RuntimeError, match="Failed to list"):
+        await firewall.save_ruleset()
 
 
 # ---------------------------------------------------------------------------
@@ -306,9 +301,8 @@ async def test_run_ok_raises():
     with patch(
         "dawos_agent.services.firewall.asyncio.create_subprocess_shell",
         return_value=proc,
-    ):
-        with pytest.raises(RuntimeError, match="Command failed"):
-            await firewall._run_ok("nft list ruleset")
+    ), pytest.raises(RuntimeError, match="Command failed"):
+        await firewall._run_ok("nft list ruleset")
 
 
 # ---------------------------------------------------------------------------

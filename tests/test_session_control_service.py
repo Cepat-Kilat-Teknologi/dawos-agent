@@ -37,9 +37,11 @@ async def test_session_by_sid_found():
 
 @pytest.mark.asyncio
 async def test_session_by_sid_not_found():
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=[]):
-            result = await session_control.session_by_sid("nope")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=[]),
+    ):
+        result = await session_control.session_by_sid("nope")
 
     assert result is None
 
@@ -67,9 +69,11 @@ async def test_session_by_ip_found():
 
 @pytest.mark.asyncio
 async def test_session_by_ip_not_found():
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=[]):
-            result = await session_control.session_by_ip("10.0.0.99")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=[]),
+    ):
+        result = await session_control.session_by_ip("10.0.0.99")
 
     assert result is None
 
@@ -97,9 +101,11 @@ async def test_session_snapshot():
 
 @pytest.mark.asyncio
 async def test_session_snapshot_not_found():
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=[]):
-            result = await session_control.session_snapshot("ghost")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=[]),
+    ):
+        result = await session_control.session_snapshot("ghost")
 
     assert result["found"] is False
     assert result["count"] == 0
@@ -163,14 +169,16 @@ async def test_drop_by_mac_found():
             "calling-sid": "11:22:33:44:55:66",
         },
     ]
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=rows):
-            with patch.object(
-                session_control.accel,
-                "terminate_session",
-                AsyncMock(return_value="ok"),
-            ):
-                result = await session_control.drop_by_mac("AA:BB:CC:DD:EE:FF")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=rows),
+        patch.object(
+            session_control.accel,
+            "terminate_session",
+            AsyncMock(return_value="ok"),
+        ),
+    ):
+        result = await session_control.drop_by_mac("AA:BB:CC:DD:EE:FF")
 
     assert result["success"] is True
     assert result["dropped"] == 1
@@ -178,9 +186,11 @@ async def test_drop_by_mac_found():
 
 @pytest.mark.asyncio
 async def test_drop_by_mac_not_found():
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=[]):
-            result = await session_control.drop_by_mac("00:00:00:00:00:00")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=[]),
+    ):
+        result = await session_control.drop_by_mac("00:00:00:00:00:00")
 
     assert result["success"] is False
     assert result["dropped"] == 0
@@ -197,14 +207,16 @@ async def test_drop_by_mac_terminate_error():
             "calling-sid": "AA:BB:CC:DD:EE:FF",
         },
     ]
-    with patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")):
-        with patch.object(session_control.accel, "parse_table", return_value=rows):
-            with patch.object(
-                session_control.accel,
-                "terminate_session",
-                AsyncMock(side_effect=RuntimeError("fail")),
-            ):
-                result = await session_control.drop_by_mac("AA:BB:CC:DD:EE:FF")
+    with (
+        patch.object(session_control.accel, "run_cmd", _mock_run_cmd("")),
+        patch.object(session_control.accel, "parse_table", return_value=rows),
+        patch.object(
+            session_control.accel,
+            "terminate_session",
+            AsyncMock(side_effect=RuntimeError("fail")),
+        ),
+    ):
+        result = await session_control.drop_by_mac("AA:BB:CC:DD:EE:FF")
 
     # Still reports success because it attempted all targets
     assert result["dropped"] == 1

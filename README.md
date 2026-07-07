@@ -1,5 +1,11 @@
 # dawos-agent
 
+[![CI](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/dawos-agent)](https://pypi.org/project/dawos-agent/)
+[![Python](https://img.shields.io/pypi/pyversions/dawos-agent)](https://pypi.org/project/dawos-agent/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://cepat-kilat-teknologi.github.io/dawos-agent/)
+
 Open-source PPP router management agent. Manages PPPoE sessions, firewall, network, traffic shaping, routing, and system services on Linux-based BNG/concentrator nodes via REST API.
 
 Wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as 138 authenticated HTTP endpoints.
@@ -30,6 +36,14 @@ Wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities 
 > **Note:** These are requirements for the agent only. accel-ppp BNG workloads (thousands of PPPoE sessions) may need significantly more CPU and RAM — consult the [accel-ppp documentation](https://accel-ppp.readthedocs.io/) for BNG sizing.
 
 ## Quick Start
+
+### Install from PyPI
+
+```bash
+pip install dawos-agent
+```
+
+### Install from source (production)
 
 ```bash
 curl -sL https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh | sudo bash
@@ -149,6 +163,10 @@ The installer builds accel-ppp from source if not present, creates a `dawos` sys
 | `/etc/systemd/system/accel-ppp.service` | accel-ppp systemd unit |
 
 See [docs/INSTALLATION.md](docs/INSTALLATION.md) for details.
+
+## Documentation
+
+Full documentation available at [cepat-kilat-teknologi.github.io/dawos-agent](https://cepat-kilat-teknologi.github.io/dawos-agent/).
 
 ## Development
 

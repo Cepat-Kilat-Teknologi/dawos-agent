@@ -232,7 +232,7 @@ async def test_loop_executes_job():
         "dawos_agent.services.scheduler.asyncio.create_subprocess_shell",
         return_value=proc,
     ):
-        task = asyncio.ensure_future(scheduler._loop("exec-test"))
+        asyncio.ensure_future(scheduler._loop("exec-test"))
         # Let the loop run one iteration
         await asyncio.sleep(0)
         await asyncio.sleep(0)
