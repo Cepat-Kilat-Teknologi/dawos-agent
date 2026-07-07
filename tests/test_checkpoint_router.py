@@ -201,7 +201,7 @@ async def test_guarded_apply_error(client, headers):
     ):
         resp = await client.post(
             "/api/v1/config/apply",
-            json={"content": "[ppp]\n", "confirm_minutes": 5},
+            json={"content": "[ppp]\nkey=value\n", "confirm_minutes": 5},
             headers=headers,
         )
 

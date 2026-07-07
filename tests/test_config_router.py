@@ -84,7 +84,7 @@ async def test_update_config_with_restart(client, headers):
         resp = await client.put(
             "/api/v1/config",
             headers=headers,
-            json={"content": "[ppp]\n", "restart_service": True, "backup": False},
+            json={"content": "[ppp]\nkey=value\n", "restart_service": True, "backup": False},
         )
 
     assert resp.status_code == 200
@@ -112,7 +112,7 @@ async def test_update_config_restart_fails(client, headers):
         resp = await client.put(
             "/api/v1/config",
             headers=headers,
-            json={"content": "[ppp]\n", "restart_service": True},
+            json={"content": "[ppp]\nkey=value\n", "restart_service": True},
         )
 
     assert resp.status_code == 200
@@ -130,7 +130,7 @@ async def test_update_config_write_error(client, headers):
         resp = await client.put(
             "/api/v1/config",
             headers=headers,
-            json={"content": "x"},
+            json={"content": "[ppp]\nkey=value\n"},
         )
 
     assert resp.status_code == 500
@@ -156,3 +156,25 @@ async def test_list_backups(client, headers):
     data = resp.json()
     assert len(data) == 1
     assert data[0]["name"] == "a.bak"
+
+
+@pytest.mark.asyncio
+async def test_update_config_rejects_empty_content(client, headers):
+    resp = await client.put(
+        "/api/v1/config",
+        headers=headers,
+        json={"content": ""},
+    )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_update_config_rejects_no_section_header(client, headers):
+    resp = await client.put(
+        "/api/v1/config",
+        headers=headers,
+        json={"content": "just some random text without headers"},
+    )
+
+    assert resp.status_code == 422
