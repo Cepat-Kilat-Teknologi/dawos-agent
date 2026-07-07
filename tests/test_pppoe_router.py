@@ -79,10 +79,13 @@ async def test_list_pppoe_interfaces_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_add_pppoe_interface(client, headers):
-    with patch(
-        "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
-        return_value="Added eth0.300 to [pppoe] section",
-    ), patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock):
+    with (
+        patch(
+            "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
+            return_value="Added eth0.300 to [pppoe] section",
+        ),
+        patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock),
+    ):
         resp = await client.post(
             "/api/v1/pppoe/interfaces",
             headers=headers,
@@ -97,10 +100,13 @@ async def test_add_pppoe_interface(client, headers):
 
 @pytest.mark.asyncio
 async def test_add_pppoe_interface_with_options(client, headers):
-    with patch(
-        "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
-        return_value="Added eth0.300 to [pppoe] section",
-    ), patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock):
+    with (
+        patch(
+            "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
+            return_value="Added eth0.300 to [pppoe] section",
+        ),
+        patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock),
+    ):
         resp = await client.post(
             "/api/v1/pppoe/interfaces",
             headers=headers,
@@ -114,13 +120,16 @@ async def test_add_pppoe_interface_with_options(client, headers):
 @pytest.mark.asyncio
 async def test_add_pppoe_interface_reload_fails(client, headers):
     """Config is saved but reload fails — should still return success with warning."""
-    with patch(
-        "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
-        return_value="Added eth0.300 to [pppoe] section",
-    ), patch(
-        "dawos_agent.routers.pppoe.reload_config",
-        new_callable=AsyncMock,
-        side_effect=RuntimeError("accel-cmd failed"),
+    with (
+        patch(
+            "dawos_agent.routers.pppoe.pppoe.add_pppoe_interface",
+            return_value="Added eth0.300 to [pppoe] section",
+        ),
+        patch(
+            "dawos_agent.routers.pppoe.reload_config",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("accel-cmd failed"),
+        ),
     ):
         resp = await client.post(
             "/api/v1/pppoe/interfaces",
@@ -184,13 +193,14 @@ async def test_add_pppoe_interface_error(client, headers):
 
 @pytest.mark.asyncio
 async def test_remove_pppoe_interface(client, headers):
-    with patch(
-        "dawos_agent.routers.pppoe.pppoe.remove_pppoe_interface",
-        return_value="Removed eth0.100 from [pppoe] section",
-    ), patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock):
-        resp = await client.delete(
-            "/api/v1/pppoe/interfaces/eth0.100", headers=headers
-        )
+    with (
+        patch(
+            "dawos_agent.routers.pppoe.pppoe.remove_pppoe_interface",
+            return_value="Removed eth0.100 from [pppoe] section",
+        ),
+        patch("dawos_agent.routers.pppoe.reload_config", new_callable=AsyncMock),
+    ):
+        resp = await client.delete("/api/v1/pppoe/interfaces/eth0.100", headers=headers)
 
     assert resp.status_code == 200
     data = resp.json()
@@ -200,17 +210,18 @@ async def test_remove_pppoe_interface(client, headers):
 
 @pytest.mark.asyncio
 async def test_remove_pppoe_interface_reload_fails(client, headers):
-    with patch(
-        "dawos_agent.routers.pppoe.pppoe.remove_pppoe_interface",
-        return_value="Removed eth0.100",
-    ), patch(
-        "dawos_agent.routers.pppoe.reload_config",
-        new_callable=AsyncMock,
-        side_effect=RuntimeError("fail"),
+    with (
+        patch(
+            "dawos_agent.routers.pppoe.pppoe.remove_pppoe_interface",
+            return_value="Removed eth0.100",
+        ),
+        patch(
+            "dawos_agent.routers.pppoe.reload_config",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("fail"),
+        ),
     ):
-        resp = await client.delete(
-            "/api/v1/pppoe/interfaces/eth0.100", headers=headers
-        )
+        resp = await client.delete("/api/v1/pppoe/interfaces/eth0.100", headers=headers)
 
     assert resp.status_code == 200
     assert "reload failed" in resp.json()["message"]

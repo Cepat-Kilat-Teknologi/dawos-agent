@@ -27,7 +27,7 @@ jobs:
           pip install pylint black
 
       - name: Black (format check)
-        run: black --check dawos_agent/ tests/
+        run: black --check --target-version py39 dawos_agent/ tests/
 
       - name: Ruff (lint)
         run: ruff check dawos_agent/ tests/
