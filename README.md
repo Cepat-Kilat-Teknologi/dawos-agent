@@ -81,7 +81,7 @@ All settings use `DAWOS_` env prefix. Place in `/etc/dawos-agent/agent.env`.
 | `DAWOS_ACCEL_SERVICE_NAME` | `accel-ppp` | Systemd service name |
 | `DAWOS_LOG_LEVEL` | `info` | Log level (`debug`, `info`, `warning`, `error`) |
 
-See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for the full reference.
+See [Configuration](https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/configuration/) for the full reference.
 
 ## API
 
@@ -121,7 +121,7 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 | diagnostics | 1 | System health check |
 | logs | 2 | Log tail, SSE stream |
 
-Full API reference: [docs/API.md](docs/API.md)
+Full API reference: [API Documentation](https://cepat-kilat-teknologi.github.io/dawos-agent/api/reference/)
 
 ## Authentication
 
@@ -162,7 +162,7 @@ The installer builds accel-ppp from source if not present, creates a `dawos` sys
 | `/etc/systemd/system/dawos-agent.service` | dawos-agent systemd unit |
 | `/etc/systemd/system/accel-ppp.service` | accel-ppp systemd unit |
 
-See [docs/INSTALLATION.md](docs/INSTALLATION.md) for details.
+See [Installation](https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/installation/) for details.
 
 ## Documentation
 
