@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- Remove inline `#` comments from accel-ppp config template that caused
+  `pppd_compat` path errors at startup (accel-ppp parser treats inline
+  comments as part of the value string).
+- Add safety-net `_ensure_accel_service` call in installer `main()` flow
+  to guarantee the accel-ppp systemd unit is always created.
+
+### Changed
+
+- Update documentation with minimum hardware requirements and measured
+  resource usage (CPU, RAM, disk).
+- Update endpoint count to 138 across 29 API groups.
+- Add accel-ppp build-from-source documentation and troubleshooting tips.
 
 ## [0.1.0] - 2026-07-06
 
@@ -15,7 +28,7 @@ Nothing yet.
 
 - Initial release of dawos-agent.
 - PPP router management agent.
-- 128+ API endpoints across 27 router modules.
+- 138 API endpoints across 29 router modules.
 - 28 service modules covering: sessions, config, network, firewall, NAT, PPPoE,
   traffic, routing (BGP/OSPF/RIP/BFD), conntrack, IP pools, DHCP, DNS, NTP,
   LLDP, VRRP, monitoring, diagnostics, flow accounting, event handling, zone

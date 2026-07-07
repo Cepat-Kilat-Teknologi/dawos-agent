@@ -451,7 +451,18 @@ DAWOS_HOST=127.0.0.1
 
 The agent is lightweight by design:
 
-- **Memory:** ~30–50 MB RSS (Python + Uvicorn + FastAPI)
+- **Memory:** ~60 MB RSS (Python + Uvicorn + FastAPI)
 - **CPU:** Near zero at idle; brief spikes during API calls that invoke system commands
-- **Disk:** ~100 MB for the virtualenv and dependencies
+- **Disk:** ~55 MB for the virtualenv and dependencies
 - **Network:** Only active when serving API requests — no background polling or outbound connections
+
+### Hardware Requirements
+
+| Resource | Minimum | Recommended |
+|----------|---------|-------------|
+| **CPU** | 1 vCPU (x86_64) | 2+ vCPU |
+| **RAM** | 512 MB | 1 GB+ |
+| **Disk** | 2 GB free | 5 GB+ |
+| **OS** | Debian 11+ / Ubuntu 22.04+ | Ubuntu 24.04 LTS |
+
+See [INSTALLATION.md](INSTALLATION.md) for detailed hardware sizing guidance.

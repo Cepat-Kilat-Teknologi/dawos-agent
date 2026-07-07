@@ -43,7 +43,7 @@ ask for additional information or guidance during the process.
 
 ### File Permissions
 
-- The configuration file (`/etc/dawos-agent/config.ini`) should be owned by
+- The configuration file (`/etc/dawos-agent/agent.env`) should be owned by
   `root:dawos` with mode **0640**.
 - The API key is stored in this file — restrict read access accordingly.
 

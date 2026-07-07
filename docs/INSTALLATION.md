@@ -6,10 +6,12 @@ Complete installation guide for **dawos-agent** — PPP router management agent.
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
+- [Hardware Requirements](#hardware-requirements)
+- [Software Prerequisites](#software-prerequisites)
 - [One-Line Install](#one-line-install)
 - [Install from Source](#install-from-source)
 - [Non-Interactive Install](#non-interactive-install)
+- [What the Installer Does](#what-the-installer-does)
 - [Manual Install](#manual-install)
 - [Verify Installation](#verify-installation)
 - [Upgrading](#upgrading)
@@ -19,15 +21,59 @@ Complete installation guide for **dawos-agent** — PPP router management agent.
 
 ---
 
-## Prerequisites
+## Hardware Requirements
+
+### Minimum
+
+| Resource | Minimum | Notes |
+|----------|---------|-------|
+| **CPU** | 1 vCPU (x86_64) | ARM is not supported |
+| **RAM** | 512 MB | Agent uses ~60 MB RSS, accel-ppp uses ~5 MB RSS at idle |
+| **Disk** | 2 GB free | 55 MB for agent venv, ~500 MB for build dependencies if compiling accel-ppp from source |
+| **Network** | 1 NIC | Minimum for management access |
+
+### Recommended for Production
+
+| Resource | Recommended | Notes |
+|----------|-------------|-------|
+| **CPU** | 2+ vCPU | accel-ppp needs CPU headroom for PPP session handling |
+| **RAM** | 1 GB+ | Scale with number of concurrent PPPoE sessions |
+| **Disk** | 5 GB+ | Room for logs, config backups, and OS updates |
+| **Network** | 2+ NICs | Separate management and subscriber-facing interfaces |
+
+### Measured Resource Usage
+
+| Component | Memory (RSS) | Disk | CPU at Idle |
+|-----------|:------------:|:----:|:-----------:|
+| dawos-agent (Uvicorn + FastAPI) | ~60 MB | 55 MB | <1% |
+| accel-ppp daemon (0 sessions) | ~5 MB | ~2 MB | <1% |
+| Build dependencies (cmake, gcc, g++, libssl-dev) | — | ~500 MB | — |
+
+> **Scaling note:** These measurements are for the agent with zero PPPoE sessions. A production BNG serving thousands of subscribers needs significantly more RAM and CPU for accel-ppp. Consult the [accel-ppp documentation](https://accel-ppp.readthedocs.io/) for BNG sizing.
+
+---
+
+## Software Prerequisites
 
 | Requirement | Minimum | Notes |
 |-------------|---------|-------|
 | **OS** | Debian 11+ / Ubuntu 22.04+ | Other Linux distros may work but are untested |
-| **Python** | 3.10+ | `python3-venv` module required |
+| **Python** | 3.9+ | `python3-venv` module required |
 | **Access** | Root / sudo | For system user, sudoers, systemd |
-| **Disk** | 200 MB free in `/opt` | For virtualenv and dependencies |
 | **Network** | curl or git | To download the source |
+
+### accel-ppp
+
+The installer automatically detects whether accel-ppp is installed:
+
+- **Found:** Skips build, creates config and systemd unit if missing
+- **Not found:** Builds from source (~2–5 minutes on 2 vCPU)
+
+Build dependencies installed automatically:
+
+```
+cmake gcc g++ make git libssl-dev libpcre3-dev liblua5.1-0-dev
+```
 
 ### System Tools
 
@@ -52,7 +98,7 @@ These are optional — the agent installs and runs without them, but related end
 curl -sL https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh | sudo bash
 ```
 
-The installer downloads the source from GitHub, creates a system user, installs the package in a virtualenv, sets up systemd and sudoers, then starts the service.
+The installer downloads the source from GitHub, builds accel-ppp if needed, creates a system user, installs the package in a virtualenv, sets up systemd and sudoers, then starts the service.
 
 For non-interactive (accepts all defaults):
 
@@ -89,11 +135,41 @@ sudo bash install.sh --yes
 
 Defaults:
 
-- API key: randomly generated
+- API key: randomly generated (43 characters, URL-safe base64)
 - Listen: `0.0.0.0:8470`
 - Log level: `info`
 - Node name: system hostname
 - accel-ppp paths: `/usr/bin/accel-cmd`, `/etc/accel-ppp.conf`
+
+---
+
+## What the Installer Does
+
+The installer (`install.sh` v2.0) performs these steps in order:
+
+| Step | Description |
+|------|-------------|
+| **1. Preflight** | Checks OS, Python, disk space, required tools |
+| **2. Configure** | Prompts for API key, listen address, node name (or uses defaults with `--yes`) |
+| **3. System setup** | Creates `dawos` system user, adds to `systemd-journal` group, creates directories |
+| **4. accel-ppp** | Detects or builds accel-ppp from source, writes `/etc/accel-ppp.conf`, creates systemd unit |
+| **5. Download** | Downloads dawos-agent source from GitHub (skipped if running from cloned repo) |
+| **6. Install** | Creates Python venv, installs package with pip |
+| **7. Service** | Installs sudoers rules, systemd unit, enables and starts service |
+| **8. Verify** | Runs health check to confirm the agent is responding |
+
+### accel-ppp Configuration
+
+The installer creates a starter `/etc/accel-ppp.conf` with:
+
+- PPPoE listener (disabled by default — edit interface name)
+- Local IP pool (`10.0.0.1/24`)
+- DNS servers (`8.8.8.8`, `8.8.4.4`)
+- TCP CLI on port 2001 (required for `accel-cmd`)
+- Log file at `/var/log/accel-ppp/accel-ppp.log`
+- pppd-compat hooks for event integration
+
+> **Important:** The config uses `tcp=` mode for the `[cli]` section, NOT `telnet=`. This is required for `accel-cmd` to connect.
 
 ---
 
@@ -186,6 +262,7 @@ Or write it manually — see [systemd/dawos-agent.service](../systemd/dawos-agen
 ```bash
 # service status
 sudo systemctl status dawos-agent
+sudo systemctl status accel-ppp
 
 # health check (no auth required)
 curl -s http://localhost:8470/health | python3 -m json.tool
@@ -193,6 +270,9 @@ curl -s http://localhost:8470/health | python3 -m json.tool
 # authenticated call
 curl -s -H 'X-API-Key: <your-key>' \
     http://localhost:8470/api/v1/system/info | python3 -m json.tool
+
+# accel-cmd direct test
+accel-cmd show version
 ```
 
 API docs are available at:
@@ -240,6 +320,8 @@ curl -s http://localhost:8470/health | python3 -m json.tool
 sudo bash install.sh --uninstall
 ```
 
+This removes the dawos-agent service, user, directories, and sudoers. It does **not** remove accel-ppp or its configuration.
+
 ### Manual
 
 ```bash
@@ -253,6 +335,19 @@ sudo rm -rf /etc/dawos-agent     # optional — keeps config if you plan to rein
 sudo userdel dawos               # optional
 ```
 
+### Full cleanup (including accel-ppp)
+
+```bash
+sudo systemctl stop accel-ppp
+sudo systemctl disable accel-ppp
+sudo rm /etc/systemd/system/accel-ppp.service
+sudo rm /etc/accel-ppp.conf
+sudo rm -rf /etc/accel-ppp.d
+sudo rm -rf /var/log/accel-ppp
+sudo rm -f /usr/sbin/accel-pppd /usr/bin/accel-cmd
+sudo systemctl daemon-reload
+```
+
 ---
 
 ## Troubleshooting
@@ -262,6 +357,7 @@ sudo userdel dawos               # optional
 ```bash
 journalctl -u dawos-agent -n 50 --no-pager   # last 50 lines
 journalctl -u dawos-agent -f                   # follow live
+journalctl -u accel-ppp -n 20 --no-pager      # accel-ppp logs
 ```
 
 ### Common issues
@@ -272,12 +368,15 @@ journalctl -u dawos-agent -f                   # follow live
 | `Address already in use` | Port conflict | `ss -tlnp \| grep 8470` — change `DAWOS_PORT` |
 | `Permission denied` | Wrong ownership | `sudo chown -R dawos:dawos /opt/dawos-agent` |
 | `sudo: a password is required` | Missing sudoers | Check: `sudo visudo -cf /etc/sudoers.d/dawos-agent` |
-| `accel-cmd not found` | accel-ppp not installed | Install accel-ppp or update `ACCEL_CMD` path |
+| `accel-cmd not found` | accel-ppp not installed | Reinstall with `install.sh` to build from source |
+| `Connection to localhost:2001 failed` | accel-ppp not running | `sudo systemctl start accel-ppp` |
+| `pppd_compat: ... No such file` | Inline comments in config | Ensure no `#` comments on value lines in `/etc/accel-ppp.conf` |
+| `failed to load vlan_mon module` | Normal in VMs | Harmless warning — vlan_mon requires physical NICs |
 
-### Python too old
+### Python version
 
 ```bash
-python3 --version   # need 3.10+
+python3 --version   # need 3.9+
 
 # Debian 12+ / Ubuntu 22.04+
 sudo apt update && sudo apt install python3 python3-venv
@@ -289,8 +388,8 @@ sudo apt update && sudo apt install python3 python3-venv
 
 ### API Key
 
-- Always replace the default key before exposing the agent to any network
-- Generate a strong key: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
+- The installer generates a strong 43-character URL-safe key automatically
+- Generate a custom key: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"`
 - Use HTTPS (reverse proxy) in production — the key travels in an HTTP header
 
 ### File Permissions
