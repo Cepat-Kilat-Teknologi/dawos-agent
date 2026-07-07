@@ -56,7 +56,12 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Run tests
-        run: pytest --cov=dawos_agent --cov-report=term-missing --cov-report=xml -q
+        run: coverage run -m pytest -q
+
+      - name: Coverage report
+        run: |
+          coverage report -m
+          coverage xml
 
       - name: Upload coverage
         if: matrix.python-version == '3.12'
