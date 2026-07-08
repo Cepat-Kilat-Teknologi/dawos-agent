@@ -34,6 +34,7 @@ Requests without a valid key receive:
 
 - **Success responses** return the documented response model with HTTP 200 (or 201/204 where noted).
 - **Error responses** return `{"detail": "<message>"}` with an appropriate HTTP status code.
+- **Validation errors** return HTTP 422 with a JSON array describing the invalid field and constraint. All request body fields are validated against type constraints and regex patterns before reaching service logic. See [Input Validation Reference](validation-rules.md) for the complete list of patterns and per-field constraints.
 - **SSE endpoints** return `text/event-stream` content type for real-time streaming.
 
 ---
