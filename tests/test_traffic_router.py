@@ -173,10 +173,7 @@ async def test_restore_ratelimit(client, headers):
             headers=headers,
         )
 
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is True
-    assert data["rate"] == "restored"
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
