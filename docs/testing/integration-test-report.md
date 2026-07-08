@@ -24,6 +24,7 @@ Testing was conducted in three phases:
 | Phase 1 | dawos-cli commands | 112 operations | End-to-end validation through the CLI client |
 | Phase 2 | Direct curl requests | 70 operations | Verify remaining endpoints and CRUD semantics |
 | Phase 3 | Full regression retest | 138 operations | Post-install verification after optional packages (dnsmasq, keepalived, FRR/vtysh) |
+| Phase 4 | dawos-cli full retest | 112 operations | Post-patch CLI retest — discovered and fixed BUG-6, BUG-7 |
 
 Combined coverage: **138 unique endpoint operations** (100% of API surface). Phase 3 confirmed zero regressions and resolved all previously-N/A endpoints.
 
@@ -64,11 +65,11 @@ Dist Router (192.168.216.82)
 | Passed | 138 (100%) |
 | N/A | 0 |
 | Failed | 0 |
-| Defects found | 5 (all fixed) |
+| Defects found | 7 (all fixed) |
 | Infrastructure issues | 5 (3 fixed, 2 environmental) |
 | Observations | 3 (non-blocking, deferred) |
 
-**Verdict:** PASS. All 138 endpoints behave correctly under normal operating conditions. Testing was conducted in three phases: initial dawos-cli walkthrough, direct curl verification, and a full regression retest after installing all optional system packages (dnsmasq, keepalived, FRR/vtysh). Zero regressions detected.
+**Verdict:** PASS. All 138 endpoints behave correctly under normal operating conditions. Testing was conducted in four phases: initial dawos-cli walkthrough, direct curl verification, a full regression retest after installing all optional system packages (dnsmasq, keepalived, FRR/vtysh), and a final dawos-cli retest that discovered and fixed 2 additional CLI bugs (BUG-6, BUG-7). Zero regressions detected.
 
 ---
 
@@ -285,7 +286,7 @@ keepalived installed and configured with VRRP instance VI_1 on eth0.
 | # | Endpoint | Response | Notes |
 |---|----------|----------|-------|
 | 1 | `GET /api/v1/monitoring/status` | 200 | Service status reported |
-| 2 | `POST /api/v1/monitoring/configure` | 200 | Configuration accepted |
+| 2 | `POST /api/v1/monitoring/configure` | 200 | `{"service":"accel-ppp","enable":true}` — BUG-7 fixed (CLI redesigned) |
 | 3 | `GET /api/v1/monitoring/metrics/{service}` | 200 | Metrics returned |
 | 4 | `POST /api/v1/monitoring/restart/{service}` | 200 | Service restart triggered |
 
@@ -297,23 +298,23 @@ All write endpoints verified with corresponding read operations to confirm persi
 
 | Feature | Create | Read | Update | Delete | Notes |
 |---------|:------:|:----:|:------:|:------:|-------|
-| Firewall groups | 201 | 200 | members | 200 | All 3 types: address, network, port |
-| NAT egress | set | map | -- | clear | Box on/off + set/clear cycle |
-| NAT masquerade | on | status | -- | off | |
-| IP Pool | 201 | 200 | -- | 200 | |
-| Zones | 201 | detail | -- | 200 | |
-| Routes | 200 | 200 | -- | 200 | |
-| VLANs | 200 | 200 | -- | 200 | Delete by interface name |
+| Firewall groups | 201 | 200 | members | 204 | All 3 types: address, network, port |
+| NAT egress | set | map | -- | 204 | Box on/off + set/clear cycle |
+| NAT masquerade | on | status | -- | 204 | |
+| IP Pool | 201 | 200 | -- | 204 | |
+| Zones | 201 | detail | -- | 204 | |
+| Routes | 200 | 200 | -- | 204 | |
+| VLANs | 200 | 200 | -- | 204 | Delete by interface name |
 | Event hooks | 201 | 200 | -- | 204 | |
-| Event fire | 200 | history | -- | clear | |
+| Event fire | 200 | history | -- | 204 | |
 | Scheduler jobs | 201 | 200 | run | 204 | |
 | Config | apply | show | confirm | rollback | 5-min auto-rollback guard |
-| Traffic shaping | rate | queue | -- | restore | tc tbf + police |
+| Traffic shaping | rate | queue | -- | 204 | tc tbf + police |
 | Conntrack | profile | config | size/timeout | -- | |
 | Service | command | status | -- | -- | |
 | Sessions | find | list/stats | snapshot | -- | |
-| PPPoE | add iface | list | PADO delay | remove | |
-| MAC filter | add | list | -- | remove | |
+| PPPoE | add iface | list | PADO delay | 204 | |
+| MAC filter | add | list | -- | 204 | |
 | SSE streaming | connect | events | -- | -- | |
 | DNS | set | read | -- | -- | systemd-resolved aware |
 
@@ -330,6 +331,8 @@ All write endpoints verified with corresponding read operations to confirm persi
 | BUG-3 | High | dawos-agent | FIXED | Firewall group API uses nonexistent nftables table |
 | BUG-4 | Critical | dawos-agent | FIXED | Firewall group CREATE always fails (shell escaping) |
 | BUG-5 | Critical | dawos-agent | FIXED | NAT egress completely broken (invalid nft syntax) |
+| BUG-6 | High | dawos-cli | FIXED | `conntrack-set` sends wrong field name (`max` instead of `max_value`) |
+| BUG-7 | High | dawos-cli | FIXED | `monitoring configure` sends wrong fields and interface |
 
 ### 5.2 Detail
 
@@ -369,6 +372,24 @@ All write endpoints verified with corresponding read operations to confirm persi
 - Impact: Box egress ON, set_egress, and clear_egress all fail. Per-customer NAT egress is completely broken.
 - Fix: Removed the invalid `ip saddr @cust_egress` prefix, keeping only `snat to ip saddr map @cust_egress`.
 - Verification: Full egress cycle confirmed: box-on, set mapping, NAT status shows map, delete mapping, box-off.
+
+**BUG-6: `conntrack-set` sends wrong field name**
+
+- File: `dawos_cli/commands/firewall.py:74`
+- Root cause: CLI sends `{"max": N}` in PUT body but the API `PUT /api/v1/firewall/conntrack` expects `{"max_value": N}` per `ConntrackUpdateRequest` model.
+- Impact: `dawos firewall conntrack-set 262144` returns HTTP 422 validation error. Conntrack max cannot be set via CLI.
+- Fix: Changed `json={"max": max_entries}` to `json={"max_value": max_entries}`.
+- Test updated: `tests/test_commands.py::TestFirewallCommands::test_conntrack_set` — now asserts correct payload.
+- Verification: `dawos firewall conntrack-set 262144` succeeds, read-back confirms `nf_conntrack_max=262144`.
+
+**BUG-7: `monitoring configure` sends wrong fields and uses wrong interface**
+
+- File: `dawos_cli/commands/monitoring.py:37-48`
+- Root cause: CLI accepted `--target`/`-t` and `--value`/`-v` flags and sent `{"target": target, "value": value}`, but the API `POST /api/v1/monitoring/configure` expects `ConfigureExporterRequest` with fields `{"service": str, "enable": bool}`.
+- Impact: `dawos monitoring configure -t prometheus -v enabled` returns HTTP 422 validation error. Monitoring exporter cannot be configured via CLI.
+- Fix: Redesigned command interface: replaced `--target`/`-t` and `--value`/`-v` with `--service`/`-s` (required) and `--enable/--disable` (boolean flag). Updated docstring to "Enable or disable a monitoring exporter."
+- Tests updated: `tests/test_commands.py::TestMonitoringCommands::test_configure` — uses new flags. Added `test_configure_disable` for the disable path.
+- Verification: `dawos monitoring configure -s accel-ppp --enable` succeeds. `--disable` path also confirmed working.
 
 ---
 
@@ -459,7 +480,7 @@ Request field names and formats discovered during testing. This serves as a refe
 | Scheduler Job Create | `name`, `command`, `interval_seconds` | interval minimum 10 seconds |
 | Firewall Group Create | `name`, `group_type` | group_type: `address`, `network`, or `port` |
 | Firewall Group Members | `elements` | Array of strings |
-| Firewall Conntrack Update | `max_value` | Integer (not `max_entries`) |
+| Firewall Conntrack Update | `max_value` | Integer (not `max` — BUG-6 fixed) |
 | Firewall Validate | `ruleset` | Full nftables ruleset string |
 | NAT Egress Set | `target`, `public_ip` | target: customer private IP |
 | NAT Box Egress | `action` | `"on"` or `"off"` |
@@ -473,6 +494,7 @@ Request field names and formats discovered during testing. This serves as a refe
 | Conntrack Profile Apply | `name` | `"default"`, `"gaming"`, `"streaming"` |
 | Config Diff | `?backup_name=` query param | Required query parameter |
 | Config Apply (guarded) | `content`, `confirm_minutes` (opt) | Full config text; default 5 minutes |
+| Monitoring Configure | `service`, `enable` (opt, default true) | Service name + boolean enable/disable (BUG-7 fixed) |
 
 ---
 
@@ -503,6 +525,6 @@ Post-fix unit test status for dawos-agent:
 
 5. **Fix `PUT /network/dns` permission** -- After dnsmasq setup changes `/etc/resolv.conf` from a symlink to a regular file, the dawos user loses write access. Either add `tee /etc/resolv.conf` to sudoers or document `PUT /dns/forwarding/config` as the preferred alternative.
 
-6. **Standardize DELETE response codes** -- Some DELETE endpoints return 200 with a response body, others return 204 No Content. Consider standardizing on 204 for all DELETE operations (RFC 7231 Section 6.3.5).
+6. ~~**Standardize DELETE response codes**~~ -- DONE. All 14 DELETE endpoints now return 204 No Content with no response body (RFC 7231 Section 6.3.5). Standardized in post-test refactor.
 
 7. **Bootstrap NAT table on install** -- `POST /firewall/nat/egress` fails on fresh systems because the `accelnat` nft table does not exist until `box-egress-set on` is called. Consider auto-creating the table on first egress call or during service startup.
