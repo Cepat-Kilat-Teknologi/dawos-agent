@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **DELETE endpoints standardized to 204 No Content** — All 14 DELETE endpoints now return HTTP 204 with no response body on success, following REST best practices. Previously only 2 of 14 used 204; the remaining 12 returned 200 with JSON body. Affected endpoints: firewall groups, NAT masquerade, NAT egress, NAT public IP, IP pools, VLANs, routes, PPPoE interfaces, MAC filter, traffic ratelimit, zones, event history.
+
 ### Added
 
 - **Live integration test report** — 106 endpoints tested against real BNG node (`docs/testing/test-report.md`)
 - **Config content validation** — `field_validator` + `min_length=10` on `ConfigUpdateRequest` and `GuardedApplyRequest` to reject empty or malformed config writes
-- **Unit tests** — 2 new tests for config content validation (810 total, 100% coverage)
+- **Unit tests** — 2 new tests for config content validation (824 total, 100% coverage)
 
 ### Fixed
 
