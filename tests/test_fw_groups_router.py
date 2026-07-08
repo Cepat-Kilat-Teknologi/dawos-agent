@@ -72,15 +72,26 @@ async def test_create_group(client, headers):
 
 @pytest.mark.asyncio
 async def test_create_group_invalid_type(client, headers):
+    resp = await client.post(
+        "/api/v1/firewall/groups",
+        headers=headers,
+        json={"name": "bad", "group_type": "invalid"},
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_group_service_valueerror(client, headers):
+    """Service-level ValueError still returns 400 with valid group_type."""
     with patch(
         "dawos_agent.routers.fw_groups_router.firewall_groups.create_group",
         new_callable=AsyncMock,
-        side_effect=ValueError("Invalid group type"),
+        side_effect=ValueError("Group already exists"),
     ):
         resp = await client.post(
             "/api/v1/firewall/groups",
             headers=headers,
-            json={"name": "bad", "group_type": "invalid"},
+            json={"name": "test", "group_type": "address"},
         )
     assert resp.status_code == 400
 
@@ -161,3 +172,51 @@ async def test_add_members_error(client, headers):
             json={"elements": ["10.0.0.1"]},
         )
     assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_create_group_with_elements(client, headers):
+    with patch(
+        "dawos_agent.routers.fw_groups_router.firewall_groups.create_group",
+        new_callable=AsyncMock,
+        return_value={
+            "success": True,
+            "message": "created",
+            "name": "nets",
+            "type": "network",
+        },
+    ):
+        resp = await client.post(
+            "/api/v1/firewall/groups",
+            headers=headers,
+            json={
+                "name": "nets",
+                "group_type": "network",
+                "elements": ["10.0.0.0/24"],
+            },
+        )
+    assert resp.status_code == 201
+
+
+@pytest.mark.asyncio
+async def test_create_group_rejects_unsafe_elements(client, headers):
+    resp = await client.post(
+        "/api/v1/firewall/groups",
+        headers=headers,
+        json={
+            "name": "bad",
+            "group_type": "address",
+            "elements": ["; rm -rf /"],
+        },
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_add_members_rejects_unsafe_elements(client, headers):
+    resp = await client.post(
+        "/api/v1/firewall/groups/ips/members",
+        headers=headers,
+        json={"elements": ["; rm -rf /"]},
+    )
+    assert resp.status_code == 422
