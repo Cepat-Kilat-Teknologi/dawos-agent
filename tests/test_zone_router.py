@@ -101,6 +101,22 @@ async def test_create_zone(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_create_zone_with_interfaces(client, headers):
+    """Valid interfaces pass the shell-safety validator."""
+    with patch(
+        "dawos_agent.routers.zone_router.zone_firewall.create_zone",
+        new_callable=AsyncMock,
+        return_value={"success": True, "message": "Zone 'lan' created"},
+    ):
+        resp = await client.post(
+            "/api/v1/zones",
+            headers=headers,
+            json={"name": "lan", "interfaces": ["eth0", "eth1.100"]},
+        )
+    assert resp.status_code == 201
+
+
+@pytest.mark.asyncio
 async def test_create_zone_error(client, headers):
     with patch(
         "dawos_agent.routers.zone_router.zone_firewall.create_zone",
@@ -136,3 +152,14 @@ async def test_delete_zone_error(client, headers):
     ):
         resp = await client.delete("/api/v1/zones/bad", headers=headers)
     assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_create_zone_rejects_unsafe_interface(client, headers):
+    """Pydantic validator rejects shell metacharacters in interface list."""
+    resp = await client.post(
+        "/api/v1/zones",
+        headers=headers,
+        json={"name": "dmz", "interfaces": ["eth0; rm -rf /"]},
+    )
+    assert resp.status_code == 422
