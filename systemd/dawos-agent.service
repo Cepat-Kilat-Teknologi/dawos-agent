@@ -19,7 +19,7 @@ RestartSec=5
 NoNewPrivileges=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf
+ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf -/etc/systemd/resolved.conf.d -/etc/dnsmasq.d -/etc/dnsmasq.conf
 PrivateTmp=true
 
 # Logging
