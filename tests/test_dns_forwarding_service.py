@@ -120,6 +120,7 @@ async def test_set_forwarders():
 async def test_set_forwarders_reload_fail():
     calls = iter(
         [
+            _mock_proc("active"),  # systemctl is-active dnsmasq
             _mock_proc(""),  # tee config
             _mock_proc("fail", returncode=1),  # systemctl reload
         ]
@@ -134,6 +135,19 @@ async def test_set_forwarders_reload_fail():
             side_effect=fake_shell,
         ),
         pytest.raises(RuntimeError, match="Failed to reload"),
+    ):
+        await dns_forwarding.set_forwarders(["8.8.8.8"])
+
+
+@pytest.mark.asyncio
+async def test_set_forwarders_dnsmasq_not_installed():
+    proc = _mock_proc("inactive", returncode=3)
+    with (
+        patch(
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            return_value=proc,
+        ),
+        pytest.raises(RuntimeError, match="dnsmasq is not installed"),
     ):
         await dns_forwarding.set_forwarders(["8.8.8.8"])
 
@@ -157,13 +171,35 @@ async def test_flush_cache():
 
 @pytest.mark.asyncio
 async def test_flush_cache_fail():
-    proc = _mock_proc("fail", returncode=1)
+    calls = iter(
+        [
+            _mock_proc("active"),  # systemctl is-active dnsmasq
+            _mock_proc("fail", returncode=1),  # systemctl kill -s HUP
+        ]
+    )
+
+    async def fake_shell(cmd, **kw):
+        return next(calls)
+
+    with (
+        patch(
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            side_effect=fake_shell,
+        ),
+        pytest.raises(RuntimeError, match="Failed to flush"),
+    ):
+        await dns_forwarding.flush_cache()
+
+
+@pytest.mark.asyncio
+async def test_flush_cache_dnsmasq_not_installed():
+    proc = _mock_proc("inactive", returncode=3)
     with (
         patch(
             "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
             return_value=proc,
         ),
-        pytest.raises(RuntimeError, match="Failed to flush"),
+        pytest.raises(RuntimeError, match="dnsmasq is not installed"),
     ):
         await dns_forwarding.flush_cache()
 
