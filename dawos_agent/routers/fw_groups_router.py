@@ -74,7 +74,7 @@ async def create_group(req: CreateGroupRequest, _key: str = ApiKey):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/{name}", response_model=MemberActionResponse)
+@router.delete("/{name}", status_code=204)
 async def delete_group(name: str, _key: str = ApiKey):
     """Delete a firewall group by name.
 
@@ -83,15 +83,11 @@ async def delete_group(name: str, _key: str = ApiKey):
     Args:
         name: The group name to delete.
 
-    Returns:
-        MemberActionResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(500): If the group cannot be deleted.
     """
     try:
-        data = await firewall_groups.delete_group(name)
-        return MemberActionResponse(**data)
+        await firewall_groups.delete_group(name)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
