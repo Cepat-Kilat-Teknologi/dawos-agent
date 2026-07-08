@@ -85,7 +85,9 @@ async def set_dns_fwd(req: DnsForwardingSetRequest, _key: str = ApiKey):
         data = await dns_forwarding.set_forwarders(req.servers, req.cache_size)
         return DnsForwardingConfigResponse(**data)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        msg = str(exc)
+        code = 503 if "not installed" in msg else 500
+        raise HTTPException(status_code=code, detail=msg) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
@@ -107,6 +109,8 @@ async def flush_dns_cache(_key: str = ApiKey):
         data = await dns_forwarding.flush_cache()
         return DnsForwardingFlushResponse(**data)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        msg = str(exc)
+        code = 503 if "not installed" in msg else 500
+        raise HTTPException(status_code=code, detail=msg) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
