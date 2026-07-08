@@ -113,8 +113,7 @@ async def test_delete_group(client, headers):
         return_value={"success": True, "message": "deleted"},
     ):
         resp = await client.delete("/api/v1/firewall/groups/ips", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
