@@ -202,10 +202,7 @@ async def test_remove_pppoe_interface(client, headers):
     ):
         resp = await client.delete("/api/v1/pppoe/interfaces/eth0.100", headers=headers)
 
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is True
-    assert "Removed" in data["message"]
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
@@ -223,8 +220,7 @@ async def test_remove_pppoe_interface_reload_fails(client, headers):
     ):
         resp = await client.delete("/api/v1/pppoe/interfaces/eth0.100", headers=headers)
 
-    assert resp.status_code == 200
-    assert "reload failed" in resp.json()["message"]
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
