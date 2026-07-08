@@ -16,7 +16,7 @@ Live integration test results for **dawos-agent v0.2.0** against a real BNG node
 | **Test Date** | 2026-07-08 |
 | **Test Method** | Direct HTTP (curl) against live API |
 | **Auth** | X-API-Key header |
-| **Unit Tests** | 824 passing (100% coverage) |
+| **Unit Tests** | 841 passing (100% coverage) |
 
 ---
 
