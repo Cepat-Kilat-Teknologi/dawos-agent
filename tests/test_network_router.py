@@ -233,8 +233,7 @@ async def test_delete_vlan(client, headers):
     ):
         resp = await client.delete("/api/v1/network/vlans/eth0.100", headers=headers)
 
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
@@ -452,8 +451,7 @@ async def test_delete_route(client, headers):
             json={"destination": "172.16.0.0/16"},
         )
 
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
