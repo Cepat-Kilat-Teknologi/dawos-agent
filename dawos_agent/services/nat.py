@@ -99,7 +99,7 @@ async def _ensure_egress_table() -> None:
         ),
         (
             f"nft add rule ip {TABLE_NAME} postrouting "
-            "ip saddr @cust_egress snat to ip saddr map @cust_egress"
+            "snat to ip saddr map @cust_egress"
         ),
     ]
     for cmd in cmds:
