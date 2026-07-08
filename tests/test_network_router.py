@@ -357,6 +357,22 @@ async def test_set_vlan_state_invalid(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_set_vlan_state_service_valueerror(client, headers):
+    with patch(
+        "dawos_agent.routers.network.network.set_vlan_state",
+        new_callable=AsyncMock,
+        side_effect=ValueError("state error"),
+    ):
+        resp = await client.put(
+            "/api/v1/network/vlans/eth0.100",
+            headers=headers,
+            json={"state": "up"},
+        )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_set_vlan_state_not_found(client, headers):
     with patch(
         "dawos_agent.routers.network.network.set_vlan_state",
@@ -526,6 +542,26 @@ async def test_set_dns_error(client, headers):
         )
 
     assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_set_dns_rejects_unsafe_nameserver(client, headers):
+    resp = await client.put(
+        "/api/v1/network/dns",
+        headers=headers,
+        json={"nameservers": ["; rm -rf /"]},
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_set_dns_rejects_unsafe_search_domain(client, headers):
+    resp = await client.put(
+        "/api/v1/network/dns",
+        headers=headers,
+        json={"nameservers": ["8.8.8.8"], "search_domains": ["; evil"]},
+    )
+    assert resp.status_code == 422
 
 
 # ---------------------------------------------------------------------------
