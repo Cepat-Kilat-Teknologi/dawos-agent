@@ -86,7 +86,7 @@ async def add_pool(req: AddPoolRequest, _key: str = ApiKey):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/{name}", response_model=RemovePoolResponse)
+@router.delete("/{name}", status_code=204)
 async def remove_pool(name: str, _key: str = ApiKey):
     """Remove an IP pool by name and reload accel-ppp.
 
@@ -96,22 +96,16 @@ async def remove_pool(name: str, _key: str = ApiKey):
     Args:
         name: The pool name to remove.
 
-    Returns:
-        RemovePoolResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(404): If the pool or config file is not found.
         HTTPException(500): If the removal or reload fails.
     """
     try:
-        msg = ip_pool.remove_pool(name=name)
+        ip_pool.remove_pool(name=name)
         try:
             await reload_config()
         except Exception as reload_exc:
             log.warning("Pool removed but reload failed: %s", reload_exc)
-            msg += " (reload failed)"
-
-        return RemovePoolResponse(success=True, message=msg)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
