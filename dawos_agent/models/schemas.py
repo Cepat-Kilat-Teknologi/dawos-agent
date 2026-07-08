@@ -24,6 +24,24 @@ from enum import Enum
 from pydantic import BaseModel, Field, field_validator
 
 # ---------------------------------------------------------------------------
+# Shell-safety regex patterns for request fields interpolated into commands.
+# Applied via ``pattern=`` on ``Field`` or ``@field_validator`` to reject
+# shell metacharacters before they reach ``create_subprocess_shell``.
+# ---------------------------------------------------------------------------
+_RE_SAFE_NAME = r"^[a-zA-Z0-9._@-]+$"
+_RE_SAFE_IFACE = r"^[a-zA-Z0-9._-]+$"
+_RE_SAFE_MAC = r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
+_RE_SAFE_RATE = r"^[0-9]+[KMGkmg]?/[0-9]+[KMGkmg]?$"
+_RE_SAFE_IP = r"^[0-9A-Fa-f.:/%]+$"
+_RE_SAFE_ROUTE_DST = r"^(default|[0-9A-Fa-f.:/%]+)$"
+_RE_SAFE_DOMAIN = r"^[a-zA-Z0-9._-]+$"
+_RE_SAFE_SYSCTL = r"^[a-z0-9_]+$"
+_RE_SAFE_OPTIONS = r"^[a-zA-Z0-9._,=/ -]*$"
+_RE_SAFE_ACCEL_CMD = r"^[a-zA-Z0-9 ._=:,/-]+$"
+_RE_SAFE_ELEMENT = r"^[0-9A-Fa-f.:/-]+$"
+
+
+# ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
 
@@ -304,8 +322,8 @@ class TerminateRequest(BaseModel):
         ifname: Terminate the session on this specific interface.
     """
 
-    username: str | None = None
-    ifname: str | None = None
+    username: str | None = Field(None, pattern=_RE_SAFE_NAME)
+    ifname: str | None = Field(None, pattern=_RE_SAFE_IFACE)
 
 
 class TerminateResponse(BaseModel):
@@ -397,7 +415,10 @@ class CommandRequest(BaseModel):
         command: Arguments to pass to ``accel-cmd`` (e.g. ``"show stat"``).
     """
 
-    command: str = Field(description="accel-cmd arguments, e.g. 'show stat'")
+    command: str = Field(
+        description="accel-cmd arguments, e.g. 'show stat'",
+        pattern=_RE_SAFE_ACCEL_CMD,
+    )
 
 
 class CommandResponse(BaseModel):
@@ -485,10 +506,18 @@ class InterfaceConfigRequest(BaseModel):
         state: Desired operational state (``"up"`` or ``"down"``).
     """
 
-    address: str | None = Field(None, description="CIDR notation, e.g. 10.0.0.1/24")
-    remove_address: str | None = Field(None, description="CIDR address to remove")
-    mtu: int | None = None
-    state: str | None = Field(None, description="up or down")
+    address: str | None = Field(
+        None, description="CIDR notation, e.g. 10.0.0.1/24",
+        pattern=_RE_SAFE_IP,
+    )
+    remove_address: str | None = Field(
+        None, description="CIDR address to remove",
+        pattern=_RE_SAFE_IP,
+    )
+    mtu: int | None = Field(None, ge=68, le=65535, description="MTU value 68-65535")
+    state: str | None = Field(
+        None, description="up or down", pattern=r"^(up|down)$",
+    )
 
 
 class InterfaceConfigResponse(BaseModel):
@@ -519,9 +548,12 @@ class VlanCreateRequest(BaseModel):
         address: Optional IP address in CIDR notation to assign immediately.
     """
 
-    parent: str = Field(description="Parent interface, e.g. eth0")
+    parent: str = Field(description="Parent interface, e.g. eth0", pattern=_RE_SAFE_IFACE)
     vlan_id: int = Field(ge=1, le=4094, description="VLAN ID 1-4094")
-    address: str | None = Field(None, description="Optional IP in CIDR notation")
+    address: str | None = Field(
+        None, description="Optional IP in CIDR notation",
+        pattern=_RE_SAFE_IP,
+    )
 
 
 class VlanDeleteResponse(BaseModel):
@@ -587,10 +619,12 @@ class RouteAddRequest(BaseModel):
         metric: Optional route metric / preference value.
     """
 
-    destination: str = Field(description="CIDR or 'default'")
-    gateway: str
-    device: str | None = None
-    metric: int | None = None
+    destination: str = Field(
+        description="CIDR or 'default'", pattern=_RE_SAFE_ROUTE_DST,
+    )
+    gateway: str = Field(pattern=_RE_SAFE_IP)
+    device: str | None = Field(None, pattern=_RE_SAFE_IFACE)
+    metric: int | None = Field(None, ge=0)
 
 
 class RouteDeleteRequest(BaseModel):
@@ -602,8 +636,10 @@ class RouteDeleteRequest(BaseModel):
             exist for the same destination.
     """
 
-    destination: str = Field(description="CIDR or 'default'")
-    gateway: str | None = None
+    destination: str = Field(
+        description="CIDR or 'default'", pattern=_RE_SAFE_ROUTE_DST,
+    )
+    gateway: str | None = Field(None, pattern=_RE_SAFE_IP)
 
 
 class RouteResponse(BaseModel):
@@ -645,6 +681,32 @@ class DnsUpdateRequest(BaseModel):
 
     nameservers: list[str] = Field(min_length=1, max_length=3)
     search_domains: list[str] = []
+
+    @field_validator("nameservers")
+    @classmethod
+    def _safe_nameservers(cls, val: list[str]) -> list[str]:
+        """Reject non-IP characters in nameserver entries."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_IP)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid nameserver address: {item!r}"
+                raise ValueError(msg)
+        return val
+
+    @field_validator("search_domains")
+    @classmethod
+    def _safe_search_domains(cls, val: list[str]) -> list[str]:
+        """Reject unsafe characters in search domain entries."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_DOMAIN)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid search domain: {item!r}"
+                raise ValueError(msg)
+        return val
 
 
 class DnsResponse(BaseModel):
@@ -703,7 +765,10 @@ class NatMasqueradeRequest(BaseModel):
         wan_interface: Name of the outbound WAN interface (e.g. ``"eth0"``).
     """
 
-    wan_interface: str = Field(description="WAN interface for masquerade, e.g. eth0")
+    wan_interface: str = Field(
+        description="WAN interface for masquerade, e.g. eth0",
+        pattern=_RE_SAFE_IFACE,
+    )
 
 
 class NatMasqueradeResponse(BaseModel):
@@ -795,7 +860,7 @@ class VlanStateRequest(BaseModel):
         state: Desired state — ``"up"`` or ``"down"``.
     """
 
-    state: str = Field(description="'up' or 'down'")
+    state: str = Field(description="'up' or 'down'", pattern=r"^(up|down)$")
 
 
 class VlanStateResponse(BaseModel):
@@ -847,9 +912,13 @@ class PppoeAddRequest(BaseModel):
             (e.g. ``"padi-limit=0"``).
     """
 
-    interface: str = Field(description="Interface name to add, e.g. eth0.100")
+    interface: str = Field(
+        description="Interface name to add, e.g. eth0.100",
+        pattern=_RE_SAFE_IFACE,
+    )
     options: str = Field(
-        "", description="Optional: comma-separated options like padi-limit=0"
+        "", description="Optional: comma-separated options like padi-limit=0",
+        pattern=_RE_SAFE_OPTIONS,
     )
 
 
@@ -890,7 +959,10 @@ class MacFilterRequest(BaseModel):
             (e.g. ``"AA:BB:CC:DD:EE:FF"``).
     """
 
-    mac: str = Field(description="MAC address, e.g. AA:BB:CC:DD:EE:FF")
+    mac: str = Field(
+        description="MAC address, e.g. AA:BB:CC:DD:EE:FF",
+        pattern=_RE_SAFE_MAC,
+    )
 
 
 class MacFilterResponse(BaseModel):
@@ -910,22 +982,6 @@ class MacFilterResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class TrafficSample(BaseModel):
-    """A point-in-time traffic measurement for a single subscriber session.
-
-    Attributes:
-        username: Subscriber's authentication username.
-        download_mbps: Current download throughput in megabits per second.
-        upload_mbps: Current upload throughput in megabits per second.
-        rx_bytes: Cumulative bytes received since session start.
-        tx_bytes: Cumulative bytes transmitted since session start.
-    """
-
-    username: str
-    download_mbps: float = 0.0
-    upload_mbps: float = 0.0
-    rx_bytes: int = 0
-    tx_bytes: int = 0
 
 
 class QueueStats(BaseModel):
@@ -956,6 +1012,7 @@ class RateLimitRequest(BaseModel):
 
     rate: str = Field(
         description="Rate in up/down format, e.g. '5M/20M'",
+        pattern=_RE_SAFE_RATE,
     )
 
 
@@ -1387,8 +1444,8 @@ class NatEgressSetRequest(BaseModel):
         public_ip: Public IP to assign for outbound NAT.
     """
 
-    target: str = Field(description="Customer IP address")
-    public_ip: str = Field(description="Public egress IP")
+    target: str = Field(description="Customer IP address", pattern=_RE_SAFE_IP)
+    public_ip: str = Field(description="Public egress IP", pattern=_RE_SAFE_IP)
 
 
 class NatEgressResponse(BaseModel):
@@ -1411,8 +1468,11 @@ class NatPublicIpRequest(BaseModel):
         interface: Uplink interface name; auto-detected if empty.
     """
 
-    public_ip: str
-    interface: str = Field("", description="Uplink interface (auto-detected if empty)")
+    public_ip: str = Field(pattern=_RE_SAFE_IP)
+    interface: str = Field(
+        "", description="Uplink interface (auto-detected if empty)",
+        pattern=r"^[a-zA-Z0-9._-]*$",
+    )
 
 
 class NatStatusResponse(BaseModel):
@@ -1436,7 +1496,7 @@ class BoxEgressRequest(BaseModel):
         action: ``"on"`` to enable or ``"off"`` to disable masquerade.
     """
 
-    action: str = Field(description="on or off")
+    action: str = Field(description="on or off", pattern=r"^(on|off)$")
 
 
 class BoxEgressResponse(BaseModel):
@@ -1518,7 +1578,7 @@ class SchedulerJobRequest(BaseModel):
         enabled: Whether the job should run on schedule.
     """
 
-    name: str = Field(description="Unique job name")
+    name: str = Field(description="Unique job name", pattern=_RE_SAFE_NAME)
     command: str = Field(description="Shell command to execute")
     interval_seconds: int = Field(ge=10, description="Repeat interval in seconds")
     enabled: bool = True
@@ -1613,7 +1673,10 @@ class ConntrackTimeoutRequest(BaseModel):
         seconds: New timeout value in seconds.
     """
 
-    key: str = Field(description="Timeout key, e.g. tcp_timeout_established")
+    key: str = Field(
+        description="Timeout key, e.g. tcp_timeout_established",
+        pattern=_RE_SAFE_SYSCTL,
+    )
     seconds: int = Field(ge=1, description="Timeout in seconds")
 
 
@@ -1663,7 +1726,10 @@ class ConntrackProfileRequest(BaseModel):
         name: Profile name — ``"default"``, ``"gaming"``, or ``"streaming"``.
     """
 
-    name: str = Field(description="Profile name: default, gaming, streaming")
+    name: str = Field(
+        description="Profile name: default, gaming, streaming",
+        pattern=r"^(default|gaming|streaming)$",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1758,6 +1824,19 @@ class DnsForwardingSetRequest(BaseModel):
 
     servers: list[str] = Field(min_length=1, max_length=5)
     cache_size: int = Field(default=1000, ge=0, le=100000)
+
+    @field_validator("servers")
+    @classmethod
+    def _safe_servers(cls, val: list[str]) -> list[str]:
+        """Reject non-IP characters in upstream server entries."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_IP)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid server address: {item!r}"
+                raise ValueError(msg)
+        return val
 
 
 class DnsForwardingFlushResponse(BaseModel):
@@ -1871,7 +1950,9 @@ class RestartSessionRequest(BaseModel):
         username: PPPoE username of the session to restart.
     """
 
-    username: str = Field(..., description="PPPoE username to restart")
+    username: str = Field(
+        ..., description="PPPoE username to restart", pattern=_RE_SAFE_NAME,
+    )
 
 
 class RestartSessionResponse(BaseModel):
@@ -1897,7 +1978,9 @@ class DropByMacRequest(BaseModel):
         mac: Calling-Station-Id (MAC address) to match.
     """
 
-    mac: str = Field(..., description="MAC address (calling-station-id)")
+    mac: str = Field(
+        ..., description="MAC address (calling-station-id)", pattern=_RE_SAFE_MAC,
+    )
 
 
 class DropByMacResponse(BaseModel):
@@ -2036,8 +2119,10 @@ class AddPoolRequest(BaseModel):
         ip_range: CIDR notation range (e.g. ``"10.0.0.0/24"``).
     """
 
-    name: str = Field(..., description="Pool name label")
-    ip_range: str = Field(..., description="CIDR range, e.g. 10.0.0.0/24")
+    name: str = Field(..., description="Pool name label", pattern=_RE_SAFE_NAME)
+    ip_range: str = Field(
+        ..., description="CIDR range, e.g. 10.0.0.0/24", pattern=_RE_SAFE_IP,
+    )
 
 
 class RemovePoolResponse(BaseModel):
@@ -2302,8 +2387,8 @@ class EventHookRequest(BaseModel):
         enabled: Whether the hook should be active immediately.
     """
 
-    name: str = Field(..., description="Unique hook name")
-    event: str = Field(..., description="Event type")
+    name: str = Field(..., description="Unique hook name", pattern=_RE_SAFE_NAME)
+    event: str = Field(..., description="Event type", pattern=_RE_SAFE_NAME)
     action: str = Field(..., description="Webhook URL or shell command")
     enabled: bool = True
 
@@ -2346,7 +2431,9 @@ class FireEventRequest(BaseModel):
         payload: Arbitrary JSON payload to include with the event.
     """
 
-    event: str = Field(..., description="Event type to fire")
+    event: str = Field(
+        ..., description="Event type to fire", pattern=_RE_SAFE_NAME,
+    )
     payload: dict = {}
 
 
@@ -2376,16 +2463,6 @@ class EventHistoryResponse(BaseModel):
 
     count: int = 0
     entries: list[dict] = []
-
-
-class ClearHistoryResponse(BaseModel):
-    """Result of clearing the event history log.
-
-    Attributes:
-        cleared: Number of history entries that were removed.
-    """
-
-    cleared: int = 0
 
 
 # ---------------------------------------------------------------------------
@@ -2457,8 +2534,21 @@ class CreateZoneRequest(BaseModel):
         interfaces: List of interfaces to assign to the zone.
     """
 
-    name: str = Field(..., description="Zone name")
+    name: str = Field(..., description="Zone name", pattern=_RE_SAFE_IFACE)
     interfaces: list[str] = []
+
+    @field_validator("interfaces")
+    @classmethod
+    def _safe_interfaces(cls, val: list[str]) -> list[str]:
+        """Reject shell metacharacters in interface list items."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_IFACE)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid interface name: {item!r}"
+                raise ValueError(msg)
+        return val
 
 
 class ZoneActionResponse(BaseModel):
@@ -2515,9 +2605,25 @@ class CreateGroupRequest(BaseModel):
         elements: Initial elements to add to the group.
     """
 
-    name: str = Field(..., description="Group name")
-    group_type: str = Field(..., description="address, network, or port")
+    name: str = Field(..., description="Group name", pattern=_RE_SAFE_IFACE)
+    group_type: str = Field(
+        ..., description="address, network, or port",
+        pattern=r"^(address|network|port)$",
+    )
     elements: list[str] = []
+
+    @field_validator("elements")
+    @classmethod
+    def _safe_elements(cls, val: list[str]) -> list[str]:
+        """Reject shell metacharacters in initial group elements."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_ELEMENT)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid element value: {item!r}"
+                raise ValueError(msg)
+        return val
 
 
 class GroupActionResponse(BaseModel):
@@ -2544,6 +2650,19 @@ class AddMembersRequest(BaseModel):
     """
 
     elements: list[str] = Field(..., min_length=1, description="Elements to add")
+
+    @field_validator("elements")
+    @classmethod
+    def _safe_elements(cls, val: list[str]) -> list[str]:
+        """Reject shell metacharacters in group element values."""
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_ELEMENT)
+        for item in val:
+            if not pat.match(item):
+                msg = f"Invalid element value: {item!r}"
+                raise ValueError(msg)
+        return val
 
 
 class MemberActionResponse(BaseModel):
@@ -2614,7 +2733,9 @@ class VrrpFailoverRequest(BaseModel):
         group: VRRP group name to fail over.
     """
 
-    group: str = Field(..., description="VRRP group name")
+    group: str = Field(
+        ..., description="VRRP group name", pattern=_RE_SAFE_NAME,
+    )
 
 
 class VrrpActionResponse(BaseModel):
@@ -2698,7 +2819,9 @@ class ConfigureExporterRequest(BaseModel):
         enable: ``True`` to enable, ``False`` to disable.
     """
 
-    service: str = Field(..., description="Exporter service name")
+    service: str = Field(
+        ..., description="Exporter service name", pattern=_RE_SAFE_IFACE,
+    )
     enable: bool = True
 
 
