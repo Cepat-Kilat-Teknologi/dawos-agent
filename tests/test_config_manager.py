@@ -281,6 +281,28 @@ def test_guarded_apply_status_no_pending():
     assert status["checkpoint"] is None
 
 
+def test_write_config_rejects_empty_content(tmp_config):
+    """write_config must refuse empty content to prevent config destruction."""
+    conf, backup_dir = tmp_config
+    with (
+        patch.object(config_manager, "ACCEL_CONFIG", conf),
+        patch.object(config_manager, "BACKUP_DIR", backup_dir),
+        pytest.raises(ValueError, match="empty"),
+    ):
+        config_manager.write_config("", backup=False)
+
+
+def test_write_config_rejects_no_section_header(tmp_config):
+    """write_config must refuse content without INI section headers."""
+    conf, backup_dir = tmp_config
+    with (
+        patch.object(config_manager, "ACCEL_CONFIG", conf),
+        patch.object(config_manager, "BACKUP_DIR", backup_dir),
+        pytest.raises(ValueError, match="section header"),
+    ):
+        config_manager.write_config("just some random text", backup=False)
+
+
 def test_cancel_guarded_timer_idempotent():
     """cancel_guarded_timer should be safe to call with no active timer."""
     config_manager._rollback_task = None
