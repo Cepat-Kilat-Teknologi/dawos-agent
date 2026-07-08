@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ async def zone_detail(zone: str) -> dict:
         A dictionary with ``zone``, ``found`` (bool), ``rules``
         (list of dicts with ``chain`` and ``rule``), and ``raw_output``.
     """
-    out, rc = await _run(f"nft list table inet {zone}", sudo=True)
+    out, rc = await _run(f"nft list table inet {shlex.quote(zone)}", sudo=True)
     if rc != 0:
         return {"zone": zone, "found": False, "rules": [], "raw_output": out}
 
@@ -111,7 +112,7 @@ async def create_zone(name: str, *, interfaces: list[str] | None = None) -> dict
     Returns:
         A dictionary with ``success`` (bool) and ``message``.
     """
-    out, rc = await _run(f"nft add table inet {name}", sudo=True)
+    out, rc = await _run(f"nft add table inet {shlex.quote(name)}", sudo=True)
     if rc != 0:
         return {"success": False, "message": out}
 
@@ -140,7 +141,7 @@ async def delete_zone(name: str) -> dict:
     Returns:
         A dictionary with ``success`` (bool) and ``message``.
     """
-    out, rc = await _run(f"nft delete table inet {name}", sudo=True)
+    out, rc = await _run(f"nft delete table inet {shlex.quote(name)}", sudo=True)
     msg = (
         (out or f"Zone '{name}' deleted")
         if rc == 0
