@@ -174,6 +174,17 @@ async def test_update_config_rejects_empty_content(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_update_config_rejects_whitespace_only(client, headers):
+    resp = await client.put(
+        "/api/v1/config",
+        headers=headers,
+        json={"content": "              "},
+    )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_update_config_rejects_no_section_header(client, headers):
     resp = await client.put(
         "/api/v1/config",
