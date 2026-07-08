@@ -16,7 +16,7 @@ Live integration test results for **dawos-agent v0.1.0** against a real BNG node
 | **Test Date** | 2026-07-08 |
 | **Test Method** | Direct HTTP (curl) against live API |
 | **Auth** | X-API-Key header |
-| **Unit Tests** | 820 passing (100% coverage) |
+| **Unit Tests** | 824 passing (100% coverage) |
 
 ---
 
@@ -420,7 +420,7 @@ Full create-read-update-delete cycles tested on live server. All resources clean
 
 | Step | Method | Endpoint | Body | HTTP | Result |
 |------|--------|----------|------|:----:|--------|
-| Configure | POST | `/api/v1/monitoring/configure` | `{"service":"accel-ppp","enabled":true}` | 200 | Monitoring enabled |
+| Configure | POST | `/api/v1/monitoring/configure` | `{"service":"accel-ppp","enable":true}` | 200 | Monitoring exporter enabled |
 
 ---
 
@@ -506,8 +506,7 @@ Tested with a real PPPoE session: PPPoE Client → BNG ens20 → accel-ppp.
 | **Client MAC** | bc:24:11:c8:32:9e |
 | **Session ID** | a35a5ccb37202dbd |
 
-### Session Read Endpoints (6/6) ✅
-
+### Session Read Endpoints (6/6)
 | # | Endpoint | Response | Verified |
 |---|----------|----------|----------|
 | 1 | `GET /api/v1/sessions` | 200 | count: 1, session with all fields |
@@ -517,16 +516,14 @@ Tested with a real PPPoE session: PPPoE Client → BNG ens20 → accel-ppp.
 | 5 | `GET /api/v1/sessions/control/by-ip/10.99.0.2` | 200 | found: true, session details |
 | 6 | `GET /api/v1/sessions/control/by-sid/a35a5ccb37202dbd` | 200 | found: true (session ID, not MAC) |
 
-### Traffic Shaping Endpoints (3/3) ✅
-
+### Traffic Shaping Endpoints (3/3)
 | # | Endpoint | Response | Verified |
 |---|----------|----------|----------|
 | 7 | `POST /api/v1/traffic/ratelimit/testuser1` | 200 | Shaper changed to 5M/20M |
 | 8 | `GET /api/v1/traffic/queue/testuser1` | 200 | TC qdisc + police rules |
 | 9 | `DELETE /api/v1/traffic/ratelimit/testuser1` | 200 | Shaper restored |
 
-### Session Control Endpoints (3/3) ✅
-
+### Session Control Endpoints (3/3)
 | # | Endpoint | Response | Verified |
 |---|----------|----------|----------|
 | 10 | `POST /api/v1/sessions/terminate` | 200 | Session terminated, CPE auto-reconnected |
