@@ -92,7 +92,7 @@ async def create_zone(req: CreateZoneRequest, _key: str = ApiKey):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/{zone}", response_model=ZoneActionResponse)
+@router.delete("/{zone}", status_code=204)
 async def delete_zone(zone: str, _key: str = ApiKey):
     """Delete a firewall zone.
 
@@ -101,14 +101,10 @@ async def delete_zone(zone: str, _key: str = ApiKey):
     Args:
         zone: The zone name to delete (path parameter).
 
-    Returns:
-        ZoneActionResponse: Success flag and result message.
-
     Raises:
         HTTPException(500): If the zone cannot be deleted.
     """
     try:
-        data = await zone_firewall.delete_zone(zone)
-        return ZoneActionResponse(**data)
+        await zone_firewall.delete_zone(zone)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
