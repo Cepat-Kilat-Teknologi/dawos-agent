@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Comprehensive input validation** -- All request models now validate user-supplied fields against regex patterns and type constraints at the Pydantic layer (HTTP 422 rejection). Covers 30+ fields across session, network, firewall, NAT, PPPoE, conntrack, DNS, routing, zone, VRRP, scheduler, event, IP pool, and monitoring endpoints.
+- **Shell injection defense-in-depth** -- Added `shlex.quote()` wrapping in 5 service modules (`accel.py`, `monitoring.py`, `zone_firewall.py`, `firewall_groups.py`, `network.py`) for all user-supplied values interpolated into shell commands.
+- **Input validation reference** -- New documentation page (`docs/api/validation-rules.md`) with per-endpoint field constraints, regex patterns, and shell quoting details.
+- **Validation tests** -- 17 new unit tests covering regex rejection, list field validation, and service-level error paths (841 total).
+
+### Changed
+
+- **API reference updated** -- Common Patterns section now documents HTTP 422 validation errors and links to the validation reference.
+
+### Removed
+
+- **Dead code cleanup** -- Removed unused `TrafficSample` and `ClearHistoryResponse` models from `schemas.py`.
+
 ## [0.2.0] - 2026-07-08
 
 ### Changed
