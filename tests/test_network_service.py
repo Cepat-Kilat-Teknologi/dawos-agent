@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -531,6 +531,110 @@ def test_set_dns_no_search(tmp_path):
     content = resolv.read_text()
     assert "nameserver 1.1.1.1" in content
     assert "search" not in content
+
+
+def test_set_dns_symlink_uses_resolved(tmp_path):
+    """When /etc/resolv.conf is a symlink, write resolved drop-in."""
+    with (
+        patch.object(network, "RESOLV_CONF") as mock_rc,
+        patch("dawos_agent.services.network._write_resolved_dropin") as mock_dropin,
+        patch("dawos_agent.services.network._write_resolv_conf") as mock_direct,
+    ):
+        mock_rc.is_symlink.return_value = True
+        network.set_dns(nameservers=["8.8.8.8"], search_domains=["a.com"])
+
+    mock_dropin.assert_called_once_with(["8.8.8.8"], ["a.com"])
+    mock_direct.assert_not_called()
+
+
+def test_set_dns_regular_file_uses_resolv_conf(tmp_path):
+    """When /etc/resolv.conf is NOT a symlink, write directly."""
+    with (
+        patch.object(network, "RESOLV_CONF") as mock_rc,
+        patch("dawos_agent.services.network._write_resolved_dropin") as mock_dropin,
+        patch("dawos_agent.services.network._write_resolv_conf") as mock_direct,
+    ):
+        mock_rc.is_symlink.return_value = False
+        network.set_dns(nameservers=["1.1.1.1"])
+
+    mock_direct.assert_called_once_with(["1.1.1.1"], None)
+    mock_dropin.assert_not_called()
+
+
+def test_write_resolved_dropin():
+    """Drop-in creates dir, writes config, restarts resolved."""
+    with patch("dawos_agent.services.network.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stderr=b"")
+        network._write_resolved_dropin(["8.8.8.8", "1.1.1.1"], ["example.com"])
+
+    assert mock_run.call_count == 3  # mkdir, tee, systemctl restart
+    # Check tee writes correct content
+    tee_call = mock_run.call_args_list[1]
+    content = tee_call.kwargs["input"].decode()
+    assert "[Resolve]" in content
+    assert "DNS=8.8.8.8 1.1.1.1" in content
+    assert "Domains=example.com" in content
+
+
+def test_write_resolved_dropin_no_search():
+    """Drop-in without search domains omits Domains= line."""
+    with patch("dawos_agent.services.network.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stderr=b"")
+        network._write_resolved_dropin(["8.8.8.8"])
+
+    tee_call = mock_run.call_args_list[1]
+    content = tee_call.kwargs["input"].decode()
+    assert "DNS=8.8.8.8" in content
+    assert "Domains=" not in content
+
+
+def test_write_resolved_dropin_mkdir_failure():
+    """Mkdir failure raises PermissionError."""
+    with (
+        patch("dawos_agent.services.network.subprocess.run") as mock_run,
+        pytest.raises(PermissionError, match="drop-in dir"),
+    ):
+        mock_run.return_value = MagicMock(returncode=1, stderr=b"permission denied")
+        network._write_resolved_dropin(["8.8.8.8"])
+
+
+def test_write_resolved_dropin_tee_failure():
+    """Tee write failure raises PermissionError."""
+    call_count = 0
+
+    def _side(cmd, **kw):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return MagicMock(returncode=0, stderr=b"")  # mkdir ok
+        return MagicMock(returncode=1, stderr=b"permission denied")
+
+    with (
+        patch("dawos_agent.services.network.subprocess.run", side_effect=_side),
+        pytest.raises(PermissionError, match="Failed to write"),
+    ):
+        network._write_resolved_dropin(["8.8.8.8"])
+
+
+def test_write_resolv_conf():
+    """Direct resolv.conf write via sudo tee."""
+    with patch("dawos_agent.services.network.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0, stderr=b"")
+        network._write_resolv_conf(["8.8.8.8"], ["example.com"])
+
+    content = mock_run.call_args.kwargs["input"].decode()
+    assert "nameserver 8.8.8.8" in content
+    assert "search example.com" in content
+
+
+def test_write_resolv_conf_failure():
+    """Sudo tee failure raises PermissionError."""
+    with (
+        patch("dawos_agent.services.network.subprocess.run") as mock_run,
+        pytest.raises(PermissionError, match="Failed to write"),
+    ):
+        mock_run.return_value = MagicMock(returncode=1, stderr=b"read-only")
+        network._write_resolv_conf(["8.8.8.8"])
 
 
 # ---------------------------------------------------------------------------

@@ -159,7 +159,7 @@ async def get_session_by_id(session_id: str) -> SessionDetail:
 
 ## Testing
 
-The project maintains **808 tests** with **100% code coverage**. All tests must pass before submitting a pull request.
+The project maintains **810 tests** with **100% code coverage**. All tests must pass before submitting a pull request.
 
 ### Running Tests
 
@@ -202,7 +202,7 @@ Every pull request must pass all quality gates. These are enforced by the CI pip
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 808+ passing | `pytest tests/ -x -q` |
+| Tests | 810+ passing | `pytest tests/ -x -q` |
 | Coverage | 100% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |

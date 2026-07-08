@@ -69,7 +69,7 @@ dawos top    # live dashboard
 
 | Metric | Value |
 |--------|-------|
-| Tests | 808 passing |
+| Tests | 820 passing |
 | Coverage | 100% |
 | Pylint | 10.00/10 |
 | Black | Formatted |

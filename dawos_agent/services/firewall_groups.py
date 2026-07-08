@@ -3,6 +3,9 @@
 Manages reusable address, network, and port groups (nftables sets)
 that can be referenced in firewall rules.  Provides CRUD operations
 for creating, listing, populating, and deleting named sets.
+
+The sets live in the ``inet filter`` table which is auto-created if
+it does not already exist.
 """
 
 from __future__ import annotations
@@ -12,6 +15,8 @@ import logging
 import re
 
 log = logging.getLogger(__name__)
+
+TABLE = "inet filter"
 
 
 async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
@@ -38,6 +43,20 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
         err = stderr.decode().strip()
         log.warning("fw-group cmd failed (rc=%d): %s — %s", proc.returncode, cmd, err)
     return out, proc.returncode
+
+
+async def _ensure_table() -> None:
+    """Create the ``inet filter`` table if it does not exist.
+
+    nftables ``add table`` is idempotent — it succeeds silently when
+    the table already exists, so this is safe to call on every write
+    operation.
+    """
+    _, rc = await _run(f"nft add table {TABLE}", sudo=True)
+    if rc != 0:
+        raise RuntimeError(
+            f"Cannot create nftables table '{TABLE}' — check sudo permissions"
+        )
 
 
 async def list_groups() -> dict:
@@ -79,6 +98,8 @@ async def create_group(
 ) -> dict:
     """Create a firewall group (nftables named set).
 
+    Auto-creates the ``inet filter`` table when it does not exist.
+
     Args:
         name: Set name.
         group_type: One of ``address``, ``network``, or ``port``.
@@ -89,6 +110,7 @@ async def create_group(
 
     Raises:
         ValueError: If *group_type* is not a valid type.
+        RuntimeError: If the nftables command fails.
     """
     nft_type_map = {
         "address": "ipv4_addr",
@@ -101,20 +123,24 @@ async def create_group(
             f"Invalid group type '{group_type}'. Valid: address, network, port"
         )
 
+    await _ensure_table()
+
     flags = "flags interval ;" if group_type == "network" else ""
     out, rc = await _run(
-        f"nft add set inet filter {name} {{ type {nft_type} ; {flags} }}",
+        f"nft add set {TABLE} {name} {{ type {nft_type} ; {flags} }}",
         sudo=True,
     )
     if rc != 0:
-        return {"success": False, "message": out}
+        raise RuntimeError(f"Failed to create group '{name}': {out}")
 
     if elements:
         elem_str = ", ".join(elements)
-        await _run(
-            f"nft add element inet filter {name} {{ {elem_str} }}",
+        eout, erc = await _run(
+            f"nft add element {TABLE} {name} {{ {elem_str} }}",
             sudo=True,
         )
+        if erc != 0:
+            raise RuntimeError(f"Group created but failed to add elements: {eout}")
 
     return {
         "success": True,
@@ -132,11 +158,16 @@ async def delete_group(name: str) -> dict:
 
     Returns:
         A dictionary with ``success`` (bool) and ``message``.
+
+    Raises:
+        RuntimeError: If the nftables command fails.
     """
-    out, rc = await _run(f"nft delete set inet filter {name}", sudo=True)
+    out, rc = await _run(f"nft delete set {TABLE} {name}", sudo=True)
+    if rc != 0:
+        raise RuntimeError(f"Failed to delete group '{name}': {out}")
     return {
-        "success": rc == 0,
-        "message": out or f"Group '{name}' deleted" if rc == 0 else f"Failed: {out}",
+        "success": True,
+        "message": f"Group '{name}' deleted",
     }
 
 
@@ -149,12 +180,15 @@ async def add_members(name: str, elements: list[str]) -> dict:
 
     Returns:
         A dictionary with ``success`` (bool) and ``message``.
+
+    Raises:
+        RuntimeError: If the nftables command fails.
     """
     elem_str = ", ".join(elements)
-    out, rc = await _run(
-        f"nft add element inet filter {name} {{ {elem_str} }}", sudo=True
-    )
+    out, rc = await _run(f"nft add element {TABLE} {name} {{ {elem_str} }}", sudo=True)
+    if rc != 0:
+        raise RuntimeError(f"Failed to add members to '{name}': {out}")
     return {
-        "success": rc == 0,
-        "message": out or f"Added {len(elements)} element(s) to '{name}'",
+        "success": True,
+        "message": f"Added {len(elements)} element(s) to '{name}'",
     }

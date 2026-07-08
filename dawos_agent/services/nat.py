@@ -7,6 +7,9 @@ Mirrors the accel-cli ``nat`` module:
 - ``nat_status`` — show egress map + postrouting rules + bound IPs
 - ``box_egress`` — toggle the accelnat table on/off
 
+The ``accelnat`` table (with ``@cust_egress`` map, ``postrouting`` chain
+and SNAT rule) is auto-created when it does not already exist.
+
 Persistence file: ``/etc/accel-nat-egress.nft`` (loaded by systemd on boot).
 """
 
@@ -76,6 +79,37 @@ async def _run_ok(cmd: str, *, sudo: bool = False) -> str:
     return out
 
 
+async def _ensure_egress_table() -> None:
+    """Create the ``accelnat`` table structure if it does not exist.
+
+    Creates the table, ``@cust_egress`` map, ``postrouting`` chain, and
+    SNAT rule idempotently.  nftables ``add`` commands succeed silently
+    when the object already exists, so this is safe to call on every
+    write operation.
+    """
+    cmds = [
+        f"nft add table ip {TABLE_NAME}",
+        (
+            f"nft add map ip {TABLE_NAME} cust_egress "
+            "{ type ipv4_addr : ipv4_addr \\; }"
+        ),
+        (
+            f"nft add chain ip {TABLE_NAME} postrouting "
+            "{ type nat hook postrouting priority 100 \\; }"
+        ),
+        (
+            f"nft add rule ip {TABLE_NAME} postrouting "
+            "ip saddr @cust_egress snat to ip saddr map @cust_egress"
+        ),
+    ]
+    for cmd in cmds:
+        _, rc = await _run(cmd, sudo=True)
+        if rc != 0:
+            raise RuntimeError(
+                f"Cannot ensure nftables table '{TABLE_NAME}' — " f"failed at: {cmd}"
+            )
+
+
 # ---------------------------------------------------------------------------
 # Egress map
 # ---------------------------------------------------------------------------
@@ -117,7 +151,8 @@ async def get_egress_map() -> list[dict]:
 async def set_egress(customer_ip: str, public_ip: str) -> str:
     """Map a subscriber IP to a specific public egress IP.
 
-    Adds the mapping to the ``@cust_egress`` nftables map and persists.
+    Auto-creates the ``accelnat`` table structure when it does not
+    exist, then adds the mapping to ``@cust_egress`` and persists.
 
     Args:
         customer_ip: The subscriber's private IP address.
@@ -126,6 +161,7 @@ async def set_egress(customer_ip: str, public_ip: str) -> str:
     Returns:
         A confirmation message string.
     """
+    await _ensure_egress_table()
     await _run_ok(
         f"nft add element ip {TABLE_NAME} cust_egress "
         f"{{ {customer_ip} : {public_ip} }}",
@@ -138,12 +174,16 @@ async def set_egress(customer_ip: str, public_ip: str) -> str:
 async def clear_egress(customer_ip: str) -> str:
     """Remove a subscriber's egress NAT mapping.
 
+    Auto-creates the ``accelnat`` table structure when it does not
+    exist (handles edge case where table was flushed externally).
+
     Args:
         customer_ip: The subscriber IP to unmap.
 
     Returns:
         A confirmation message string.
     """
+    await _ensure_egress_table()
     await _run_ok(
         f"nft delete element ip {TABLE_NAME} cust_egress " f"{{ {customer_ip} }}",
         sudo=True,
@@ -268,24 +308,7 @@ async def box_egress_set(action: str) -> str:
         ValueError: If *action* is not ``"on"`` or ``"off"``.
     """
     if action == "on":
-        # Create table + map + chain if not exists
-        cmds = [
-            f"nft add table ip {TABLE_NAME}",
-            (
-                f"nft add map ip {TABLE_NAME} cust_egress "
-                "{ type ipv4_addr : ipv4_addr \\; }"
-            ),
-            (
-                f"nft add chain ip {TABLE_NAME} postrouting "
-                "{ type nat hook postrouting priority 100 \\; }"
-            ),
-            (
-                f"nft add rule ip {TABLE_NAME} postrouting "
-                "ip saddr @cust_egress snat to ip saddr map @cust_egress"
-            ),
-        ]
-        for cmd in cmds:
-            await _run(cmd, sudo=True)
+        await _ensure_egress_table()
         await _persist()
         return "Box egress enabled"
     if action == "off":

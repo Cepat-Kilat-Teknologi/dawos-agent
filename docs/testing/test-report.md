@@ -16,7 +16,7 @@ Live integration test results for **dawos-agent v0.1.0** against a real BNG node
 | **Test Date** | 2026-07-08 |
 | **Test Method** | Direct HTTP (curl) against live API |
 | **Auth** | X-API-Key header |
-| **Unit Tests** | 810 passing (100% coverage) |
+| **Unit Tests** | 820 passing (100% coverage) |
 
 ---
 
@@ -27,11 +27,13 @@ Live integration test results for **dawos-agent v0.1.0** against a real BNG node
 | GET (read) endpoints | 67 | 67 | 0 | 0 |
 | CRUD (write) endpoints | 37 | 37 | 4 | 0 |
 | SSE (streaming) endpoints | 2 | 2 | 0 | 0 |
-| **Total** | **106** | **106** | **4** | **0** |
+| Live PPPoE session endpoints | 12 | 12 | 0 | 0 |
+| **Total** | **118** | **118** | **4** | **0** |
 
 - **Zero failures.** Every endpoint behaves according to spec.
 - **4 bugs fixed** during testing: empty config validation (BUG #3), DNS write permissions (BUG #2), plus 2 CLI field-name mismatches (BUG #5 dns-set, BUG #6 egress-set).
-- **2 tests added** for config content validation (total 810 unit tests).
+- **2 tests added** for config content validation (total 820 unit tests).
+- **12 live PPPoE endpoints** verified with real PPPoE Client → BNG session.
 
 ---
 
@@ -483,8 +485,59 @@ These endpoints returned non-200 responses due to missing infrastructure, not AP
 | Endpoint | Response | Reason |
 |----------|----------|--------|
 | `POST /api/v1/dns/forwarding/flush` | 500 | dnsmasq not installed |
-| `POST /api/v1/traffic/ratelimit/{user}` | 404 | No active PPPoE session |
-| `DELETE /api/v1/traffic/ratelimit/{user}` | 404 | No active PPPoE session |
 | `POST /api/v1/firewall/groups` | 201 (success=false) | nft tables not configured |
 
-All four are correct behavior given the environment.
+> **Note:** Traffic ratelimit endpoints were previously listed here but are now fully verified with a live PPPoE session (see below).
+
+---
+
+## Live PPPoE Session Tests (12 endpoints)
+
+Tested with a real PPPoE session: PPPoE Client → BNG ens20 → accel-ppp.
+
+### Test Environment
+
+| Field | Value |
+|-------|-------|
+| **PPPoE User** | testuser1 |
+| **Auth** | chap-secrets (PAP/CHAP/MSCHAPv1/v2) |
+| **IP** | 10.99.0.2 (static via chap-secrets) |
+| **BNG Interface** | ens20 |
+| **Client MAC** | bc:24:11:c8:32:9e |
+| **Session ID** | a35a5ccb37202dbd |
+
+### Session Read Endpoints (6/6) ✅
+
+| # | Endpoint | Response | Verified |
+|---|----------|----------|----------|
+| 1 | `GET /api/v1/sessions` | 200 | count: 1, session with all fields |
+| 2 | `GET /api/v1/sessions/find/testuser1` | 200 | Session found with rate-limit, rx/tx |
+| 3 | `GET /api/v1/sessions/stats` | 200 | active: 1, pool_used: 0, pool_total: 9 |
+| 4 | `GET /api/v1/sessions/control/snapshot/testuser1` | 200 | Full session with sid, rx/tx pkts |
+| 5 | `GET /api/v1/sessions/control/by-ip/10.99.0.2` | 200 | found: true, session details |
+| 6 | `GET /api/v1/sessions/control/by-sid/a35a5ccb37202dbd` | 200 | found: true (session ID, not MAC) |
+
+### Traffic Shaping Endpoints (3/3) ✅
+
+| # | Endpoint | Response | Verified |
+|---|----------|----------|----------|
+| 7 | `POST /api/v1/traffic/ratelimit/testuser1` | 200 | Shaper changed to 5M/20M |
+| 8 | `GET /api/v1/traffic/queue/testuser1` | 200 | TC qdisc + police rules |
+| 9 | `DELETE /api/v1/traffic/ratelimit/testuser1` | 200 | Shaper restored |
+
+### Session Control Endpoints (3/3) ✅
+
+| # | Endpoint | Response | Verified |
+|---|----------|----------|----------|
+| 10 | `POST /api/v1/sessions/terminate` | 200 | Session terminated, CPE auto-reconnected |
+| 11 | `POST /api/v1/sessions/control/restart` | 200 | Session restarted, CPE auto-reconnected |
+| 12 | `POST /api/v1/sessions/control/drop-by-mac` | 200 | Dropped 1 session by MAC |
+
+### Design Observations
+
+| Observation | Detail |
+|-------------|--------|
+| **by-sid semantics** | Looks up by accel-ppp session ID, not calling-sid/MAC |
+| **terminate no-op** | Returns success even for non-existent usernames |
+| **IP pool** | Pool total: 9 for range 10.99.0.2-254 (build-specific) |
+| **Auto-reconnect** | PPPoE client reconnects in ~3s after terminate |

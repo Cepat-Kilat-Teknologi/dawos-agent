@@ -376,7 +376,7 @@ dawos-agent/
 │   │   ├── vrrp.py          # VRRP high-availability
 │   │   └── zone.py          # Zone-based firewall
 │   └── services/            # 27 service modules (business logic + shell calls)
-├── tests/                   # 808 tests, 100% coverage
+├── tests/                   # 820 tests, 100% coverage
 ├── docs/                    # MkDocs Material documentation
 ├── .github/
 │   └── workflows/
@@ -477,7 +477,7 @@ The agent starts on `http://localhost:8470` with Swagger docs at `/docs`.
 
 ## Testing
 
-The project maintains **808 tests** with **100% coverage** across all source files:
+The project maintains **820 tests** with **100% coverage** across all source files:
 
 ```bash
 # Quick test run
@@ -491,7 +491,7 @@ coverage run -m pytest tests/ && coverage report -m
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 808 passing | `pytest tests/ -x -q` |
+| Tests | 820 passing | `pytest tests/ -x -q` |
 | Coverage | 100% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
@@ -513,7 +513,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 - Setting up your development environment
 - Code style and formatting standards (Black, Pylint 10.0/10, Ruff)
-- Testing requirements (808+ tests, 100% coverage)
+- Testing requirements (820+ tests, 100% coverage)
 - Submitting pull requests
 
 ---

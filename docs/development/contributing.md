@@ -15,7 +15,7 @@ pip install pylint black
 ## Development Commands
 
 ```bash
-pytest tests/ -x -q              # Run 808 tests
+pytest tests/ -x -q              # Run 820 tests
 coverage run -m pytest tests/    # Run with coverage
 coverage report -m               # Coverage report
 pylint dawos_agent/              # Lint (must be 10.00/10)
