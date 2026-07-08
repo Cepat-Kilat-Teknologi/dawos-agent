@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -134,7 +135,7 @@ async def configure_exporter(service: str, *, enable: bool = True) -> dict:
         and ``message``.
     """
     action = "enable --now" if enable else "disable --now"
-    out, rc = await _run(f"systemctl {action} {service}", sudo=True)
+    out, rc = await _run(f"systemctl {action} {shlex.quote(service)}", sudo=True)
     return {
         "success": rc == 0,
         "service": service,
@@ -152,7 +153,7 @@ async def exporter_restart(service: str) -> dict:
     Returns:
         A dictionary with ``success`` (bool), ``service``, and ``message``.
     """
-    out, rc = await _run(f"systemctl restart {service}", sudo=True)
+    out, rc = await _run(f"systemctl restart {shlex.quote(service)}", sudo=True)
     return {
         "success": rc == 0,
         "service": service,
