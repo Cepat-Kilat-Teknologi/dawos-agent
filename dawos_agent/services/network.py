@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -168,7 +169,7 @@ async def get_interface(name: str) -> InterfaceDetail:
     Raises:
         RuntimeError: If the interface is not found or has no data.
     """
-    out, rc = await _run(f"ip -j addr show dev {name}")
+    out, rc = await _run(f"ip -j addr show dev {shlex.quote(name)}")
     if rc != 0:
         raise RuntimeError(f"Interface not found: {name}")
 
