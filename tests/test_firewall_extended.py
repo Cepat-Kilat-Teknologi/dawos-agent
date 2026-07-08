@@ -91,8 +91,7 @@ async def test_clear_egress(client, headers):
             headers=headers,
         )
 
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
@@ -160,7 +159,7 @@ async def test_remove_public_ip(client, headers):
             headers=headers,
         )
 
-    assert resp.status_code == 200
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
