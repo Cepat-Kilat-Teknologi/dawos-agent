@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ async def delete_group(name: str) -> dict:
     Raises:
         RuntimeError: If the nftables command fails.
     """
-    out, rc = await _run(f"nft delete set {TABLE} {name}", sudo=True)
+    out, rc = await _run(f"nft delete set {TABLE} {shlex.quote(name)}", sudo=True)
     if rc != 0:
         raise RuntimeError(f"Failed to delete group '{name}': {out}")
     return {
@@ -184,8 +185,10 @@ async def add_members(name: str, elements: list[str]) -> dict:
     Raises:
         RuntimeError: If the nftables command fails.
     """
-    elem_str = ", ".join(elements)
-    out, rc = await _run(f"nft add element {TABLE} {name} {{ {elem_str} }}", sudo=True)
+    elem_str = ", ".join(shlex.quote(e) for e in elements)
+    out, rc = await _run(
+        f"nft add element {TABLE} {shlex.quote(name)} {{ {elem_str} }}", sudo=True,
+    )
     if rc != 0:
         raise RuntimeError(f"Failed to add members to '{name}': {out}")
     return {
