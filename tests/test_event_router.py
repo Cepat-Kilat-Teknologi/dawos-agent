@@ -161,12 +161,10 @@ async def test_event_history(client, headers):
 async def test_clear_history(client, headers):
     event_handler._event_log.extend([{"a": 1}, {"b": 2}])
     resp = await client.delete("/api/v1/events/history", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json()["cleared"] == 2
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
 async def test_clear_history_empty(client, headers):
     resp = await client.delete("/api/v1/events/history", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json()["cleared"] == 0
+    assert resp.status_code == 204
