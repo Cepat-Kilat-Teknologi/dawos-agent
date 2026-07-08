@@ -78,6 +78,24 @@ async def test_set_dns_fwd_runtime_error(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_set_dns_fwd_dnsmasq_unavailable(client, headers):
+    with patch(
+        "dawos_agent.routers.dns_forwarding.dns_forwarding.set_forwarders",
+        side_effect=RuntimeError(
+            "dnsmasq is not installed or not running — "
+            "install with: apt install dnsmasq"
+        ),
+    ):
+        resp = await client.put(
+            "/api/v1/dns/forwarding/config",
+            json={"servers": ["8.8.8.8"]},
+            headers=headers,
+        )
+    assert resp.status_code == 503
+    assert "not installed" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
 async def test_set_dns_fwd_error(client, headers):
     with patch(
         "dawos_agent.routers.dns_forwarding.dns_forwarding.set_forwarders",
@@ -110,6 +128,20 @@ async def test_flush_dns_cache_runtime_error(client, headers):
     ):
         resp = await client.post("/api/v1/dns/forwarding/flush", headers=headers)
     assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_flush_dns_cache_dnsmasq_unavailable(client, headers):
+    with patch(
+        "dawos_agent.routers.dns_forwarding.dns_forwarding.flush_cache",
+        side_effect=RuntimeError(
+            "dnsmasq is not installed or not running — "
+            "install with: apt install dnsmasq"
+        ),
+    ):
+        resp = await client.post("/api/v1/dns/forwarding/flush", headers=headers)
+    assert resp.status_code == 503
+    assert "not installed" in resp.json()["detail"]
 
 
 @pytest.mark.asyncio
