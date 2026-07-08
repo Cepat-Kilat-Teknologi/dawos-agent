@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 from typing import Any
 
 from ..config import settings
@@ -121,9 +122,9 @@ async def terminate_session(
         ValueError: If neither *username* nor *ifname* is provided.
     """
     if username:
-        return await run_cmd(f"terminate username {username}")
+        return await run_cmd(f"terminate username {shlex.quote(username)}")
     if ifname:
-        return await run_cmd(f"terminate if {ifname}")
+        return await run_cmd(f"terminate if {shlex.quote(ifname)}")
     raise ValueError("Either username or ifname must be provided")
 
 
@@ -245,7 +246,9 @@ async def ifname_of(username: str) -> str | None:
         The interface name (e.g. ``ppp0``), or ``None`` if the user
         has no active session.
     """
-    output = await run_cmd(f"show sessions match username ^{username}$ ifname")
+    output = await run_cmd(
+        f"show sessions match username ^{shlex.quote(username)}$ ifname"
+    )
     for line in output.splitlines():
         line = line.strip()
         if line and line != "ifname" and not set(line) <= set("-+ "):
@@ -270,7 +273,9 @@ async def shaper_change(ifname: str, rate: str) -> str:
     Returns:
         Command output confirming the shaper change.
     """
-    return await run_cmd(f"shaper change {ifname} {rate} temp")
+    return await run_cmd(
+        f"shaper change {shlex.quote(ifname)} {shlex.quote(rate)} temp"
+    )
 
 
 async def shaper_restore(ifname: str) -> str:
@@ -282,7 +287,7 @@ async def shaper_restore(ifname: str) -> str:
     Returns:
         Command output confirming the shaper restoration.
     """
-    return await run_cmd(f"shaper restore {ifname}")
+    return await run_cmd(f"shaper restore {shlex.quote(ifname)}")
 
 
 # ---------------------------------------------------------------------------
@@ -301,5 +306,5 @@ async def mac_filter(action: str = "show", mac: str = "") -> str:
         Command output showing the current filter state or confirmation
         of the add/delete operation.
     """
-    cmd = f"pppoe mac-filter {action} {mac}".strip()
+    cmd = f"pppoe mac-filter {action} {shlex.quote(mac)}".strip()
     return await run_cmd(cmd)
