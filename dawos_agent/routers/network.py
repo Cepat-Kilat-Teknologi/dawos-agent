@@ -154,7 +154,7 @@ async def create_vlan(req: VlanCreateRequest, _key: str = ApiKey):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.delete("/vlans/{name}", response_model=VlanDeleteResponse)
+@router.delete("/vlans/{name}", status_code=204)
 async def delete_vlan(name: str, _key: str = ApiKey):
     """Delete a VLAN sub-interface.
 
@@ -163,15 +163,11 @@ async def delete_vlan(name: str, _key: str = ApiKey):
     Args:
         name: The VLAN interface name to delete (e.g. ``eth0.100``).
 
-    Returns:
-        VlanDeleteResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(400): If the VLAN cannot be deleted.
     """
     try:
-        msg = await network.delete_vlan(name)
-        return VlanDeleteResponse(success=True, message=msg, name=name)
+        await network.delete_vlan(name)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -260,7 +256,7 @@ async def add_route(req: RouteAddRequest, _key: str = ApiKey):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.delete("/routes", response_model=RouteResponse)
+@router.delete("/routes", status_code=204)
 async def delete_route(req: RouteDeleteRequest, _key: str = ApiKey):
     """Delete a route from the routing table.
 
@@ -270,18 +266,14 @@ async def delete_route(req: RouteDeleteRequest, _key: str = ApiKey):
     Args:
         req: Request body with destination and optional gateway.
 
-    Returns:
-        RouteResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(400): If the route cannot be deleted.
     """
     try:
-        msg = await network.delete_route(
+        await network.delete_route(
             destination=req.destination,
             gateway=req.gateway,
         )
-        return RouteResponse(success=True, message=msg)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
