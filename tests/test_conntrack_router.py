@@ -194,13 +194,23 @@ async def test_apply_profile(client, headers):
 
 @pytest.mark.asyncio
 async def test_apply_profile_unknown(client, headers):
+    resp = await client.post(
+        "/api/v1/conntrack/profiles/apply",
+        json={"name": "fake"},
+        headers=headers,
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_apply_profile_service_valueerror(client, headers):
     with patch(
         "dawos_agent.routers.conntrack_router.conntrack.apply_profile",
         side_effect=ValueError("Unknown profile"),
     ):
         resp = await client.post(
             "/api/v1/conntrack/profiles/apply",
-            json={"name": "fake"},
+            json={"name": "default"},
             headers=headers,
         )
     assert resp.status_code == 400
