@@ -194,6 +194,28 @@ async def test_guarded_apply(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_guarded_apply_rejects_whitespace_only(client, headers):
+    resp = await client.post(
+        "/api/v1/config/apply",
+        json={"content": "              ", "confirm_minutes": 5},
+        headers=headers,
+    )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_guarded_apply_rejects_no_section_header(client, headers):
+    resp = await client.post(
+        "/api/v1/config/apply",
+        json={"content": "just some random text without headers", "confirm_minutes": 5},
+        headers=headers,
+    )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_guarded_apply_error(client, headers):
     with patch(
         "dawos_agent.routers.checkpoint.config_manager.create_checkpoint",
