@@ -105,25 +105,17 @@ async def enable_masquerade(req: NatMasqueradeRequest, _key: str = ApiKey):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.delete("/nat/masquerade", response_model=NatMasqueradeResponse)
+@router.delete("/nat/masquerade", status_code=204)
 async def disable_masquerade(_key: str = ApiKey):
     """Remove the NAT masquerade table and rule.
 
     Deletes the ``dawos-nat`` nftables table, disabling outbound NAT.
 
-    Returns:
-        NatMasqueradeResponse: Success status and message.
-
     Raises:
         HTTPException(400): If the table cannot be removed.
     """
     try:
-        msg = await firewall.remove_masquerade()
-        return NatMasqueradeResponse(
-            success=True,
-            message=msg,
-            wan_interface="",
-        )
+        await firewall.remove_masquerade()
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -278,7 +270,7 @@ async def set_egress(req: NatEgressSetRequest, _key: str = ApiKey):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.delete("/nat/egress/{customer_ip}", response_model=NatEgressResponse)
+@router.delete("/nat/egress/{customer_ip}", status_code=204)
 async def clear_egress(customer_ip: str, _key: str = ApiKey):
     """Remove a subscriber's egress NAT mapping.
 
@@ -288,15 +280,11 @@ async def clear_egress(customer_ip: str, _key: str = ApiKey):
     Args:
         customer_ip: The subscriber IP whose mapping should be removed.
 
-    Returns:
-        NatEgressResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(400): If the mapping removal fails.
     """
     try:
-        msg = await nat.clear_egress(customer_ip)
-        return NatEgressResponse(success=True, message=msg)
+        await nat.clear_egress(customer_ip)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -326,7 +314,7 @@ async def add_public_ip(req: NatPublicIpRequest, _key: str = ApiKey):
 
 @router.delete(
     "/nat/public-ip/{public_ip}",
-    response_model=NatEgressResponse,
+    status_code=204,
 )
 async def remove_public_ip(public_ip: str, _key: str = ApiKey):
     """Remove a public IP address from the uplink interface.
@@ -336,15 +324,11 @@ async def remove_public_ip(public_ip: str, _key: str = ApiKey):
     Args:
         public_ip: The public IP address to remove.
 
-    Returns:
-        NatEgressResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(400): If the IP cannot be removed.
     """
     try:
-        msg = await nat.remove_public_ip(public_ip)
-        return NatEgressResponse(success=True, message=msg)
+        await nat.remove_public_ip(public_ip)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
