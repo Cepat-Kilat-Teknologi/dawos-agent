@@ -110,6 +110,16 @@ async def test_set_dns_fwd_error(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_set_dns_fwd_rejects_unsafe_server(client, headers):
+    resp = await client.put(
+        "/api/v1/dns/forwarding/config",
+        json={"servers": ["; rm -rf /"]},
+        headers=headers,
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_flush_dns_cache(client, headers):
     with patch(
         "dawos_agent.routers.dns_forwarding.dns_forwarding.flush_cache",
