@@ -288,17 +288,28 @@ async def test_box_egress_toggle_off(client, headers):
 
 @pytest.mark.asyncio
 async def test_box_egress_toggle_invalid(client, headers):
+    resp = await client.post(
+        "/api/v1/firewall/nat/box-egress",
+        headers=headers,
+        json={"action": "maybe"},
+    )
+
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_box_egress_toggle_service_valueerror(client, headers):
+    """Service-level ValueError still returns 400."""
     with patch(
         "dawos_agent.routers.firewall.nat.box_egress_set",
         new_callable=AsyncMock,
-        side_effect=ValueError("Invalid action"),
+        side_effect=ValueError("nft command failed"),
     ):
         resp = await client.post(
             "/api/v1/firewall/nat/box-egress",
             headers=headers,
-            json={"action": "maybe"},
+            json={"action": "on"},
         )
-
     assert resp.status_code == 400
 
 
