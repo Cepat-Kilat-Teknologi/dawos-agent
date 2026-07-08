@@ -54,7 +54,7 @@ Basic health check for load balancers and orchestrators.
 {
   "status": "ok",
   "node_name": "bng-node-01",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "uptime_seconds": 3621.5,
   "timestamp": "2026-07-07T00:00:00Z"
 }

@@ -1,7 +1,7 @@
 # Integration Test Report
 
 **Project:** dawos-agent + dawos-cli
-**Version:** dawos-agent 0.1.0 / dawos-cli 0.2.0
+**Version:** dawos-agent 0.2.0 / dawos-cli 0.3.0
 **Date:** 2026-07-08
 **Environment:** dawos-dev (192.168.216.99)
 **Tester:** Manual — CLI commands + direct curl against live hardware
@@ -36,7 +36,7 @@ All write operations were verified with corresponding read operations to confirm
 |-----------|--------|
 | OS | Ubuntu 22.04.5 LTS |
 | accel-ppp | Version f4014a4, systemd-managed |
-| dawos-agent | 0.1.0, port 8470, systemd-managed |
+| dawos-agent | 0.2.0, port 8470, systemd-managed |
 | Python | 3.10.12 |
 | Auth | X-API-Key header |
 
@@ -515,7 +515,7 @@ Post-fix unit test status for dawos-agent:
 
 ## 11. Recommendations
 
-1. **Tag v0.1.0** -- The code is released on PyPI but the git tag is pending. Tag it to establish a baseline.
+1. **Tag v0.2.0** -- Version 0.2.0 released on PyPI with DELETE 204 standardization and all integration test fixes.
 
 2. **Fix installer permissions** -- Fresh installs should automatically set ownership of `/etc/accel-ppp.d/` and `/etc/accel-ppp.conf` to the `dawos` user. Without this, config backup operations fail.
 

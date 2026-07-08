@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dawos-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "PPP router management agent — REST API for accel-ppp BNG nodes"
 readme = "README.md"
 license = {text = "MIT"}

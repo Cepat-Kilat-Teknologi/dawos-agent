@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-08
+
 ### Changed
 
 - **DELETE endpoints standardized to 204 No Content** — All 14 DELETE endpoints now return HTTP 204 with no response body on success, following REST best practices. Previously only 2 of 14 used 204; the remaining 12 returned 200 with JSON body. Affected endpoints: firewall groups, NAT masquerade, NAT egress, NAT public IP, IP pools, VLANs, routes, PPPoE interfaces, MAC filter, traffic ratelimit, zones, event history.
@@ -74,5 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.1.0

@@ -16,4 +16,4 @@ Environment variables prefixed with ``DAWOS_`` (e.g. ``DAWOS_API_KEY``)
 override the defaults defined in :mod:`dawos_agent.config`.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

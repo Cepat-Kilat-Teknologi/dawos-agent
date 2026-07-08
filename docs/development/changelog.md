@@ -2,6 +2,10 @@
 
 See the full changelog on GitHub: [CHANGELOG.md](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/CHANGELOG.md)
 
+## v0.2.0 (2026-07-08)
+
+See [CHANGELOG.md](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/CHANGELOG.md) for full details.
+
 ## v0.1.0 (2026-07-06)
 
 Initial release.
