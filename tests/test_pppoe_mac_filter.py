@@ -116,10 +116,7 @@ async def test_delete_mac(client, headers):
             headers=headers,
         )
 
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["success"] is True
-    assert "AA:BB:CC:DD:EE:FF" in data["message"]
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
