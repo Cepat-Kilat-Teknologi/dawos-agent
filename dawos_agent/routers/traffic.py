@@ -160,7 +160,7 @@ async def change_ratelimit(
 
 @router.delete(
     "/ratelimit/{username}",
-    response_model=RateLimitResponse,
+    status_code=204,
 )
 async def restore_ratelimit(username: str, _key: str = ApiKey):
     """Restore a session's shaper to the RADIUS-assigned value.
@@ -171,21 +171,12 @@ async def restore_ratelimit(username: str, _key: str = ApiKey):
     Args:
         username: The PPPoE username whose rate to restore.
 
-    Returns:
-        RateLimitResponse: Success flag and confirmation message.
-
     Raises:
         HTTPException(404): If the user has no active session.
         HTTPException(500): If the shaper restore command fails.
     """
     try:
-        msg = await traffic.restore_ratelimit(username)
-        return RateLimitResponse(
-            success=True,
-            message=msg,
-            username=username,
-            rate="restored",
-        )
+        await traffic.restore_ratelimit(username)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
