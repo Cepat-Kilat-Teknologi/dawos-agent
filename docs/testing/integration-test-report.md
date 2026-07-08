@@ -504,8 +504,8 @@ Post-fix unit test status for dawos-agent:
 
 | Metric | Value |
 |--------|-------|
-| Total tests | 824 |
-| Passing | 824 (100%) |
+| Total tests | 841 |
+| Passing | 841 (100%) |
 | Pylint score | 10.00/10 |
 | Code coverage | 100% |
 | Black formatting | Clean |
