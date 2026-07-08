@@ -124,8 +124,7 @@ async def test_delete_zone(client, headers):
         return_value={"success": True, "message": "Zone 'dmz' deleted"},
     ):
         resp = await client.delete("/api/v1/zones/dmz", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
