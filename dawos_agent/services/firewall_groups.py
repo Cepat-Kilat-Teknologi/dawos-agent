@@ -125,9 +125,9 @@ async def create_group(
 
     await _ensure_table()
 
-    flags = "flags interval ;" if group_type == "network" else ""
+    flags = "flags interval \\;" if group_type == "network" else ""
     out, rc = await _run(
-        f"nft add set {TABLE} {name} {{ type {nft_type} ; {flags} }}",
+        f"nft add set {TABLE} {name} {{ type {nft_type} \\; {flags} }}",
         sudo=True,
     )
     if rc != 0:
