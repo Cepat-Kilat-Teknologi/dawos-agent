@@ -107,8 +107,15 @@ async def set_forwarders(servers: list[str], cache_size: int = 1000) -> dict:
         A dictionary with ``servers`` and ``cache_size`` as confirmed.
 
     Raises:
-        RuntimeError: If the dnsmasq reload fails.
+        RuntimeError: If dnsmasq is not installed or the reload fails.
     """
+    _, rc = await _run("systemctl is-active dnsmasq")
+    if rc != 0:
+        raise RuntimeError(
+            "dnsmasq is not installed or not running — "
+            "install with: apt install dnsmasq"
+        )
+
     lines = [f"server={s}" for s in servers]
     lines.append(f"cache-size={cache_size}")
     lines.append("no-resolv")
@@ -132,8 +139,15 @@ async def flush_cache() -> dict:
         A dictionary with ``flushed`` (bool).
 
     Raises:
-        RuntimeError: If the signal delivery fails.
+        RuntimeError: If dnsmasq is not running or signal delivery fails.
     """
+    _, rc = await _run("systemctl is-active dnsmasq")
+    if rc != 0:
+        raise RuntimeError(
+            "dnsmasq is not installed or not running — "
+            "install with: apt install dnsmasq"
+        )
+
     _, rc = await _run("systemctl kill -s HUP dnsmasq", sudo=True)
     if rc != 0:
         raise RuntimeError("Failed to flush DNS cache")
