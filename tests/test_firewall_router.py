@@ -146,8 +146,7 @@ async def test_disable_masquerade(client, headers):
     ):
         resp = await client.delete("/api/v1/firewall/nat/masquerade", headers=headers)
 
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
