@@ -13,7 +13,6 @@ from fastapi import APIRouter, HTTPException
 
 from ..auth import ApiKey
 from ..models.schemas import (
-    ClearHistoryResponse,
     EventHistoryResponse,
     EventHookListResponse,
     EventHookRequest,
@@ -128,15 +127,13 @@ async def event_history(_key: str = ApiKey):
     return EventHistoryResponse(count=len(entries), entries=entries)
 
 
-@router.delete("/history", response_model=ClearHistoryResponse)
+@router.delete("/history", status_code=204)
 async def clear_history(_key: str = ApiKey):
     """Clear the event history log.
 
-    Removes all recorded event history entries and returns the number
-    of entries that were cleared.
+    Removes all recorded event history entries.
 
-    Returns:
-        ClearHistoryResponse: Number of entries cleared.
+    Raises:
+        HTTPException(500): If the history cannot be cleared.
     """
-    count = event_handler.clear_history()
-    return ClearHistoryResponse(cleared=count)
+    event_handler.clear_history()
