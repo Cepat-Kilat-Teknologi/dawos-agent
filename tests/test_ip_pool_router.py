@@ -149,8 +149,7 @@ async def test_remove_pool(client, headers):
         ),
     ):
         resp = await client.delete("/api/v1/ip-pool/customers", headers=headers)
-    assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
@@ -177,7 +176,7 @@ async def test_remove_pool_reload_failure(client, headers):
         ),
     ):
         resp = await client.delete("/api/v1/ip-pool/old", headers=headers)
-    assert resp.status_code == 200
+    assert resp.status_code == 204
 
 
 @pytest.mark.asyncio
