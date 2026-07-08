@@ -100,7 +100,7 @@ async def add_pppoe_interface(req: PppoeAddRequest, _key: str = ApiKey):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/interfaces/{name}", response_model=PppoeResponse)
+@router.delete("/interfaces/{name}", status_code=204)
 async def remove_pppoe_interface(name: str, _key: str = ApiKey):
     """Remove a PPPoE listener interface and reload accel-ppp.
 
@@ -110,22 +110,16 @@ async def remove_pppoe_interface(name: str, _key: str = ApiKey):
     Args:
         name: The interface name to remove (e.g. ``eth1``).
 
-    Returns:
-        PppoeResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(404): If the config file or interface is not found.
         HTTPException(500): If the write or reload fails.
     """
     try:
-        msg = pppoe.remove_pppoe_interface(interface=name)
+        pppoe.remove_pppoe_interface(interface=name)
         try:
             await reload_config()
         except Exception as reload_exc:
             log.warning("Config saved but reload failed: %s", reload_exc)
-            msg += " (reload failed — manual restart may be needed)"
-
-        return PppoeResponse(success=True, message=msg)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -185,7 +179,7 @@ async def add_mac(req: MacFilterRequest, _key: str = ApiKey):
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.delete("/mac-filter/{mac}", response_model=MacFilterResponse)
+@router.delete("/mac-filter/{mac}", status_code=204)
 async def delete_mac(mac: str, _key: str = ApiKey):
     """Remove a MAC address from the PPPoE filter.
 
@@ -194,17 +188,10 @@ async def delete_mac(mac: str, _key: str = ApiKey):
     Args:
         mac: The MAC address to remove (path parameter).
 
-    Returns:
-        MacFilterResponse: Success status and confirmation message.
-
     Raises:
         HTTPException(500): If the accel-cmd command fails.
     """
     try:
         await mac_filter("del", mac)
-        return MacFilterResponse(
-            success=True,
-            message=f"Removed {mac}",
-        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
