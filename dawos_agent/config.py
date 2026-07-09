@@ -52,6 +52,9 @@ class Settings(BaseSettings):
             used when starting, stopping, or restarting the daemon.
         log_level: Uvicorn/Python log level string (e.g. ``debug``,
             ``info``, ``warning``, ``error``).
+        ping_target: Host used by the internet reachability diagnostic
+            check.  Override via ``DAWOS_PING_TARGET`` when the BNG
+            node cannot reach Google DNS (e.g. air-gapped networks).
     """
 
     # --- agent identity -------------------------------------------------------
@@ -72,6 +75,9 @@ class Settings(BaseSettings):
 
     # --- logging --------------------------------------------------------------
     log_level: str = "info"
+
+    # --- diagnostics ----------------------------------------------------------
+    ping_target: str = "8.8.8.8"
 
     model_config = {
         "env_prefix": "DAWOS_",
