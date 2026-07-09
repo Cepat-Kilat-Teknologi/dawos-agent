@@ -9,30 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Request ID middleware** -- Every HTTP request is assigned a UUID v4 trace ID, returned in the `X-Request-ID` response header. Client-supplied `X-Request-ID` values are preserved. The trace ID is injected into all log records for end-to-end request tracing.
-- **Health readiness probe** -- New `GET /health/ready` endpoint checks accel-ppp connectivity and returns HTTP 200 (all dependencies reachable) or HTTP 503 (dependency down). The existing `/health` endpoint remains a lightweight liveness check.
-- **Rate limiting** -- Global per-IP rate limiting via slowapi. Default: 120 requests/minute per IP. Configurable via `DAWOS_RATE_LIMIT` environment variable. Health endpoints are exempt. Set to empty string to disable.
-- **Structured JSON logging** -- Opt-in JSON log format via `DAWOS_LOG_FORMAT=json`. Each log line is a valid JSON object with `timestamp`, `level`, `name`, `message`, and `request_id` fields. Default remains human-readable text format.
-- **Configurable ping target** -- Internet reachability diagnostic check now uses `DAWOS_PING_TARGET` (default: `8.8.8.8`). Override for air-gapped networks or custom DNS.
-- **PEP 561 type marker** -- Added `py.typed` marker file for downstream type-checking support.
-- **Named constants** -- Extracted magic numbers to `dawos_agent/constants.py` (shared) and module-level constants (local). Improves readability and single-source-of-truth for conntrack thresholds, port numbers, and byte conversion factors.
-- **Comprehensive input validation** -- All request models now validate user-supplied fields against regex patterns and type constraints at the Pydantic layer (HTTP 422 rejection). Covers 30+ fields across session, network, firewall, NAT, PPPoE, conntrack, DNS, routing, zone, VRRP, scheduler, event, IP pool, and monitoring endpoints.
-- **Shell injection defense-in-depth** -- Added `shlex.quote()` wrapping in 5 service modules (`accel.py`, `monitoring.py`, `zone_firewall.py`, `firewall_groups.py`, `network.py`) for all user-supplied values interpolated into shell commands.
-- **Input validation reference** -- New documentation page (`docs/api/validation-rules.md`) with per-endpoint field constraints, regex patterns, and shell quoting details.
-- **Validation tests** -- 17 new unit tests covering regex rejection, list field validation, and service-level error paths.
-- **New dependencies** -- `slowapi>=0.1.9,<1` (rate limiting), `python-json-logger>=3,<5` (structured logging). Both pip-audit clean.
-- **Retry with exponential backoff** -- `accel-cmd` calls now retry on transient failures (connection refused, timeout) with configurable max retries (`DAWOS_RETRY_MAX`, default 3) and base delay (`DAWOS_RETRY_DELAY`, default 1.0s). Non-transient errors propagate immediately.
-- **Audit log for write operations** -- All mutating HTTP requests (POST/PUT/PATCH/DELETE) are logged to a dedicated `dawos_agent.audit` logger with method, path, client IP, request ID, status code, and response time. GET/HEAD requests are not logged.
-- **Config completeness check** -- On startup, the agent warns if `DAWOS_API_KEY` still uses the insecure default placeholder and logs available optional settings that haven't been explicitly configured.
+- **WebSocket event bus** -- Real-time event streaming via `WS /ws/events` with API key authentication (query parameter). Four channels: `session`, `config`, `audit`, `system`. Per-subscriber `asyncio.Queue` with configurable max size prevents slow consumers from blocking publishers. Supports `subscribe`, `unsubscribe`, and `ping` control messages.
+- **Prometheus metrics endpoint** -- `GET /metrics` exposes application metrics in Prometheus text exposition format. Five metrics: `dawos_http_requests_total` (counter), `dawos_http_request_duration_seconds` (histogram), `dawos_accel_cmd_errors_total` (counter), `dawos_accel_cmd_retries_total` (counter), `dawos_rate_limit_hits_total` (counter). No authentication required. Rate limiting exempt.
+- **Metrics middleware** -- Pure ASGI middleware (not `BaseHTTPMiddleware`) records HTTP request metrics. Health, metrics, and readiness paths excluded from recording to prevent self-instrumentation loops.
+- **Request ID middleware** -- Every HTTP request receives a UUID v4 trace ID in the `X-Request-ID` response header. Client-supplied values are preserved for distributed tracing. The ID is injected into all log records.
+- **Health readiness probe** -- `GET /health/ready` checks accel-ppp connectivity and returns HTTP 200 or HTTP 503. The existing `/health` remains a lightweight liveness check.
+- **Rate limiting** -- Per-IP rate limiting via SlowAPI. Default: `120/minute`. Configurable via `DAWOS_RATE_LIMIT`. Health and metrics endpoints exempt. Returns HTTP 429 with `Retry-After` header when triggered.
+- **Structured JSON logging** -- Opt-in via `DAWOS_LOG_FORMAT=json`. Each log line is a valid JSON object with `timestamp`, `level`, `name`, `message`, and `request_id` fields. Default remains human-readable text format.
+- **Retry with exponential backoff** -- `accel-cmd` calls retry on transient failures with configurable `DAWOS_RETRY_MAX` (default 3) and `DAWOS_RETRY_DELAY` (default 1.0s). Non-transient errors propagate immediately. Retry count tracked by Prometheus counter.
+- **RBAC (Role-Based Access Control)** -- Three-tier role hierarchy: viewer (read-only), operator (read+write), admin (full access). Configure via `DAWOS_API_KEYS_FILE` (JSON key-to-role mapping). Single-key mode backward compatible -- `DAWOS_API_KEY` grants admin access.
+- **Audit log** -- All mutating requests logged to `dawos_agent.audit` with method, path, client IP, request ID, RBAC role, status code, and duration. In-memory ring buffer (`DAWOS_AUDIT_BUFFER_SIZE`, default 1000) exposed via admin-only `GET /api/v1/audit` with filtering.
+- **Webhook notifications** -- Fire-and-forget HTTP POST on every mutating request. Enable via `DAWOS_WEBHOOK_URL`. Optional HMAC-SHA256 signing via `DAWOS_WEBHOOK_SECRET` (sent in `X-Dawos-Signature` header). Non-blocking delivery.
+- **Bulk operations** -- `POST /api/v1/bulk` accepts multiple API calls in a single request for batch processing. Operator role required.
+- **Operational playbooks** -- `GET /api/v1/playbooks` and `POST /api/v1/playbooks/{name}/run`. Three built-in sequences: `health-check`, `backup-config`, `safe-restart`. Admin role required.
+- **Comprehensive input validation** -- All request models validate fields with regex patterns and type constraints at the Pydantic layer (HTTP 422). Covers 30+ fields with `shlex.quote()` defense-in-depth in 5 service modules.
+- **Config completeness check** -- Startup warnings for insecure default API key and unconfigured optional settings.
+- **Named constants** -- Extracted magic numbers to `dawos_agent/constants.py` for readability and single-source-of-truth.
+- **PEP 561 type marker** -- `py.typed` marker for downstream type-checking.
+- **New dependencies** -- `prometheus-client>=0.20,<1`, `slowapi>=0.1.9,<1`, `python-json-logger>=3,<5`. All pip-audit clean.
 
 ### Changed
 
-- **API reference updated** -- Common Patterns section now documents HTTP 422 validation errors, rate limiting (HTTP 429), request tracing (X-Request-ID), and readiness probe usage.
-- **Configuration documentation updated** -- New settings reference sections for `DAWOS_LOG_FORMAT`, `DAWOS_PING_TARGET`, and `DAWOS_RATE_LIMIT`. Logging section expanded with JSON format examples and request tracing guide.
+- **API reference updated** -- Common Patterns section documents HTTP 422 validation errors, rate limiting (HTTP 429), request tracing (X-Request-ID), WebSocket protocol, and readiness probe usage.
+- **Configuration documentation updated** -- New settings reference for `DAWOS_LOG_FORMAT`, `DAWOS_PING_TARGET`, `DAWOS_RATE_LIMIT`, `DAWOS_RETRY_MAX`, `DAWOS_RETRY_DELAY`, `DAWOS_AUDIT_BUFFER_SIZE`, `DAWOS_WEBHOOK_URL`, `DAWOS_WEBHOOK_SECRET`, and `DAWOS_API_KEYS_FILE`.
+- **Systemd unit hardened** -- `Restart=on-failure` changed to `Restart=always` to handle clean exits from uncaught exceptions. Added `WatchdogSec=30` for hung process detection. `StartLimitBurst` increased from 3 to 5 with interval extended from 60s to 300s. `RestartSec` reduced from 5s to 3s.
+- **Installer inline systemd unit** -- Synchronized with the main unit file to include all hardening directives.
+
+### Fixed
+
+- **Installer: accel-ppp config ownership** -- The installer now sets ownership of `/etc/accel-ppp.conf` and `/etc/accel-ppp.d/` to the `dawos` service user after package installation. Without this, config checkpoint and rollback operations fail with HTTP 500 on fresh installs.
+- **Installer: ReadWritePaths sync** -- The inline systemd unit fallback now includes `/etc/systemd/resolved.conf.d`, `/etc/dnsmasq.d`, and `/etc/dnsmasq.conf` in `ReadWritePaths`, matching the main unit file.
 
 ### Removed
 
 - **Dead code cleanup** -- Removed unused `TrafficSample` and `ClearHistoryResponse` models from `schemas.py`.
+
+### Documentation
+
+- **Monitoring Integration guide** -- Prometheus scrape configurations (single-node, multi-node, service discovery), Grafana PromQL panels, 5 alerting rules, health probe configurations (Kubernetes, HAProxy, Nginx), WebSocket client examples (Python, JavaScript), audit log aggregation (Filebeat, Promtail), and environment variable reference.
+- **Production Hardening guide** -- Resource planning with measured data, journald log rotation, swap configuration, systemd restart hardening, health check scripting, multi-node scaling architecture, security hardening, backup strategy, and 10-point post-hardening checklist.
+- **Architecture Decision Records** -- 14 ADRs documenting key design decisions: FastAPI selection, router-service-shell architecture, API key auth with RBAC, Prometheus metrics, pure ASGI middleware, in-memory audit buffer, webhook delivery, WebSocket event bus, rate limiting, retry backoff, DELETE 204 convention, least-privilege sudoers, structured logging, and config checkpoint/rollback.
 
 ## [0.2.0] - 2026-07-08
 

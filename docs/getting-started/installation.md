@@ -1,6 +1,6 @@
 # Installation Guide
 
-Complete installation guide for **dawos-agent** — PPP router management agent.
+Complete installation guide for **DawOS Agent** -- open-source broadband network gateway management daemon.
 
 ---
 
@@ -155,8 +155,9 @@ The installer (`install.sh` v2.0) performs these steps in order:
 | **4. accel-ppp** | Detects or builds accel-ppp from source, writes `/etc/accel-ppp.conf`, creates systemd unit |
 | **5. Download** | Downloads dawos-agent source from GitHub (skipped if running from cloned repo) |
 | **6. Install** | Creates Python venv, installs package with pip |
-| **7. Service** | Installs sudoers rules, systemd unit, enables and starts service |
-| **8. Verify** | Runs health check to confirm the agent is responding |
+| **7. Permissions** | Sets ownership of `/etc/accel-ppp.conf` and `/etc/accel-ppp.d/` to the `dawos` user (required for config checkpoint/rollback) |
+| **8. Service** | Installs sudoers rules, systemd unit with security hardening (`Restart=always`, `WatchdogSec=30`), enables and starts service |
+| **9. Verify** | Runs health check to confirm the agent is responding |
 
 ### accel-ppp Configuration
 
@@ -403,9 +404,22 @@ sudo apt update && sudo apt install python3 python3-venv
 
 Only 6 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See [deploy/dawos-agent.sudoers](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/deploy/dawos-agent.sudoers).
 
+### accel-ppp Config Ownership
+
+The installer automatically sets ownership of `/etc/accel-ppp.conf` and `/etc/accel-ppp.d/` to the `dawos` user. This is required for config checkpoint and rollback to work.
+
+If you install manually, set this ownership yourself:
+
+```bash
+sudo chown dawos:dawos /etc/accel-ppp.conf
+sudo chown -R dawos:dawos /etc/accel-ppp.d/
+```
+
+Without correct ownership, config backup operations fail with HTTP 500.
+
 ### Systemd Hardening
 
-The service runs with `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`. Only explicitly listed paths are writable.
+The service runs with `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `WatchdogSec=30`, and `Restart=always`. Only explicitly listed paths are writable. See the [Security documentation](../development/security.md) for the full list of directives.
 
 ### Network
 

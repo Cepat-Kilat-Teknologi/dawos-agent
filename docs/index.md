@@ -1,15 +1,17 @@
-# dawos-agent
+# DawOS Agent
 
-**REST API daemon for managing PPPoE/BNG routers powered by accel-ppp.**
+**Broadband management, simplified.**
 
 [![CI](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/dawos-agent)](https://pypi.org/project/dawos-agent/)
 [![Python](https://img.shields.io/pypi/pyversions/dawos-agent)](https://pypi.org/project/dawos-agent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/LICENSE)
 
-## What is dawos-agent?
+## What is DawOS Agent?
 
-`dawos-agent` is a FastAPI-based management daemon for Linux-based PPPoE BNG (Broadband Network Gateway) nodes. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **138 authenticated HTTP endpoints** across **29 router modules**.
+DawOS Agent is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **149 authenticated HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+
+The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access.
 
 ### Features
 
@@ -18,10 +20,11 @@
 - **Firewall** -- nftables rules, NAT/masquerade, zone firewall, conntrack
 - **Dynamic routing** -- BGP, OSPF, RIP, BFD status via FRR/vtysh
 - **Config management** -- checkpoint, diff, rollback, guarded apply with auto-revert
+- **Monitoring** -- Prometheus metrics endpoint, health/readiness probes, WebSocket event streaming
+- **Security** -- API-key auth with RBAC (viewer/operator/admin), rate limiting, systemd sandboxing
+- **Observability** -- structured JSON logging, request ID tracing, audit log, webhook notifications
+- **Automation** -- operational playbooks, bulk operations, cron-like scheduler
 - **Streaming** -- SSE endpoints for live traffic and log tailing
-- **Event hooks** -- webhooks on session/config events with history
-- **Scheduler** -- cron-like job scheduling with run-on-demand
-- **Hardened** -- systemd sandboxing, least-privilege sudoers, API-key auth
 
 ### Quick Example
 
@@ -69,11 +72,12 @@ dawos top    # live dashboard
 
 | Metric | Value |
 |--------|-------|
-| Tests | 820 passing |
+| Tests | 1088 passing |
 | Coverage | 100% |
 | Pylint | 10.00/10 |
 | Black | Formatted |
 | Ruff | Zero violations |
+| Vulnerabilities | 0 known (pip-audit) |
 
 ## Links
 

@@ -1,6 +1,6 @@
-# dawos-agent API Reference
+# DawOS Agent API Reference
 
-REST API reference for dawos-agent.
+REST API reference for DawOS Agent.
 
 **Base URL:** `http://<node-ip>:8470`
 
@@ -130,7 +130,73 @@ Readiness probe that verifies the agent can communicate with its dependencies. C
 
 ---
 
-## 2. System
+## 2. Prometheus Metrics
+
+Application metrics in Prometheus text exposition format for monitoring and alerting.
+
+### GET /metrics
+
+Returns all registered Prometheus metrics as plain text. Use this endpoint as a scrape target in your Prometheus configuration.
+
+**Auth:** Not required
+
+**Rate limit:** Exempt
+
+**Response Content-Type:** `text/plain; version=0.0.4; charset=utf-8`
+
+**Response body (excerpt):**
+
+```
+# HELP dawos_http_requests_total Total HTTP requests received.
+# TYPE dawos_http_requests_total counter
+dawos_http_requests_total{method="GET",endpoint="/api/v1/sessions",status="200"} 142.0
+
+# HELP dawos_http_request_duration_seconds HTTP request latency in seconds.
+# TYPE dawos_http_request_duration_seconds histogram
+dawos_http_request_duration_seconds_bucket{method="GET",endpoint="/api/v1/sessions",le="0.05"} 130.0
+dawos_http_request_duration_seconds_count{method="GET",endpoint="/api/v1/sessions"} 142.0
+dawos_http_request_duration_seconds_sum{method="GET",endpoint="/api/v1/sessions"} 2.87
+
+# HELP dawos_accel_cmd_errors_total Total accel-cmd non-zero exit codes.
+# TYPE dawos_accel_cmd_errors_total counter
+dawos_accel_cmd_errors_total 3.0
+
+# HELP dawos_accel_cmd_retries_total Total accel-cmd transient retry attempts.
+# TYPE dawos_accel_cmd_retries_total counter
+dawos_accel_cmd_retries_total 5.0
+
+# HELP dawos_rate_limit_hits_total Total HTTP 429 rate-limit rejections.
+# TYPE dawos_rate_limit_hits_total counter
+dawos_rate_limit_hits_total 0.0
+```
+
+### Available Metrics
+
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `dawos_http_requests_total` | Counter | `method`, `endpoint`, `status` | Total HTTP requests received. The `endpoint` label uses the route template (e.g. `/api/v1/sessions`) to prevent label cardinality explosion from dynamic path segments. |
+| `dawos_http_request_duration_seconds` | Histogram | `method`, `endpoint` | HTTP request latency in seconds. Default Prometheus histogram buckets (.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10). |
+| `dawos_accel_cmd_errors_total` | Counter | -- | Incremented every time `accel-cmd` returns a non-zero exit code. Useful for alerting on accel-ppp CLI failures. |
+| `dawos_accel_cmd_retries_total` | Counter | -- | Incremented on each transient retry attempt (connection refused, timeout). Tracks how often the retry mechanism activates. |
+| `dawos_rate_limit_hits_total` | Counter | -- | Incremented every time an HTTP 429 response is returned due to rate limiting. |
+
+### Excluded Paths
+
+The following paths are excluded from metric recording to prevent self-instrumentation loops and noise from frequent health probes:
+
+- `/metrics`
+- `/health`
+- `/health/ready`
+
+Requests to these paths still work normally -- they are just not counted in `dawos_http_requests_total` or `dawos_http_request_duration_seconds`.
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Metrics returned successfully |
+
+---
+
+## 3. System
 
 Host-level system information and resource metrics.
 
@@ -219,7 +285,7 @@ Quick resource-usage metrics snapshot for monitoring dashboards.
 
 ---
 
-## 3. Service Management
+## 4. Service Management
 
 Control the accel-ppp systemd service and execute whitelisted commands.
 
@@ -307,7 +373,7 @@ Execute a whitelisted accel-cmd command.
 
 ---
 
-## 4. Sessions
+## 5. Sessions
 
 PPPoE session listing, statistics, search, and termination.
 
@@ -424,7 +490,7 @@ Terminate a PPPoE session by username or interface name.
 
 ---
 
-## 5. Session Control
+## 6. Session Control
 
 Advanced session management: lookup by SID/IP, snapshots, restart, and bulk drop.
 
@@ -558,7 +624,7 @@ Drop all sessions from a specific MAC address.
 
 ---
 
-## 6. Configuration
+## 7. Configuration
 
 Read and update the accel-ppp configuration file.
 
@@ -644,7 +710,7 @@ List available configuration backups.
 
 ---
 
-## 7. Configuration Checkpoint
+## 8. Configuration Checkpoint
 
 Diff, rollback, and guarded apply with auto-rollback timer.
 
@@ -800,7 +866,7 @@ Check whether a guarded apply is pending confirmation.
 
 ---
 
-## 8. Network
+## 9. Network
 
 Manage network interfaces, VLANs, static routes, and DNS.
 
@@ -1188,7 +1254,7 @@ Update DNS configuration in `/etc/resolv.conf`.
 
 ---
 
-## 9. Firewall
+## 10. Firewall
 
 Manage nftables firewall, IP forwarding sysctl, and SNMP.
 
@@ -1408,7 +1474,7 @@ Check SNMP daemon status and UDP port availability.
 
 ---
 
-## 10. Firewall Groups
+## 11. Firewall Groups
 
 Manage nftables named sets (address, network, and port groups).
 
@@ -1532,7 +1598,7 @@ Add members to an existing firewall group.
 
 ---
 
-## 11. NAT
+## 12. NAT
 
 Per-subscriber egress NAT, masquerade, and box-level egress control.
 
@@ -1795,7 +1861,7 @@ Toggle box-level egress NAT on or off.
 
 ---
 
-## 12. PPPoE
+## 13. PPPoE
 
 Manage PPPoE listener interfaces and MAC address filters.
 
@@ -1952,7 +2018,7 @@ Remove a MAC address from the PPPoE filter.
 
 ---
 
-## 13. PPPoE PADO Delay
+## 14. PPPoE PADO Delay
 
 Control PADO (PPPoE Active Discovery Offer) delay settings.
 
@@ -2007,7 +2073,7 @@ Set the PADO delay and reload accel-ppp.
 
 ---
 
-## 14. Traffic & Rate Limiting
+## 15. Traffic & Rate Limiting
 
 Real-time traffic monitoring (SSE), queue stats, and shaper overrides.
 
@@ -2133,7 +2199,7 @@ Restore a session's shaper to the RADIUS-assigned value.
 
 ---
 
-## 15. Routing (BGP, OSPF, RIP, BFD)
+## 16. Routing (BGP, OSPF, RIP, BFD)
 
 Query FRRouting dynamic routing protocol status via `vtysh`.
 
@@ -2345,7 +2411,7 @@ Return BFD counters summary.
 
 ---
 
-## 16. Conntrack
+## 17. Conntrack
 
 Advanced conntrack table tuning, timeouts, helpers, and profiles.
 
@@ -2509,7 +2575,7 @@ Apply a named conntrack tuning profile.
 
 ---
 
-## 17. Connection Limits
+## 18. Connection Limits
 
 Manage accel-ppp session and rate-limit caps.
 
@@ -2590,7 +2656,7 @@ Read the PADI rate-limit for a specific PPPoE interface.
 
 ---
 
-## 18. IP Pool
+## 19. IP Pool
 
 Manage IP address pools used for PPPoE subscriber assignment.
 
@@ -2698,7 +2764,7 @@ Get real-time IP pool utilisation statistics.
 
 ---
 
-## 19. Scheduler
+## 20. Scheduler
 
 CRUD management of recurring scheduled jobs.
 
@@ -2805,7 +2871,7 @@ Execute a scheduled job immediately.
 
 ---
 
-## 20. DNS Forwarding
+## 21. DNS Forwarding
 
 Manage the dnsmasq DNS forwarding service.
 
@@ -2897,7 +2963,7 @@ Flush the dnsmasq DNS cache.
 
 ---
 
-## 21. NTP
+## 22. NTP
 
 Query NTP synchronisation status via `chronyc`.
 
@@ -2956,7 +3022,7 @@ Return configured NTP time sources.
 
 ---
 
-## 22. LLDP
+## 23. LLDP
 
 Query Link Layer Discovery Protocol neighbors via `lldpctl`.
 
@@ -3034,7 +3100,7 @@ Get LLDP neighbors for a specific interface.
 
 ---
 
-## 23. DHCP
+## 24. DHCP
 
 Monitor and control DHCP server and relay services.
 
@@ -3150,7 +3216,7 @@ Restart the DHCP relay agent.
 
 ---
 
-## 24. Flow Accounting
+## 25. Flow Accounting
 
 Monitor NetFlow/sFlow/IPFIX flow-accounting daemons.
 
@@ -3243,7 +3309,7 @@ Restart the flow accounting daemon.
 
 ---
 
-## 25. Event Handler
+## 26. Event Handler
 
 Register webhooks/scripts and fire events.
 
@@ -3397,7 +3463,7 @@ Clear the event history log.
 
 ---
 
-## 26. Zone Firewall
+## 27. Zone Firewall
 
 Manage nftables zone-based firewall policies.
 
@@ -3509,7 +3575,7 @@ Delete a firewall zone.
 
 ---
 
-## 27. VRRP
+## 28. VRRP
 
 Manage keepalived VRRP high-availability groups.
 
@@ -3621,7 +3687,7 @@ Restart the keepalived service.
 
 ---
 
-## 28. Monitoring
+## 29. Monitoring
 
 Manage Prometheus and SNMP monitoring exporters.
 
@@ -3736,7 +3802,7 @@ Restart a monitoring exporter service.
 
 ---
 
-## 29. Diagnostics
+## 30. Diagnostics
 
 Comprehensive BNG health checks.
 
@@ -3774,7 +3840,7 @@ Run all BNG health checks and return aggregated results.
 
 ---
 
-## 30. Logs
+## 31. Logs
 
 Retrieve and stream accel-ppp logs from the systemd journal.
 

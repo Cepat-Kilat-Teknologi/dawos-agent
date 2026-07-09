@@ -1,13 +1,13 @@
 # Input Validation Reference
 
-This document describes the input validation strategy used by dawos-agent
+This document describes the input validation strategy used by DawOS Agent
 to protect against malformed data and shell injection attacks.
 
 ---
 
 ## Validation Strategy
 
-dawos-agent validates all user-supplied input through two independent layers:
+DawOS Agent validates all user-supplied input through two independent layers:
 
 1. **Pydantic model validation** -- Request fields are validated against
    type constraints and regex patterns before reaching any service logic.

@@ -1,6 +1,6 @@
 <p align="center">
-  <strong>dawos-agent</strong><br>
-  <em>REST API daemon for managing PPPoE/BNG routers powered by accel-ppp.</em><br>
+  <strong>DawOS Agent</strong><br>
+  <em>Broadband management, simplified.</em><br>
   <a href="https://pypi.org/project/dawos-agent/">PyPI</a> |
   <a href="https://cepat-kilat-teknologi.github.io/dawos-agent/">Documentation</a> |
   <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases">Releases</a>
@@ -16,7 +16,9 @@
 
 ## Overview
 
-**dawos-agent** is a FastAPI-based management daemon for Linux PPPoE BNG (Broadband Network Gateway) nodes powered by [accel-ppp](https://accel-ppp.org/). It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **138 authenticated HTTP endpoints** across **29 router modules**.
+**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **149 authenticated HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+
+The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access, making it suitable for automation, orchestration platforms, and multi-node ISP deployments.
 
 ### Key Features
 
@@ -25,10 +27,11 @@
 - **Firewall** -- nftables rules, NAT/masquerade, zone firewall, conntrack
 - **Dynamic routing** -- BGP, OSPF, RIP, BFD status via FRR/vtysh
 - **Config management** -- checkpoint, diff, rollback, guarded apply with auto-revert
+- **Monitoring** -- Prometheus metrics endpoint, health/readiness probes, WebSocket event streaming
+- **Security** -- API-key auth with RBAC (viewer/operator/admin), rate limiting, systemd sandboxing, least-privilege sudoers
+- **Observability** -- structured JSON logging, request ID tracing, audit log with in-memory buffer, webhook notifications
+- **Automation** -- operational playbooks, bulk operations, cron-like scheduler
 - **Streaming** -- SSE endpoints for live traffic and log tailing
-- **Event hooks** -- webhooks on session/config events with history
-- **Scheduler** -- cron-like job scheduling with run-on-demand
-- **Hardened** -- systemd sandboxing, least-privilege sudoers, API-key auth
 
 ---
 
@@ -87,7 +90,7 @@ sudo bash install.sh --yes      # Non-interactive (accept defaults)
 sudo bash install.sh --uninstall # Remove everything
 ```
 
-> The installer builds accel-ppp from source if not already installed, creates a `dawos` system user, sets up a venv at `/opt/dawos-agent/venv`, installs the systemd unit, and configures least-privilege sudoers.
+The installer builds accel-ppp from source if not already installed, creates a `dawos` system user, sets up a venv at `/opt/dawos-agent/venv`, installs the systemd unit, configures least-privilege sudoers, and sets correct file ownership for accel-ppp config management.
 
 ### Install from Source (Development)
 
@@ -125,6 +128,9 @@ sudo systemctl start dawos-agent
 # Health check (no auth required)
 curl -s http://localhost:8470/health | python3 -m json.tool
 
+# Readiness probe (checks accel-ppp connectivity)
+curl -s http://localhost:8470/health/ready | python3 -m json.tool
+
 # System info (auth required)
 curl -H "X-API-Key: your-secret" http://localhost:8470/api/v1/system/info
 ```
@@ -149,6 +155,14 @@ All settings use the `DAWOS_` environment variable prefix. Place them in `/etc/d
 | `DAWOS_API_KEY` | *(generated)* | Shared secret for `X-API-Key` header |
 | `DAWOS_NODE_NAME` | *(hostname)* | Node identity for health responses |
 | `DAWOS_LOG_LEVEL` | `info` | Log level (`debug`, `info`, `warning`, `error`) |
+| `DAWOS_LOG_FORMAT` | `text` | Log format (`text` or `json` for structured logging) |
+| `DAWOS_RATE_LIMIT` | `120/minute` | Per-IP rate limit (empty to disable) |
+| `DAWOS_RETRY_MAX` | `3` | Max retry attempts for transient accel-cmd failures |
+| `DAWOS_RETRY_DELAY` | `1.0` | Base retry delay in seconds |
+| `DAWOS_AUDIT_BUFFER_SIZE` | `1000` | In-memory audit ring buffer size |
+| `DAWOS_WEBHOOK_URL` | *(disabled)* | Webhook endpoint for event notifications |
+| `DAWOS_WEBHOOK_SECRET` | *(disabled)* | HMAC-SHA256 secret for webhook signing |
+| `DAWOS_API_KEYS_FILE` | *(disabled)* | JSON file mapping API keys to RBAC roles |
 | `ACCEL_CMD` | `/usr/bin/accel-cmd` | Path to accel-cmd |
 | `ACCEL_CLI_PORT` | `2001` | accel-ppp CLI port |
 | `ACCEL_CONFIG_PATH` | `/etc/accel-ppp.conf` | accel-ppp config path |
@@ -160,17 +174,18 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 
 ## API Reference
 
-138 endpoints across 29 groups. All require `X-API-Key` header except `/health`.
+149 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
 
 | Group | Endpoints | Description |
 |---|:---:|---|
-| health | 1 | Liveness probe (public) |
+| health | 2 | Liveness and readiness probes (public) |
+| metrics | 1 | Prometheus metrics (public) |
 | system | 2 | OS info, CPU, memory, disk |
 | service | 3 | Start/stop/restart accel-ppp, accel-cmd passthrough |
 | sessions | 4 | List, stats, find, terminate |
 | session-control | 5 | Lookup by SID/IP, snapshot, restart |
 | config | 3 | Read/update accel-ppp.conf |
-| checkpoint | 6 | Revisions, diff, rollback, guarded apply |
+| checkpoint | 8 | Revisions, diff, rollback, guarded apply, confirm |
 | network | 12 | Interfaces, VLANs, routes, DNS |
 | firewall | 19 | nftables, NAT, sysctl, conntrack, SNMP |
 | firewall-groups | 4 | Named groups with member management |
@@ -193,6 +208,10 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 | monitoring | 4 | Prometheus exporters |
 | diagnostics | 1 | System health check |
 | logs | 2 | Log tail, SSE stream |
+| audit | 1 | Write operation trail (admin-only) |
+| bulk | 3 | Batch API operations |
+| playbooks | 2 | Operational automation sequences |
+| websocket | 1 | Real-time event streaming |
 
 Full API reference: [API Documentation](https://cepat-kilat-teknologi.github.io/dawos-agent/api/reference/)
 
@@ -200,7 +219,7 @@ Full API reference: [API Documentation](https://cepat-kilat-teknologi.github.io/
 
 ## Authentication
 
-All endpoints except `/health` require an `X-API-Key` header:
+All endpoints except `/health`, `/health/ready`, and `/metrics` require an `X-API-Key` header:
 
 ```bash
 # Authenticated request
@@ -212,6 +231,16 @@ curl http://bng-node:8470/api/v1/system/info
 # Health check (public, no key required)
 curl http://bng-node:8470/health
 ```
+
+### RBAC Roles
+
+| Role | Access | Use Case |
+|------|--------|----------|
+| viewer | GET endpoints only | Monitoring dashboards, read-only scripts |
+| operator | GET + POST/PUT/DELETE | Day-to-day management |
+| admin | Full access | Service restart, config apply, audit log, playbooks |
+
+The primary `DAWOS_API_KEY` always grants admin access. For multi-key RBAC, configure `DAWOS_API_KEYS_FILE` with a JSON mapping.
 
 Generate a strong API key:
 
@@ -240,19 +269,6 @@ curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
   -d '{"username":"john"}' http://$HOST:8470/api/v1/sessions/terminate
 ```
 
-### Service Control
-
-```bash
-# Service status
-curl -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/service/status
-
-# Restart accel-ppp
-curl -X POST -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/service/restart
-
-# Reload config (graceful, no session drop)
-curl -X POST -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/service/reload
-```
-
 ### Configuration with Guarded Apply
 
 ```bash
@@ -267,20 +283,17 @@ curl -X POST -H "X-API-Key: $KEY" -H "Content-Type: application/json" \
 curl -X POST -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/checkpoint/confirm
 ```
 
-### Network and Firewall
+### Monitoring
 
 ```bash
-# List interfaces
-curl -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/network/interfaces
+# Prometheus metrics
+curl http://$HOST:8470/metrics
 
-# List routes
-curl -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/network/routes
+# Readiness probe
+curl http://$HOST:8470/health/ready
 
-# Firewall status
-curl -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/firewall/status
-
-# BGP summary
-curl -H "X-API-Key: $KEY" http://$HOST:8470/api/v1/routing/bgp
+# WebSocket event stream (requires wscat or websocat)
+wscat -c "ws://$HOST:8470/ws/events?key=$KEY"
 ```
 
 ### Using with dawos-cli
@@ -299,18 +312,21 @@ dawos top    # live dashboard
 
 ## Deployment
 
-### Hardware Requirements
+### Measured Resource Usage
 
-| Resource | Minimum | Recommended | Notes |
-|----------|---------|-------------|-------|
-| **CPU** | 1 vCPU | 2+ vCPU | accel-ppp itself needs CPU for PPP |
-| **RAM** | 512 MB | 1 GB+ | Agent ~60 MB + accel-ppp ~5 MB + OS |
-| **Disk** | 2 GB free | 5 GB+ | 55 MB venv + ~500 MB build deps (if compiling accel-ppp) |
-| **OS** | Debian 11 / Ubuntu 22.04 | Ubuntu 24.04 LTS | x86_64 architecture required |
-| **Python** | 3.9 | 3.10+ | `python3-venv` module required |
-| **Network** | 1 NIC | 2+ NICs | Management + subscriber-facing |
+| Component | Memory (RSS) | CPU (idle) | CPU (under load) |
+|-----------|:------------:|:----------:|:-----------------:|
+| dawos-agent (FastAPI + Uvicorn) | 64 MB | < 0.1% | < 2% |
+| accel-ppp daemon (0 sessions) | 6 MB | 0% | varies |
+| Combined management stack | **70 MB** | **< 0.2%** | **< 3%** |
 
-> **Note:** These are requirements for the agent only. accel-ppp BNG workloads (thousands of PPPoE sessions) may need significantly more CPU and RAM -- consult the [accel-ppp documentation](https://accel-ppp.readthedocs.io/) for BNG sizing.
+### Sizing by Scale
+
+| Scale | Sessions | CPU | RAM | Disk |
+|-------|:--------:|:---:|:---:|:----:|
+| Small | < 500 | 2 vCPU | 2 GB | 10 GB |
+| Medium | 500 -- 2,000 | 2 vCPU | 4 GB | 20 GB |
+| Large | 2,000 -- 10,000 | 4 vCPU | 8 GB | 40 GB |
 
 ### File Locations
 
@@ -334,7 +350,7 @@ sudo systemctl status dawos-agent
 sudo journalctl -u dawos-agent -f
 ```
 
-See [Installation docs](https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/installation/) for full deployment details.
+See [Installation docs](https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/installation/) for full deployment details and the [Production Hardening guide](https://cepat-kilat-teknologi.github.io/dawos-agent/guides/production-hardening/) for production-ready configuration.
 
 ---
 
@@ -346,37 +362,21 @@ dawos-agent/
 │   ├── __init__.py          # Package metadata
 │   ├── __main__.py          # uvicorn entry point
 │   ├── app.py               # FastAPI app factory, mounts all routers
-│   ├── auth.py              # X-API-Key header auth (returns 401, NOT 403)
+│   ├── auth.py              # X-API-Key header auth with RBAC
 │   ├── config.py            # pydantic-settings, DAWOS_ env prefix
+│   ├── constants.py         # Shared named constants
+│   ├── events.py            # WebSocket event bus (4 channels)
+│   ├── logging.py           # Structured logging setup (text/JSON)
+│   ├── metrics.py           # Prometheus metric definitions
+│   ├── middleware.py         # RequestId + AuditLog + Metrics middleware
+│   ├── rbac.py              # Role-based access control (viewer/operator/admin)
+│   ├── retry.py             # Exponential backoff retry for accel-cmd
+│   ├── webhooks.py          # Fire-and-forget webhook delivery
 │   ├── models/
-│   │   └── schemas.py       # 140+ Pydantic v2 request/response models
-│   ├── routers/             # 29 API router modules (HTTP layer only)
-│   │   ├── checkpoint.py    # Config checkpoint, diff, rollback, guarded apply
-│   │   ├── config.py        # Config read/update
-│   │   ├── conntrack.py     # Connection tracking
-│   │   ├── dhcp.py          # DHCP server and relay
-│   │   ├── diagnostics.py   # System health check
-│   │   ├── dns.py           # DNS forwarding
-│   │   ├── event_handler.py # Event hooks and webhooks
-│   │   ├── firewall.py      # nftables, NAT, sysctl, conntrack
-│   │   ├── flow.py          # NetFlow/sFlow collectors
-│   │   ├── lldp.py          # LLDP discovery
-│   │   ├── logs.py          # Log tail, SSE stream
-│   │   ├── monitoring.py    # Prometheus exporters
-│   │   ├── nat.py           # NAT masquerade
-│   │   ├── network.py       # Interfaces, routes, VLANs, DNS
-│   │   ├── ntp.py           # NTP time sync
-│   │   ├── pool.py          # IP address pools
-│   │   ├── pppoe.py         # PPPoE interfaces, MAC filter
-│   │   ├── routing.py       # BGP, OSPF, RIP, BFD
-│   │   ├── scheduler.py     # Job scheduling
-│   │   ├── service.py       # Service start/stop/restart
-│   │   ├── sessions.py      # Session list, stats, find, terminate
-│   │   ├── traffic.py       # SSE streams, TC queues, rate limits
-│   │   ├── vrrp.py          # VRRP high-availability
-│   │   └── zone.py          # Zone-based firewall
-│   └── services/            # 27 service modules (business logic + shell calls)
-├── tests/                   # 820 tests, 100% coverage
+│   │   └── schemas.py       # 185 Pydantic v2 request/response models
+│   ├── routers/             # 34 API router modules (HTTP layer only)
+│   └── services/            # 30 service modules (business logic + shell calls)
+├── tests/                   # 1088 tests
 ├── docs/                    # MkDocs Material documentation
 ├── .github/
 │   └── workflows/
@@ -400,11 +400,11 @@ dawos-agent/
 | Principle | Implementation |
 |-----------|---------------|
 | **Router -> Service -> Shell** | Routers handle HTTP, services contain business logic, shell commands via `_run()`. |
-| **Auth on every endpoint** | `ApiKey` dependency returns 401 on missing/invalid key. `/health` is the only public endpoint. |
+| **Auth on every endpoint** | `ApiKey` dependency returns 401 on missing/invalid key. `/health`, `/health/ready`, `/metrics` are the only public endpoints. |
 | **Pydantic v2 models** | All request/response types defined in `models/schemas.py` with strict validation. |
 | **Least-privilege sudo** | Only 6 commands allowed: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`. |
-| **No shell injection** | All subprocess calls use list-form arguments, never string interpolation. |
-| **Systemd sandboxing** | `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `NoNewPrivileges=yes`. |
+| **No shell injection** | All subprocess calls use list-form arguments, never string interpolation. Defense-in-depth `shlex.quote()` on user-supplied values. |
+| **Systemd sandboxing** | `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `WatchdogSec=30`. |
 
 ---
 
@@ -425,10 +425,10 @@ pip install pylint black
 | Tool | Purpose | Configuration |
 |------|---------|---------------|
 | **[Black](https://black.readthedocs.io/)** | Code formatting | `pyproject.toml` `[tool.black]` |
-| **[Pylint](https://pylint.readthedocs.io/)** | Static analysis (10.00/10 required) | `pyproject.toml` `[tool.pylint]` |
+| **[Pylint](https://pylint.readthedocs.io/)** | Static analysis | `pyproject.toml` `[tool.pylint]` |
 | **[Ruff](https://docs.astral.sh/ruff/)** | Fast linting (E/F/W/I/N/UP/B/SIM) | `pyproject.toml` `[tool.ruff]` |
 | **[pytest](https://docs.pytest.org/)** | Test framework with async support | `pyproject.toml` `[tool.pytest]` |
-| **[coverage](https://coverage.readthedocs.io/)** | Coverage reporting (100% required) | `pyproject.toml` `[tool.coverage]` |
+| **[coverage](https://coverage.readthedocs.io/)** | Coverage reporting | `pyproject.toml` `[tool.coverage]` |
 | **[pre-commit](https://pre-commit.com/)** | Git hooks (Black + Ruff + Pylint) | `.pre-commit-config.yaml` |
 
 ### Running Quality Checks
@@ -477,8 +477,6 @@ The agent starts on `http://localhost:8470` with Swagger docs at `/docs`.
 
 ## Testing
 
-The project maintains **820 tests** with **100% coverage** across all source files:
-
 ```bash
 # Quick test run
 pytest tests/ -x -q
@@ -491,7 +489,7 @@ coverage run -m pytest tests/ && coverage report -m
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 820 passing | `pytest tests/ -x -q` |
+| Tests | 1088 passing | `pytest tests/ -x -q` |
 | Coverage | 100% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
@@ -509,24 +507,26 @@ coverage run -m pytest tests/ && coverage report -m
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
 
 - Setting up your development environment
 - Code style and formatting standards (Black, Pylint 10.0/10, Ruff)
-- Testing requirements (820+ tests, 100% coverage)
+- Testing requirements
 - Submitting pull requests
 
 ---
 
 ## Security
 
-- **API-key auth** on all endpoints (except `/health`)
-- **Systemd sandboxing** (`ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`)
-- **Least-privilege sudo** limited to 6 commands: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`
-- **No shell injection** -- all subprocess calls use list-form arguments
+- **API-key auth with RBAC** -- three-tier role hierarchy (viewer, operator, admin) on all endpoints except public probes
+- **Rate limiting** -- per-IP throttling with configurable limits, HTTP 429 responses
+- **Systemd sandboxing** -- `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `WatchdogSec=30`
+- **Least-privilege sudo** -- limited to 6 commands: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`
+- **No shell injection** -- all subprocess calls use list-form arguments with `shlex.quote()` defense-in-depth
 - **No `eval()` or `exec()`** anywhere in the codebase
+- **Webhook signing** -- optional HMAC-SHA256 payload verification
 
-See [SECURITY.md](SECURITY.md) for the full security policy.
+See [SECURITY.md](SECURITY.md) for the full security policy and vulnerability reporting process.
 
 ---
 
@@ -538,7 +538,7 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed version history.
 
 ## API Compatibility
 
-dawos-agent exposes a REST API on port 8470 consumed by [dawos-cli](https://github.com/Cepat-Kilat-Teknologi/dawos-cli). All endpoints use `X-API-Key` header authentication.
+DawOS Agent exposes a REST API on port 8470 consumed by [DawOS CLI](https://github.com/Cepat-Kilat-Teknologi/dawos-cli). All endpoints use `X-API-Key` header authentication. The WebSocket endpoint at `/ws/events` accepts the key as a query parameter.
 
 ---
 
@@ -549,5 +549,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for the f
 ---
 
 <p align="center">
-  <sub>Built with <a href="https://fastapi.tiangolo.com/">FastAPI</a>, <a href="https://docs.pydantic.dev/">Pydantic v2</a>, and <a href="https://www.uvicorn.org/">Uvicorn</a>.</sub>
+  <sub>DawOS Agent is built with <a href="https://fastapi.tiangolo.com/">FastAPI</a>, <a href="https://docs.pydantic.dev/">Pydantic v2</a>, and <a href="https://www.uvicorn.org/">Uvicorn</a>.</sub>
 </p>

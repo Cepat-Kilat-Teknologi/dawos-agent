@@ -1,6 +1,6 @@
 # API Test Report
 
-Live integration test results for **dawos-agent v0.2.0** against a real BNG node.
+Live integration test results for **DawOS Agent v0.2.0** against a real BNG node.
 
 ---
 
@@ -112,7 +112,7 @@ All 29 API groups tested. Every GET endpoint returns HTTP 200 with valid JSON.
 
 | # | Endpoint | HTTP | Response |
 |---|----------|:----:|----------|
-| 1 | `GET /health` | 200 | `{"status":"ok","node_name":"dawos-dev","version":"0.2.0"}` |
+| 1 | `GET /health` | 200 | `{"status":"ok","node_name":"bng-node","version":"0.2.0"}` |
 | 2 | `GET /api/v1/system/info` | 200 | Hostname, OS, kernel, arch, uptime |
 | 3 | `GET /api/v1/system/metrics` | 200 | CPU, memory, disk, load average |
 | 4 | `GET /api/v1/service/status` | 200 | accel-ppp running, uptime |
@@ -503,7 +503,7 @@ Tested with a real PPPoE session: PPPoE Client → BNG ens20 → accel-ppp.
 | **Auth** | chap-secrets (PAP/CHAP/MSCHAPv1/v2) |
 | **IP** | 10.99.0.2 (static via chap-secrets) |
 | **BNG Interface** | ens20 |
-| **Client MAC** | bc:24:11:c8:32:9e |
+| **Client MAC** | aa:bb:cc:dd:ee:ff |
 | **Session ID** | a35a5ccb37202dbd |
 
 ### Session Read Endpoints (6/6)

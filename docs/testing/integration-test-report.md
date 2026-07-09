@@ -3,7 +3,7 @@
 **Project:** dawos-agent + dawos-cli
 **Version:** dawos-agent 0.2.0 / dawos-cli 0.3.0
 **Date:** 2026-07-08
-**Environment:** dawos-dev (192.168.216.99)
+**Environment:** Lab BNG node (10.0.0.1)
 **Tester:** Manual — CLI commands + direct curl against live hardware
 **Status:** PASS (138/138 endpoints verified, 0 N/A)
 
@@ -43,17 +43,17 @@ All write operations were verified with corresponding read operations to confirm
 **Lab topology:**
 
 ```
-PPPoE Client (192.168.216.100)
+PPPoE Client (10.0.0.2)
   eth2/vlan666
     |
-BNG (192.168.216.99) ens20
+BNG (10.0.0.1) ens20
     |
   accel-ppp
     |
-Dist Router (192.168.216.82)
+Dist Router (10.0.0.3)
 ```
 
-**Live session during testing:** `testuser1` / IP `10.99.0.2` / interface `ppp0` / MAC `bc:24:11:c8:32:9e`
+**Live session during testing:** `testuser1` / IP `10.99.0.2` / interface `ppp0` / MAC `aa:bb:cc:dd:ee:ff`
 
 ---
 
@@ -251,7 +251,7 @@ FRR (Free Range Routing) installed with zebra, bgpd, ospfd, ripd, and bfdd enabl
 | 1 | Logs tail | `logs tail` | PASS | Journal entries with timestamps |
 | 2 | DHCP status | `dhcp status` | PASS | Inactive (no DHCP server configured) |
 | 3 | NTP status | `ntp status` | PASS | Not synced (normal for dev VM) |
-| 4 | VRRP status | `vrrp status` | PASS | Active, VI_1 MASTER, VIP 192.168.216.250 |
+| 4 | VRRP status | `vrrp status` | PASS | Active, VI_1 MASTER, VIP 10.0.0.250 |
 | 5 | Flow status | `flow status` | PASS | No flow daemon active |
 | 6 | LLDP neighbors | `lldp neighbors` | PASS | No peers (correct for lab) |
 | 7 | Monitoring status | `monitoring status` | PASS | Service status reported |
@@ -277,7 +277,7 @@ keepalived installed and configured with VRRP instance VI_1 on eth0.
 | # | Endpoint | Response | Notes |
 |---|----------|----------|-------|
 | 1 | `GET /api/v1/vrrp/status` | 200 | active=true, state=MASTER |
-| 2 | `GET /api/v1/vrrp/groups/VI_1` | 200 | VIP 192.168.216.250/24, priority 100 |
+| 2 | `GET /api/v1/vrrp/groups/VI_1` | 200 | VIP 10.0.0.250/24, priority 100 |
 | 3 | `POST /api/v1/vrrp/restart` | 200 | Service restarted |
 | 4 | `POST /api/v1/vrrp/failover` | 200 | Priority adjusted |
 

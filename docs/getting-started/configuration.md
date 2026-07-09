@@ -1,6 +1,6 @@
 # Configuration Reference
 
-Complete configuration reference for **dawos-agent** — PPP router management agent.
+Complete configuration reference for **DawOS Agent** — PPP router management agent.
 
 ---
 
@@ -19,7 +19,7 @@ Complete configuration reference for **dawos-agent** — PPP router management a
 
 ## Configuration Methods
 
-dawos-agent uses [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for configuration. Settings are resolved in the following order of precedence (highest to lowest):
+DawOS Agent uses [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) for configuration. Settings are resolved in the following order of precedence (highest to lowest):
 
 | Priority | Source | Example |
 |----------|--------|---------|
@@ -517,17 +517,66 @@ DAWOS_HOST=127.0.0.1
 
 ### Monitoring
 
-8. **Monitor the `/health` endpoint** — it is unauthenticated and returns the agent version, node name, and status. Use it as a liveness check target in your monitoring system (Prometheus blackbox exporter, Uptime Kuma, etc.):
+8. **Monitor the `/health` endpoint** -- it is unauthenticated and returns the agent version, node name, and status. Use it as a liveness check target in your monitoring system (Prometheus blackbox exporter, Uptime Kuma, etc.):
    ```bash
    curl -sf http://localhost:8470/health
    ```
 
-9. **Use `/health/ready` for readiness checks** — verifies accel-ppp connectivity in addition to agent health. Returns HTTP 200 when all dependencies are reachable, HTTP 503 when a dependency is down:
+9. **Use `/health/ready` for readiness checks** -- verifies accel-ppp connectivity in addition to agent health. Returns HTTP 200 when all dependencies are reachable, HTTP 503 when a dependency is down:
    ```bash
    curl -sf http://localhost:8470/health/ready
    ```
 
-10. **Set up alerting** on systemd service failures:
+10. **Scrape Prometheus metrics** -- the agent exposes a `GET /metrics` endpoint in Prometheus text exposition format. No authentication required. Add the agent as a scrape target in your `prometheus.yml`:
+
+    ```yaml
+    # prometheus.yml
+    scrape_configs:
+      - job_name: dawos-agent
+        scrape_interval: 15s
+        static_configs:
+          - targets:
+              - "10.0.1.1:8470"   # production BNG
+              - "10.0.0.1:8470"    # development BNG
+            labels:
+              service: dawos-agent
+    ```
+
+    The `/metrics` endpoint exposes these application-level metrics:
+
+    | Metric | Type | Description |
+    |--------|------|-------------|
+    | `dawos_http_requests_total` | Counter | HTTP request count by method, endpoint, and status code |
+    | `dawos_http_request_duration_seconds` | Histogram | HTTP request latency distribution |
+    | `dawos_accel_cmd_errors_total` | Counter | accel-cmd non-zero exit codes (CLI failures) |
+    | `dawos_accel_cmd_retries_total` | Counter | Transient retry attempts for accel-cmd calls |
+    | `dawos_rate_limit_hits_total` | Counter | HTTP 429 rate-limit rejections |
+
+    Health and metrics paths (`/health`, `/health/ready`, `/metrics`) are excluded from metric recording to prevent self-instrumentation loops.
+
+    Example Grafana query for request rate:
+
+    ```promql
+    rate(dawos_http_requests_total{job="dawos-agent"}[5m])
+    ```
+
+    Example alert rule for accel-cmd failures:
+
+    ```yaml
+    # prometheus alert rule
+    groups:
+      - name: dawos
+        rules:
+          - alert: AccelCmdErrorRate
+            expr: rate(dawos_accel_cmd_errors_total[5m]) > 0.1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "accel-cmd error rate elevated on {{ $labels.instance }}"
+    ```
+
+11. **Set up alerting** on systemd service failures:
     ```bash
     # Check if the service is active
     systemctl is-active dawos-agent
