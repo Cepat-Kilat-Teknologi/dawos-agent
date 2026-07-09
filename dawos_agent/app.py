@@ -22,6 +22,7 @@ from fastapi import FastAPI
 
 from . import __version__
 from .config import settings
+from .middleware import RequestIdMiddleware
 from .routers import (
     checkpoint,
     config_router,
@@ -86,6 +87,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Middleware (executes in reverse order — last added runs first) -------------
+app.add_middleware(RequestIdMiddleware)
 
 # Public (no auth) ----------------------------------------------------------
 app.include_router(health.router)
