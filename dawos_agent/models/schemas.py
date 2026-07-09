@@ -23,6 +23,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
+from ..constants import CONNTRACK_RECOMMENDED_MIN
+
 # ---------------------------------------------------------------------------
 # Shell-safety regex patterns for request fields interpolated into commands.
 # Applied via ``pattern=`` on ``Field`` or ``@field_validator`` to reject
@@ -1529,7 +1531,7 @@ class ConntrackResponse(BaseModel):
     """
 
     current_max: int = 0
-    recommended_min: int = 262144
+    recommended_min: int = CONNTRACK_RECOMMENDED_MIN
     status: str = Field("unknown", description="ok or warn")
     detail: str = ""
 
