@@ -14,6 +14,9 @@ import asyncio
 import logging
 import socket
 
+from ..constants import CONNTRACK_RECOMMENDED_MIN, SNMPD_PORT
+from ..config import settings
+
 log = logging.getLogger(__name__)
 
 
@@ -122,7 +125,7 @@ async def check_conntrack() -> dict:
             "detail": "conntrack not available",
         }
     val = int(out.strip()) if out.strip().isdigit() else 0
-    if val >= 262144:
+    if val >= CONNTRACK_RECOMMENDED_MIN:
         return {
             "name": "conntrack",
             "status": "ok",
@@ -131,7 +134,7 @@ async def check_conntrack() -> dict:
     return {
         "name": "conntrack",
         "status": "warn",
-        "detail": f"nf_conntrack_max={val} (recommend ≥262144)",
+        "detail": f"nf_conntrack_max={val} (recommend ≥{CONNTRACK_RECOMMENDED_MIN})",
     }
 
 
@@ -165,15 +168,19 @@ async def check_pool() -> dict:
 
 
 async def check_internet() -> dict:
-    """Check internet connectivity by pinging 8.8.8.8.
+    """Check internet connectivity by pinging the configured target.
+
+    The target host defaults to ``8.8.8.8`` and can be overridden via
+    the ``DAWOS_PING_TARGET`` environment variable.
 
     Returns:
         A diagnostic result dict with ``name``, ``status``, and ``detail``.
     """
-    _, rc = await _run("ping -c 1 -W 3 8.8.8.8")
+    target = settings.ping_target
+    _, rc = await _run(f"ping -c 1 -W 3 {target}")
     if rc == 0:
         return {"name": "internet", "status": "ok", "detail": "Internet reachable"}
-    return {"name": "internet", "status": "fail", "detail": "Cannot reach 8.8.8.8"}
+    return {"name": "internet", "status": "fail", "detail": f"Cannot reach {target}"}
 
 
 async def check_snmp() -> dict:
@@ -190,7 +197,7 @@ async def check_snmp() -> dict:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.settimeout(1)
             s.bind(("127.0.0.1", 0))
-            s.sendto(b"\x00", ("127.0.0.1", 161))
+            s.sendto(b"\x00", ("127.0.0.1", SNMPD_PORT))
             port_open = True
     except OSError:
         pass
@@ -199,13 +206,13 @@ async def check_snmp() -> dict:
         return {
             "name": "snmp",
             "status": "ok",
-            "detail": "snmpd running, port 161 open",
+            "detail": f"snmpd running, port {SNMPD_PORT} open",
         }
     if running:
         return {
             "name": "snmp",
             "status": "warn",
-            "detail": "snmpd running, port 161 closed",
+            "detail": f"snmpd running, port {SNMPD_PORT} closed",
         }
     return {"name": "snmp", "status": "warn", "detail": "snmpd not running"}
 
@@ -226,18 +233,18 @@ async def get_conntrack() -> dict:
     if rc != 0:
         return {
             "current_max": 0,
-            "recommended_min": 262144,
+            "recommended_min": CONNTRACK_RECOMMENDED_MIN,
             "status": "warn",
             "detail": "conntrack not available",
         }
     val = int(out.strip()) if out.strip().isdigit() else 0
-    status = "ok" if val >= 262144 else "warn"
+    status = "ok" if val >= CONNTRACK_RECOMMENDED_MIN else "warn"
     detail = f"nf_conntrack_max={val}"
     if status == "warn":
-        detail += " (recommend ≥262144)"
+        detail += f" (recommend ≥{CONNTRACK_RECOMMENDED_MIN})"
     return {
         "current_max": val,
-        "recommended_min": 262144,
+        "recommended_min": CONNTRACK_RECOMMENDED_MIN,
         "status": status,
         "detail": detail,
     }
