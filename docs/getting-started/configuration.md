@@ -108,6 +108,13 @@ sudo systemctl restart dawos-agent
 |----------|---------|------|-------------|
 | `DAWOS_RATE_LIMIT` | `120/minute` | `string` | Global per-IP rate limit in slowapi format (e.g. `120/minute`, `5/second`). Set to an empty string to disable rate limiting. Health endpoints are exempt. |
 
+### Retry
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_RETRY_MAX` | `3` | `integer` | Maximum retry attempts for transient accel-cmd failures (connection refused, timeout). Set to `0` to disable retries. |
+| `DAWOS_RETRY_DELAY` | `1.0` | `float` | Base delay in seconds between retry attempts. Uses exponential backoff (1s, 2s, 4s, ...). |
+
 ### Example Configuration File
 
 ```bash
@@ -138,6 +145,10 @@ DAWOS_PING_TARGET=8.8.8.8
 
 # Rate limiting (empty string to disable)
 DAWOS_RATE_LIMIT=120/minute
+
+# Retry (for transient accel-cmd failures)
+DAWOS_RETRY_MAX=3
+DAWOS_RETRY_DELAY=1.0
 ```
 
 ---

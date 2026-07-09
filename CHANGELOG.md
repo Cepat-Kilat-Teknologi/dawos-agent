@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Input validation reference** -- New documentation page (`docs/api/validation-rules.md`) with per-endpoint field constraints, regex patterns, and shell quoting details.
 - **Validation tests** -- 17 new unit tests covering regex rejection, list field validation, and service-level error paths.
 - **New dependencies** -- `slowapi>=0.1.9,<1` (rate limiting), `python-json-logger>=3,<5` (structured logging). Both pip-audit clean.
+- **Retry with exponential backoff** -- `accel-cmd` calls now retry on transient failures (connection refused, timeout) with configurable max retries (`DAWOS_RETRY_MAX`, default 3) and base delay (`DAWOS_RETRY_DELAY`, default 1.0s). Non-transient errors propagate immediately.
+- **Audit log for write operations** -- All mutating HTTP requests (POST/PUT/PATCH/DELETE) are logged to a dedicated `dawos_agent.audit` logger with method, path, client IP, request ID, status code, and response time. GET/HEAD requests are not logged.
+- **Config completeness check** -- On startup, the agent warns if `DAWOS_API_KEY` still uses the insecure default placeholder and logs available optional settings that haven't been explicitly configured.
 
 ### Changed
 
