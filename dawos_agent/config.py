@@ -55,6 +55,10 @@ class Settings(BaseSettings):
         ping_target: Host used by the internet reachability diagnostic
             check.  Override via ``DAWOS_PING_TARGET`` when the BNG
             node cannot reach Google DNS (e.g. air-gapped networks).
+        rate_limit: Global per-IP rate limit string in ``slowapi``
+            format (e.g. ``"120/minute"``, ``"5/second"``).  Override
+            via ``DAWOS_RATE_LIMIT``.  Set to an empty string to
+            disable rate limiting entirely.
     """
 
     # --- agent identity -------------------------------------------------------
@@ -78,6 +82,9 @@ class Settings(BaseSettings):
 
     # --- diagnostics ----------------------------------------------------------
     ping_target: str = "8.8.8.8"
+
+    # --- rate limiting --------------------------------------------------------
+    rate_limit: str = "120/minute"
 
     model_config = {
         "env_prefix": "DAWOS_",
