@@ -53,8 +53,12 @@ def test_silent_defaults_not_warned(monkeypatch):
     msgs = check_config()
     # Silent defaults like host, port, log_level should not appear
     silent_vars = [
-        "DAWOS_HOST", "DAWOS_PORT", "DAWOS_LOG_LEVEL",
-        "DAWOS_LOG_FORMAT", "DAWOS_PING_TARGET", "DAWOS_RATE_LIMIT",
+        "DAWOS_HOST",
+        "DAWOS_PORT",
+        "DAWOS_LOG_LEVEL",
+        "DAWOS_LOG_FORMAT",
+        "DAWOS_PING_TARGET",
+        "DAWOS_RATE_LIMIT",
     ]
     for var in silent_vars:
         assert not any(var in m for m in msgs), f"{var} should be silent"
@@ -85,8 +89,8 @@ def test_info_logged_for_non_silent_setting(monkeypatch, caplog):
 
     assert any("DAWOS_RETRY_MAX" in m for m in msgs)
     info_records = [
-        r for r in caplog.records
+        r
+        for r in caplog.records
         if r.levelno == logging.INFO and "DAWOS_RETRY_MAX" in r.message
     ]
     assert len(info_records) >= 1
-

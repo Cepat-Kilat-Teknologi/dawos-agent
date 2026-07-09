@@ -17,7 +17,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import AdminKey, ViewerKey
 from ..models.schemas import (
     CheckpointDiffResponse,
     CheckpointListResponse,
@@ -27,6 +27,8 @@ from ..models.schemas import (
     GuardedApplyRequest,
     GuardedApplyResponse,
     GuardedStatusResponse,
+    RevisionCompareResponse,
+    RevisionContentResponse,
 )
 from ..services import config_manager
 
@@ -41,7 +43,7 @@ router = APIRouter(prefix="/api/v1/config", tags=["checkpoint"])
 
 
 @router.get("/revisions", response_model=CheckpointListResponse)
-async def list_revisions(_key: str = ApiKey):
+async def list_revisions(_key: str = ViewerKey):
     """List all configuration backup and checkpoint revisions.
 
     Scans the backup directory for ``.bak`` and ``.checkpoint`` files and
@@ -69,7 +71,7 @@ async def list_revisions(_key: str = ApiKey):
 
 
 @router.get("/diff", response_model=CheckpointDiffResponse)
-async def diff_revision(backup_name: str, _key: str = ApiKey):
+async def diff_revision(backup_name: str, _key: str = ViewerKey):
     """Compute a unified diff between the running config and a backup.
 
     Compares the current ``accel-ppp.conf`` against the specified backup
@@ -100,7 +102,7 @@ async def diff_revision(backup_name: str, _key: str = ApiKey):
 
 
 @router.post("/rollback/{backup_name}", response_model=CheckpointRollbackResponse)
-async def rollback(backup_name: str, _key: str = ApiKey):
+async def rollback(backup_name: str, _key: str = AdminKey):
     """Restore a previous configuration revision.
 
     Creates a safety backup of the current running config before
@@ -130,12 +132,79 @@ async def rollback(backup_name: str, _key: str = ApiKey):
 
 
 # ---------------------------------------------------------------------------
+# Revision content
+# ---------------------------------------------------------------------------
+
+
+@router.get("/revisions/{name}/content", response_model=RevisionContentResponse)
+async def revision_content(name: str, _key: str = ViewerKey):
+    """Read the full content of a specific configuration revision.
+
+    Returns the text content, file size, and creation timestamp of
+    the named backup or checkpoint file.
+
+    Args:
+        name: Filename of the revision to read.
+
+    Returns:
+        RevisionContentResponse: Revision content and metadata.
+
+    Raises:
+        HTTPException(404): If the named revision does not exist.
+    """
+    try:
+        content, size, created = config_manager.read_backup(name)
+        return RevisionContentResponse(
+            name=name,
+            size=size,
+            created=created,
+            content=content,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
+# Compare two revisions
+# ---------------------------------------------------------------------------
+
+
+@router.get("/compare", response_model=RevisionCompareResponse)
+async def compare_revisions(
+    from_name: str,
+    to_name: str,
+    _key: str = ViewerKey,
+):
+    """Compute a unified diff between two named configuration revisions.
+
+    Unlike the ``/diff`` endpoint which compares a revision against the
+    running config, this endpoint compares any two historical revisions
+    directly.
+
+    Args:
+        from_name: Filename of the first (older) revision.
+        to_name: Filename of the second (newer) revision.
+
+    Returns:
+        RevisionCompareResponse: Unified diff output with change flag.
+
+    Raises:
+        HTTPException(404): If either revision does not exist.
+    """
+    try:
+        result = config_manager.diff_two_revisions(from_name, to_name)
+        return RevisionCompareResponse(**result)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+# ---------------------------------------------------------------------------
 # Guarded apply
 # ---------------------------------------------------------------------------
 
 
 @router.post("/apply", response_model=GuardedApplyResponse)
-async def guarded_apply(req: GuardedApplyRequest, _key: str = ApiKey):
+async def guarded_apply(req: GuardedApplyRequest, _key: str = AdminKey):
     """Apply new config with auto-rollback timer.
 
     The operator must call ``POST /confirm`` within *confirm_minutes*
@@ -163,7 +232,7 @@ async def guarded_apply(req: GuardedApplyRequest, _key: str = ApiKey):
 
 
 @router.post("/confirm", response_model=ConfirmApplyResponse)
-async def confirm_apply(_key: str = ApiKey):
+async def confirm_apply(_key: str = AdminKey):
     """Confirm a pending guarded apply and cancel the auto-rollback timer.
 
     Must be called within the deadline window set during ``POST /apply``.
@@ -187,7 +256,7 @@ async def confirm_apply(_key: str = ApiKey):
 
 
 @router.get("/apply/status", response_model=GuardedStatusResponse)
-async def apply_status(_key: str = ApiKey):
+async def apply_status(_key: str = ViewerKey):
     """Check whether a guarded apply is pending confirmation.
 
     Returns the current timer state including whether an apply is

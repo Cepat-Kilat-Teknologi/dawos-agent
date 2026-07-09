@@ -105,7 +105,9 @@ def list_backups() -> list[dict]:
         return []
 
     backups = []
-    for f in sorted(BACKUP_DIR.glob("accel-ppp.conf.*.bak"), reverse=True):
+    for f in sorted(BACKUP_DIR.glob("accel-ppp.conf.*"), reverse=True):
+        if f.suffix not in {".bak", ".checkpoint"}:
+            continue
         stat = f.stat()
         backups.append(
             {
@@ -117,6 +119,64 @@ def list_backups() -> list[dict]:
         )
 
     return backups
+
+
+def read_backup(backup_name: str) -> tuple[str, int, str]:
+    """Read the content of a specific backup or checkpoint file.
+
+    Args:
+        backup_name: Filename of the backup to read.
+
+    Returns:
+        A tuple of (content, size_bytes, created_iso).
+
+    Raises:
+        FileNotFoundError: If the named backup does not exist.
+    """
+    bak_path = BACKUP_DIR / backup_name
+    if not bak_path.exists():
+        raise FileNotFoundError(f"Backup not found: {backup_name}")
+
+    content = bak_path.read_text(encoding="utf-8")
+    stat = bak_path.stat()
+    created = datetime.fromtimestamp(stat.st_mtime).isoformat()
+    return content, stat.st_size, created
+
+
+def diff_two_revisions(name_a: str, name_b: str) -> dict:
+    """Compute a unified diff between two backup revisions.
+
+    Unlike :func:`diff_with_backup` which always compares against the
+    running config, this function compares any two named revisions
+    directly.
+
+    Args:
+        name_a: Filename of the first (older) revision.
+        name_b: Filename of the second (newer) revision.
+
+    Returns:
+        A dictionary with ``from_name``, ``to_name``, ``diff``
+        (unified diff text), and ``changed`` (bool).
+
+    Raises:
+        FileNotFoundError: If either revision does not exist.
+    """
+    path_a = BACKUP_DIR / name_a
+    path_b = BACKUP_DIR / name_b
+    if not path_a.exists():
+        raise FileNotFoundError(f"Revision not found: {name_a}")
+    if not path_b.exists():
+        raise FileNotFoundError(f"Revision not found: {name_b}")
+
+    content_a = path_a.read_text(encoding="utf-8")
+    content_b = path_b.read_text(encoding="utf-8")
+    raw_diff = diff_configs(content_a, content_b)
+    return {
+        "from_name": name_a,
+        "to_name": name_b,
+        "diff": raw_diff,
+        "changed": len(raw_diff) > 0,
+    }
 
 
 # ---------------------------------------------------------------------------

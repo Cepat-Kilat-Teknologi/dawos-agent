@@ -14,7 +14,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import PadoDelayResponse, SetPadoDelayRequest
 from ..services import pado_delay
 from ..services.accel import reload_config
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/v1/pppoe/pado", tags=["pado-delay"])
 
 
 @router.get("", response_model=PadoDelayResponse)
-async def get_pado_delay(_key: str = ApiKey):
+async def get_pado_delay(_key: str = ViewerKey):
     """Read the current PADO delay configuration.
 
     Returns the delay value (in milliseconds) and the minimum session

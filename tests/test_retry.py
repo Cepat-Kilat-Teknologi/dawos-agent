@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from dawos_agent.retry import TRANSIENT_PATTERNS, is_transient, with_retry
-
 
 # ---------------------------------------------------------------------------
 # is_transient
@@ -91,9 +88,7 @@ class TestWithRetry:
                 raise RuntimeError("accel-cmd error: connection refused")
             return "recovered"
 
-        result = await with_retry(
-            fail_then_succeed, max_retries=3, base_delay=0.01
-        )
+        result = await with_retry(fail_then_succeed, max_retries=3, base_delay=0.01)
         assert result == "recovered"
         assert call_count == 3
 
@@ -108,9 +103,7 @@ class TestWithRetry:
                 raise OSError("Network is unreachable")
             return "recovered"
 
-        result = await with_retry(
-            fail_then_succeed, max_retries=2, base_delay=0.01
-        )
+        result = await with_retry(fail_then_succeed, max_retries=2, base_delay=0.01)
         assert result == "recovered"
         assert call_count == 2
 
@@ -124,9 +117,7 @@ class TestWithRetry:
             raise RuntimeError("command not found")
 
         with pytest.raises(RuntimeError, match="command not found"):
-            await with_retry(
-                fail_permanent, max_retries=3, base_delay=0.01
-            )
+            await with_retry(fail_permanent, max_retries=3, base_delay=0.01)
         assert call_count == 1
 
     async def test_raises_after_max_retries_exhausted(self) -> None:
@@ -139,9 +130,7 @@ class TestWithRetry:
             raise RuntimeError("accel-cmd error: connection refused")
 
         with pytest.raises(RuntimeError, match="connection refused"):
-            await with_retry(
-                always_fail, max_retries=2, base_delay=0.01
-            )
+            await with_retry(always_fail, max_retries=2, base_delay=0.01)
         assert call_count == 3  # 1 initial + 2 retries
 
     async def test_zero_retries_disables(self) -> None:
@@ -154,13 +143,12 @@ class TestWithRetry:
             raise RuntimeError("accel-cmd error: timed out")
 
         with pytest.raises(RuntimeError, match="timed out"):
-            await with_retry(
-                always_fail, max_retries=0, base_delay=0.01
-            )
+            await with_retry(always_fail, max_retries=0, base_delay=0.01)
         assert call_count == 1
 
     async def test_passes_args_and_kwargs(self) -> None:
         """Arguments and keyword arguments should be forwarded."""
+
         async def echo(a: str, b: int, key: str = "") -> str:
             return f"{a}-{b}-{key}"
 
@@ -171,10 +159,9 @@ class TestWithRetry:
 
     async def test_non_runtime_os_error_propagates(self) -> None:
         """Exceptions other than RuntimeError/OSError should propagate."""
+
         async def fail_value() -> str:
             raise ValueError("bad value")
 
         with pytest.raises(ValueError, match="bad value"):
-            await with_retry(
-                fail_value, max_retries=3, base_delay=0.01
-            )
+            await with_retry(fail_value, max_retries=3, base_delay=0.01)

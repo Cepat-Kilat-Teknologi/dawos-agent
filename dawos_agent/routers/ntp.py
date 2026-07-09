@@ -10,7 +10,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import NtpSourcesResponse, NtpStatusResponse
 from ..services import ntp
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/v1/ntp", tags=["ntp"])
 
 
 @router.get("/status", response_model=NtpStatusResponse)
-async def ntp_status_endpoint(_key: str = ApiKey):
+async def ntp_status_endpoint(_key: str = ViewerKey):
     """Return NTP synchronisation status.
 
     Runs ``chronyc tracking`` and returns the current sync state,
@@ -40,7 +40,7 @@ async def ntp_status_endpoint(_key: str = ApiKey):
 
 
 @router.get("/sources", response_model=NtpSourcesResponse)
-async def ntp_sources_endpoint(_key: str = ApiKey):
+async def ntp_sources_endpoint(_key: str = ViewerKey):
     """Return NTP time sources.
 
     Runs ``chronyc sources`` and returns a list of configured NTP

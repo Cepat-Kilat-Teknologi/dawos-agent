@@ -10,7 +10,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import (
     BfdPeersResponse,
     BfdSummaryResponse,
@@ -34,7 +34,7 @@ router = APIRouter(prefix="/api/v1/routing", tags=["routing"])
 
 
 @router.get("/bgp/status", response_model=BgpStatusResponse)
-async def bgp_status(_key: str = ApiKey):
+async def bgp_status(_key: str = ViewerKey):
     """Return the BGP summary.
 
     Queries ``vtysh -c 'show bgp summary json'`` and returns the
@@ -54,7 +54,7 @@ async def bgp_status(_key: str = ApiKey):
 
 
 @router.get("/bgp/routes", response_model=BgpRoutesResponse)
-async def bgp_routes(_key: str = ApiKey):
+async def bgp_routes(_key: str = ViewerKey):
     """Return BGP IPv4 unicast routes.
 
     Queries the FRR RIB for all BGP-learned IPv4 unicast prefixes.
@@ -78,7 +78,7 @@ async def bgp_routes(_key: str = ApiKey):
 
 
 @router.get("/ospf/status", response_model=OspfStatusResponse)
-async def ospf_status(_key: str = ApiKey):
+async def ospf_status(_key: str = ViewerKey):
     """Return OSPF status.
 
     Queries ``vtysh -c 'show ip ospf json'`` and returns the router
@@ -98,7 +98,7 @@ async def ospf_status(_key: str = ApiKey):
 
 
 @router.get("/ospf/neighbors", response_model=OspfStatusResponse)
-async def ospf_neighbors(_key: str = ApiKey):
+async def ospf_neighbors(_key: str = ViewerKey):
     """Return the OSPF neighbor table.
 
     Lists all OSPF adjacencies with neighbor ID, state, dead timer,
@@ -118,7 +118,7 @@ async def ospf_neighbors(_key: str = ApiKey):
 
 
 @router.get("/ospf/routes", response_model=OspfRoutesResponse)
-async def ospf_routes(_key: str = ApiKey):
+async def ospf_routes(_key: str = ViewerKey):
     """Return OSPF routes from the routing table.
 
     Queries the FRR RIB for all OSPF-learned routes including intra-area,
@@ -143,7 +143,7 @@ async def ospf_routes(_key: str = ApiKey):
 
 
 @router.get("/rip/status", response_model=RipStatusResponse)
-async def rip_status(_key: str = ApiKey):
+async def rip_status(_key: str = ViewerKey):
     """Return RIP protocol status.
 
     Queries ``vtysh`` for the RIP version, configured networks,
@@ -163,7 +163,7 @@ async def rip_status(_key: str = ApiKey):
 
 
 @router.get("/rip/routes", response_model=RipRoutesResponse)
-async def rip_routes(_key: str = ApiKey):
+async def rip_routes(_key: str = ViewerKey):
     """Return RIP routing table entries.
 
     Lists all routes learned via the RIP protocol with their metric,
@@ -188,7 +188,7 @@ async def rip_routes(_key: str = ApiKey):
 
 
 @router.get("/bfd/peers", response_model=BfdPeersResponse)
-async def bfd_peers(_key: str = ApiKey):
+async def bfd_peers(_key: str = ViewerKey):
     """Return BFD peer status.
 
     Lists all Bidirectional Forwarding Detection peers with their
@@ -208,7 +208,7 @@ async def bfd_peers(_key: str = ApiKey):
 
 
 @router.get("/bfd/summary", response_model=BfdSummaryResponse)
-async def bfd_summary(_key: str = ApiKey):
+async def bfd_summary(_key: str = ViewerKey):
     """Return BFD counters summary.
 
     Provides aggregate BFD statistics including total peers, sessions

@@ -23,10 +23,17 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from . import __version__
-from .config import settings, check_config
+from .config import check_config, settings
 from .logging import setup_logging
-from .middleware import AuditLogMiddleware, RequestIdMiddleware, limiter
+from .middleware import (
+    AuditLogMiddleware,
+    MetricsMiddleware,
+    RequestIdMiddleware,
+    limiter,
+)
 from .routers import (
+    audit_router,
+    bulk_router,
     checkpoint,
     config_router,
     conntrack_router,
@@ -42,10 +49,12 @@ from .routers import (
     limits_router,
     lldp_router,
     logs,
+    metrics_router,
     monitoring_router,
     network,
     ntp,
     pado_router,
+    playbooks_router,
     pppoe,
     routing,
     scheduler,
@@ -55,6 +64,7 @@ from .routers import (
     system,
     traffic,
     vrrp_router,
+    ws,
     zone_router,
 )
 
@@ -96,6 +106,7 @@ app = FastAPI(
 )
 
 # Middleware (executes in reverse order — last added runs first) -------------
+app.add_middleware(MetricsMiddleware)
 app.add_middleware(AuditLogMiddleware)
 app.add_middleware(RequestIdMiddleware)
 app.state.limiter = limiter
@@ -103,8 +114,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Public (no auth) ----------------------------------------------------------
 app.include_router(health.router)
+app.include_router(metrics_router.router)
 
 # Protected (require API key) -----------------------------------------------
+app.include_router(audit_router.router)
+app.include_router(bulk_router.router)
 app.include_router(system.router)
 app.include_router(service.router)
 app.include_router(sessions.router)
@@ -131,5 +145,9 @@ app.include_router(zone_router.router)
 app.include_router(fw_groups_router.router)
 app.include_router(vrrp_router.router)
 app.include_router(monitoring_router.router)
+app.include_router(playbooks_router.router)
 app.include_router(diagnostics.router)
 app.include_router(logs.router)
+
+# WebSocket (authenticated via query parameter) ----------------------------
+app.include_router(ws.router)

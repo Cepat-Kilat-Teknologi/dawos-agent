@@ -104,6 +104,24 @@ def test_list_backups_with_files(tmp_path):
     assert result[0]["name"] > result[1]["name"]
 
 
+def test_list_backups_skips_non_matching_suffix(tmp_path):
+    """Files with suffixes other than .bak/.checkpoint are ignored."""
+    backup_dir = tmp_path / "accel-ppp.d"
+    backup_dir.mkdir()
+    (backup_dir / "accel-ppp.conf.20250101_120000.bak").write_text("[ok]")
+    (backup_dir / "accel-ppp.conf.20250101_120000.tmp").write_text("[skip]")
+    (backup_dir / "accel-ppp.conf.20250102_120000.checkpoint").write_text("[ok2]")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        result = config_manager.list_backups()
+
+    names = [r["name"] for r in result]
+    assert len(result) == 2
+    assert any(n.endswith(".bak") for n in names)
+    assert any(n.endswith(".checkpoint") for n in names)
+    assert not any(n.endswith(".tmp") for n in names)
+
+
 # ---------------------------------------------------------------------------
 # Diff
 # ---------------------------------------------------------------------------
@@ -330,3 +348,106 @@ async def test_auto_rollback_cancelled_error():
     await cancel_soon(task)
     # CancelledError path was hit — task is done
     assert task.done()
+
+
+# ---------------------------------------------------------------------------
+# read_backup
+# ---------------------------------------------------------------------------
+
+
+def test_read_backup(tmp_config):
+    conf, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    bak = backup_dir / "accel-ppp.conf.20250101_120000.bak"
+    bak.write_text("[ppp]\nverbose=1\n")
+
+    with (
+        patch.object(config_manager, "ACCEL_CONFIG", conf),
+        patch.object(config_manager, "BACKUP_DIR", backup_dir),
+    ):
+        content, size, created = config_manager.read_backup(bak.name)
+
+    assert "[ppp]" in content
+    assert size > 0
+    assert created  # non-empty ISO string
+
+
+def test_read_backup_not_found(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        with pytest.raises(FileNotFoundError, match="not found"):
+            config_manager.read_backup("nonexistent.bak")
+
+
+def test_read_backup_checkpoint(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    cp = backup_dir / "accel-ppp.conf.20250102_080000.checkpoint"
+    cp.write_text("[modules]\nlog_syslog\n")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        content, size, _ = config_manager.read_backup(cp.name)
+
+    assert "[modules]" in content
+    assert size > 0
+
+
+# ---------------------------------------------------------------------------
+# diff_two_revisions
+# ---------------------------------------------------------------------------
+
+
+def test_diff_two_revisions(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    a = backup_dir / "a.bak"
+    b = backup_dir / "b.bak"
+    a.write_text("[ppp]\nverbose=0\n")
+    b.write_text("[ppp]\nverbose=1\n")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        result = config_manager.diff_two_revisions("a.bak", "b.bak")
+
+    assert result["from_name"] == "a.bak"
+    assert result["to_name"] == "b.bak"
+    assert result["changed"] is True
+    assert "verbose" in result["diff"]
+
+
+def test_diff_two_revisions_identical(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    a = backup_dir / "a.bak"
+    b = backup_dir / "b.bak"
+    a.write_text("[ppp]\nverbose=1\n")
+    b.write_text("[ppp]\nverbose=1\n")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        result = config_manager.diff_two_revisions("a.bak", "b.bak")
+
+    assert result["changed"] is False
+    assert result["diff"] == ""
+
+
+def test_diff_two_revisions_first_not_found(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    b = backup_dir / "b.bak"
+    b.write_text("[ppp]\n")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        with pytest.raises(FileNotFoundError, match="missing.bak"):
+            config_manager.diff_two_revisions("missing.bak", "b.bak")
+
+
+def test_diff_two_revisions_second_not_found(tmp_config):
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    a = backup_dir / "a.bak"
+    a.write_text("[ppp]\n")
+
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        with pytest.raises(FileNotFoundError, match="missing.bak"):
+            config_manager.diff_two_revisions("a.bak", "missing.bak")

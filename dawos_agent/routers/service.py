@@ -15,7 +15,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import AdminKey, ViewerKey
 from ..config import settings
 from ..models.schemas import (
     CommandRequest,
@@ -71,7 +71,7 @@ def _is_allowed_command(cmd: str) -> bool:
 
 
 @router.get("/status", response_model=ServiceStatusResponse)
-async def service_status(_key: str = ApiKey):
+async def service_status(_key: str = ViewerKey):
     """Check accel-ppp service status.
 
     Queries ``systemctl`` for the accel-ppp unit's active state, PID,
@@ -137,7 +137,7 @@ async def service_status(_key: str = ApiKey):
 
 
 @router.post("/command", response_model=CommandResponse)
-async def run_command(req: CommandRequest, _key: str = ApiKey):
+async def run_command(req: CommandRequest, _key: str = AdminKey):
     """Execute a whitelisted accel-cmd command.
 
     Validates the command against the built-in whitelist before
@@ -168,7 +168,7 @@ async def run_command(req: CommandRequest, _key: str = ApiKey):
 
 
 @router.post("/{action}", response_model=ServiceActionResponse)
-async def service_action(action: ServiceAction, _key: str = ApiKey):
+async def service_action(action: ServiceAction, _key: str = AdminKey):
     """Start, stop, restart, or reload accel-ppp.
 
     For ``reload``, uses ``accel-cmd reload`` which is graceful and

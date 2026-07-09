@@ -13,7 +13,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     ConnectionLimitsResponse,
     InterfaceLimitResponse,
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/api/v1/limits", tags=["connection-limits"])
 
 
 @router.get("", response_model=ConnectionLimitsResponse)
-async def get_limits(_key: str = ApiKey):
+async def get_limits(_key: str = ViewerKey):
     """Read global session limits from the accel-ppp configuration.
 
     Returns the current ``max-sessions`` and ``max-starting`` values
@@ -86,7 +86,7 @@ async def set_limits(req: SetLimitsRequest, _key: str = ApiKey):
 
 
 @router.get("/interface/{name}", response_model=InterfaceLimitResponse)
-async def get_interface_limit(name: str, _key: str = ApiKey):
+async def get_interface_limit(name: str, _key: str = ViewerKey):
     """Read the PADI rate-limit for a specific PPPoE interface.
 
     Returns the ``padi-limit`` value configured for the named interface

@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     SchedulerJobRequest,
     SchedulerJobResponse,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/scheduler", tags=["scheduler"])
 
 
 @router.get("/jobs", response_model=SchedulerListResponse)
-async def list_jobs(_key: str = ApiKey):
+async def list_jobs(_key: str = ViewerKey):
     """List all scheduled jobs.
 
     Returns every registered job with its name, command, interval,

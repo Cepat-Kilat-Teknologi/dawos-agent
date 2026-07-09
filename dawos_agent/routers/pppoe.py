@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     MacFilterListResponse,
     MacFilterRequest,
@@ -35,7 +35,7 @@ router = APIRouter(prefix="/api/v1/pppoe", tags=["pppoe"])
 
 
 @router.get("/interfaces", response_model=PppoeInterfaceListResponse)
-async def list_pppoe_interfaces(_key: str = ApiKey):
+async def list_pppoe_interfaces(_key: str = ViewerKey):
     """List PPPoE listener interfaces from the accel-ppp config.
 
     Parses the ``[pppoe]`` section of ``/etc/accel-ppp.conf`` and
@@ -134,7 +134,7 @@ async def remove_pppoe_interface(name: str, _key: str = ApiKey):
 
 
 @router.get("/mac-filter", response_model=MacFilterListResponse)
-async def list_mac_filter(_key: str = ApiKey):
+async def list_mac_filter(_key: str = ViewerKey):
     """List the PPPoE MAC address filter entries.
 
     Runs ``accel-cmd pppoe mac-filter show`` and returns the raw

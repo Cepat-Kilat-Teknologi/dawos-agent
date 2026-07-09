@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     VrrpActionResponse,
     VrrpFailoverRequest,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/vrrp", tags=["vrrp"])
 
 
 @router.get("/status", response_model=VrrpStatusResponse)
-async def vrrp_status(_key: str = ApiKey):
+async def vrrp_status(_key: str = ViewerKey):
     """Return VRRP / keepalived status.
 
     Queries the keepalived daemon and returns the state of all
@@ -46,7 +46,7 @@ async def vrrp_status(_key: str = ApiKey):
 
 
 @router.get("/groups/{group}", response_model=VrrpGroupDetailResponse)
-async def vrrp_group_detail(group: str, _key: str = ApiKey):
+async def vrrp_group_detail(group: str, _key: str = ViewerKey):
     """Get detailed information for a specific VRRP group.
 
     Returns the group's current state, priority, virtual IP addresses,

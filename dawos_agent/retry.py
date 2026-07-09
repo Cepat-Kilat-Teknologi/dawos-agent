@@ -30,7 +30,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Callable, Awaitable, TypeVar
+from collections.abc import Awaitable
+from typing import Any, Callable, TypeVar
 
 log = logging.getLogger(__name__)
 
@@ -118,6 +119,12 @@ async def with_retry(
                     exc,
                     delay,
                 )
+                # Lazy import to avoid circular dependency at load time.
+                from .metrics import (  # pylint: disable=import-outside-toplevel
+                    ACCEL_CMD_RETRIES_TOTAL,
+                )
+
+                ACCEL_CMD_RETRIES_TOTAL.inc()
                 await asyncio.sleep(delay)
             else:
                 log.error(

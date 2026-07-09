@@ -187,7 +187,8 @@ async def add_members(name: str, elements: list[str]) -> dict:
     """
     elem_str = ", ".join(shlex.quote(e) for e in elements)
     out, rc = await _run(
-        f"nft add element {TABLE} {shlex.quote(name)} {{ {elem_str} }}", sudo=True,
+        f"nft add element {TABLE} {shlex.quote(name)} {{ {elem_str} }}",
+        sudo=True,
     )
     if rc != 0:
         raise RuntimeError(f"Failed to add members to '{name}': {out}")

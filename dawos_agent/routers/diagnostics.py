@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import DiagnosticsResponse
 from ..services import diagnostics
 
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/v1/diagnostics", tags=["diagnostics"])
 
 
 @router.get("/doctor", response_model=DiagnosticsResponse)
-async def doctor(_key: str = ApiKey):
+async def doctor(_key: str = ViewerKey):
     """Run all BNG health checks and return aggregated results.
 
     Executes a battery of diagnostic probes (service status, resource

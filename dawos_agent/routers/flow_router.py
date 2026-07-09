@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     FlowCollectorsResponse,
     FlowRestartResponse,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/flow", tags=["flow-accounting"])
 
 
 @router.get("/status", response_model=FlowStatusResponse)
-async def flow_status(_key: str = ApiKey):
+async def flow_status(_key: str = ViewerKey):
     """Retrieve the flow accounting daemon status.
 
     Checks whether the flow-accounting daemon is running and returns
@@ -46,7 +46,7 @@ async def flow_status(_key: str = ApiKey):
 
 
 @router.get("/collectors", response_model=FlowCollectorsResponse)
-async def flow_collectors(_key: str = ApiKey):
+async def flow_collectors(_key: str = ViewerKey):
     """List configured flow collectors.
 
     Returns all flow collector destinations (IP:port pairs) that the
@@ -66,7 +66,7 @@ async def flow_collectors(_key: str = ApiKey):
 
 
 @router.get("/stats", response_model=FlowStatsResponse)
-async def flow_stats(_key: str = ApiKey):
+async def flow_stats(_key: str = ViewerKey):
     """Retrieve flow accounting statistics.
 
     Returns counters for exported flows, active flows, and daemon

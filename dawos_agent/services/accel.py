@@ -61,6 +61,12 @@ async def _run_cmd_once(args: str) -> str:
     if proc.returncode != 0:
         err = stderr.decode().strip()
         log.warning("accel-cmd failed (rc=%d): %s", proc.returncode, err)
+        # Lazy import to avoid circular dependency at load time.
+        from ..metrics import (  # pylint: disable=import-outside-toplevel
+            ACCEL_CMD_ERRORS_TOTAL,
+        )
+
+        ACCEL_CMD_ERRORS_TOTAL.inc()
         raise RuntimeError(f"accel-cmd error: {err or output}")
 
     return output

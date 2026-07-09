@@ -37,6 +37,7 @@ dependencies = [
     "python-dotenv>=1,<2",
     "slowapi>=0.1.9,<1",
     "python-json-logger>=3,<5",
+    "prometheus-client>=0.20,<1",
     "eval_type_backport>=0.2.0; python_version < '3.10'",
 ]
 

@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import (
     LldpInterfaceResponse,
     LldpNeighborsResponse,
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/v1/lldp", tags=["lldp"])
 
 
 @router.get("/status", response_model=LldpStatusResponse)
-async def lldp_status(_key: str = ApiKey):
+async def lldp_status(_key: str = ViewerKey):
     """Retrieve the LLDP daemon status.
 
     Checks whether the lldpd process is running and returns its
@@ -45,7 +45,7 @@ async def lldp_status(_key: str = ApiKey):
 
 
 @router.get("/neighbors", response_model=LldpNeighborsResponse)
-async def lldp_neighbors(_key: str = ApiKey):
+async def lldp_neighbors(_key: str = ViewerKey):
     """List all discovered LLDP neighbors.
 
     Runs ``lldpctl`` and returns every neighbor across all interfaces,
@@ -65,7 +65,7 @@ async def lldp_neighbors(_key: str = ApiKey):
 
 
 @router.get("/neighbors/{name}", response_model=LldpInterfaceResponse)
-async def lldp_interface(name: str, _key: str = ApiKey):
+async def lldp_interface(name: str, _key: str = ViewerKey):
     """Get LLDP neighbors for a specific interface.
 
     Returns neighbor information discovered on the named network

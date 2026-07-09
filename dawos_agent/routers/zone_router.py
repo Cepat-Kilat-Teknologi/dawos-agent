@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     CreateZoneRequest,
     ZoneActionResponse,
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/zones", tags=["zone-firewall"])
 
 
 @router.get("", response_model=ZoneListResponse)
-async def list_zones(_key: str = ApiKey):
+async def list_zones(_key: str = ViewerKey):
     """List all firewall zones.
 
     Returns every configured zone with its name, bound interfaces,
@@ -47,7 +47,7 @@ async def list_zones(_key: str = ApiKey):
 
 
 @router.get("/{zone}", response_model=ZoneDetailResponse)
-async def zone_detail(zone: str, _key: str = ApiKey):
+async def zone_detail(zone: str, _key: str = ViewerKey):
     """Get detailed information and rules for a firewall zone.
 
     Returns the zone's bound interfaces, default policy, and all

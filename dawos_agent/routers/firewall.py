@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     BoxEgressRequest,
     BoxEgressResponse,
@@ -44,7 +44,7 @@ router = APIRouter(prefix="/api/v1/firewall", tags=["firewall"])
 
 
 @router.get("/status", response_model=FirewallStatus)
-async def firewall_status(_key: str = ApiKey):
+async def firewall_status(_key: str = ViewerKey):
     """Check the overall firewall status.
 
     Returns whether nftables is active, whether NAT masquerade is
@@ -63,7 +63,7 @@ async def firewall_status(_key: str = ApiKey):
 
 
 @router.get("/rules", response_model=FirewallRulesetResponse)
-async def list_rules(_key: str = ApiKey):
+async def list_rules(_key: str = ViewerKey):
     """List the full nftables ruleset.
 
     Runs ``nft list ruleset`` and returns the raw output along with
@@ -171,7 +171,7 @@ async def validate_ruleset(
 
 
 @router.get("/sysctl", response_model=SysctlResponse)
-async def get_sysctl(_key: str = ApiKey):
+async def get_sysctl(_key: str = ViewerKey):
     """Read current IP forwarding sysctl values.
 
     Returns the state of ``net.ipv4.ip_forward`` and
@@ -228,7 +228,7 @@ async def set_sysctl(req: SysctlUpdateRequest, _key: str = ApiKey):
 
 
 @router.get("/nat/egress", response_model=NatEgressMapResponse)
-async def get_egress_map(_key: str = ApiKey):
+async def get_egress_map(_key: str = ViewerKey):
     """List the per-subscriber egress NAT map.
 
     Returns all subscriber-IP to public-IP mappings currently active
@@ -334,7 +334,7 @@ async def remove_public_ip(public_ip: str, _key: str = ApiKey):
 
 
 @router.get("/nat/status", response_model=NatStatusResponse)
-async def full_nat_status(_key: str = ApiKey):
+async def full_nat_status(_key: str = ViewerKey):
     """Return comprehensive NAT status.
 
     Aggregates egress map entries, postrouting chain state, and
@@ -354,7 +354,7 @@ async def full_nat_status(_key: str = ApiKey):
 
 
 @router.get("/nat/box-egress", response_model=BoxEgressResponse)
-async def box_egress_status(_key: str = ApiKey):
+async def box_egress_status(_key: str = ViewerKey):
     """Check whether the accelnat table (box egress) is enabled.
 
     The accelnat table provides server-originated traffic NAT, separate
@@ -414,7 +414,7 @@ async def box_egress_toggle(req: BoxEgressRequest, _key: str = ApiKey):
 
 
 @router.get("/conntrack", response_model=ConntrackResponse)
-async def conntrack_status(_key: str = ApiKey):
+async def conntrack_status(_key: str = ViewerKey):
     """Return the ``nf_conntrack_max`` setting and current usage.
 
     Reads the kernel conntrack table size limit and the number of
@@ -465,7 +465,7 @@ async def conntrack_tune(
 
 
 @router.get("/snmp", response_model=SnmpStatusResponse)
-async def snmp_status(_key: str = ApiKey):
+async def snmp_status(_key: str = ViewerKey):
     """Check SNMP daemon status and UDP port availability.
 
     Verifies whether the SNMP daemon (snmpd) is running and whether

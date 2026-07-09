@@ -71,6 +71,25 @@ class Settings(BaseSettings):
         retry_delay: Base delay in seconds between retry attempts.
             Uses exponential backoff (1s, 2s, 4s, ...).  Override
             via ``DAWOS_RETRY_DELAY``.
+        api_keys_file: Optional path to a JSON file mapping API keys
+            to RBAC roles (``viewer``, ``operator``, ``admin``).
+            When set, the agent supports multiple keys with different
+            privilege levels.  The primary ``DAWOS_API_KEY`` always
+            retains admin access regardless of the keys file content.
+            Override via ``DAWOS_API_KEYS_FILE``.
+        audit_buffer_size: Maximum number of audit log entries kept in
+            the in-memory ring buffer.  Exposed via the ``GET
+            /api/v1/audit`` admin endpoint.  Older entries are
+            automatically evicted when the buffer is full.  Override
+            via ``DAWOS_AUDIT_BUFFER_SIZE``.
+        webhook_url: HTTP(S) URL to receive webhook notifications for
+            mutating API operations.  When empty (default), webhooks
+            are disabled.  Override via ``DAWOS_WEBHOOK_URL``.
+        webhook_secret: Shared secret used to compute HMAC-SHA256
+            signatures for webhook payloads.  The signature is sent
+            in the ``X-Dawos-Signature`` header so receivers can
+            verify authenticity.  When empty, the signature header
+            is omitted.  Override via ``DAWOS_WEBHOOK_SECRET``.
     """
 
     # --- agent identity -------------------------------------------------------
@@ -82,6 +101,7 @@ class Settings(BaseSettings):
 
     # --- auth -----------------------------------------------------------------
     api_key: str = "changeme-generate-a-strong-key"
+    api_keys_file: str = ""
 
     # --- accel-ppp paths ------------------------------------------------------
     accel_cmd: str = "/usr/bin/accel-cmd"
@@ -102,6 +122,13 @@ class Settings(BaseSettings):
     # --- retry ----------------------------------------------------------------
     retry_max: int = 3
     retry_delay: float = 1.0
+
+    # --- audit ----------------------------------------------------------------
+    audit_buffer_size: int = 1000
+
+    # --- webhooks -------------------------------------------------------------
+    webhook_url: str = ""
+    webhook_secret: str = ""
 
     model_config = {
         "env_prefix": "DAWOS_",
@@ -139,6 +166,10 @@ _SILENT_DEFAULTS: frozenset[str] = frozenset(
         "rate_limit",
         "retry_max",
         "retry_delay",
+        "api_keys_file",
+        "audit_buffer_size",
+        "webhook_url",
+        "webhook_secret",
     }
 )
 
@@ -169,7 +200,7 @@ def check_config(logger: logging.Logger | None = None) -> list[str]:
         msg = (
             "DAWOS_API_KEY is using the default placeholder — "
             "generate a strong key for production: "
-            "python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+            'python3 -c "import secrets; print(secrets.token_urlsafe(32))"'
         )
         messages.append(msg)
         if logger:

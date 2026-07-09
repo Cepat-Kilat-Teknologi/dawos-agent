@@ -12,7 +12,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import LogResponse
 from ..services import logs
 
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api/v1/logs", tags=["logs"])
 async def tail_logs(
     lines: int = 100,
     unit: str = "accel-ppp",
-    _key: str = ApiKey,
+    _key: str = ViewerKey,
 ):
     """Return the last N log lines from a systemd journal unit.
 
@@ -52,7 +52,7 @@ async def tail_logs(
 @router.get("/stream")
 async def stream_logs(
     unit: str = "accel-ppp",
-    _key: str = ApiKey,
+    _key: str = ViewerKey,
 ):
     """Stream live log lines via Server-Sent Events (SSE).
 

@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     DnsConfig,
     DnsResponse,
@@ -44,7 +44,7 @@ router = APIRouter(prefix="/api/v1/network", tags=["network"])
 
 
 @router.get("/interfaces", response_model=InterfaceListResponse)
-async def list_interfaces(_key: str = ApiKey):
+async def list_interfaces(_key: str = ViewerKey):
     """List all network interfaces with addresses and operational state.
 
     Runs ``ip -j addr show`` and returns a structured list of every
@@ -65,7 +65,7 @@ async def list_interfaces(_key: str = ApiKey):
 
 
 @router.get("/interfaces/{name}", response_model=InterfaceDetail)
-async def get_interface(name: str, _key: str = ApiKey):
+async def get_interface(name: str, _key: str = ViewerKey):
     """Get detailed information for a specific network interface.
 
     Returns full interface details including all assigned addresses,
@@ -173,7 +173,7 @@ async def delete_vlan(name: str, _key: str = ApiKey):
 
 
 @router.get("/vlans", response_model=VlanListResponse)
-async def list_vlans(_key: str = ApiKey):
+async def list_vlans(_key: str = ViewerKey):
     """Auto-detect all VLANs on the system.
 
     Uses kernel-level VLAN metadata (``ip -j -d link show type vlan``)
@@ -209,7 +209,7 @@ async def set_vlan_state(name: str, req: VlanStateRequest, _key: str = ApiKey):
 
 
 @router.get("/routes", response_model=RouteListResponse)
-async def list_routes(_key: str = ApiKey):
+async def list_routes(_key: str = ViewerKey):
     """Show the IPv4 routing table.
 
     Returns all IPv4 routes from the main routing table via
@@ -284,7 +284,7 @@ async def delete_route(req: RouteDeleteRequest, _key: str = ApiKey):
 
 
 @router.get("/dns", response_model=DnsResponse)
-async def get_dns(_key: str = ApiKey):
+async def get_dns(_key: str = ViewerKey):
     """Show current DNS configuration from ``/etc/resolv.conf``.
 
     Parses the resolver configuration file and returns the list of

@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     EventHistoryResponse,
     EventHookListResponse,
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/api/v1/events", tags=["event-handler"])
 
 
 @router.get("/hooks", response_model=EventHookListResponse)
-async def list_hooks(_key: str = ApiKey):
+async def list_hooks(_key: str = ViewerKey):
     """List all registered event hooks.
 
     Returns every hook currently registered in the event handler,
@@ -114,7 +114,7 @@ async def fire_event(req: FireEventRequest, _key: str = ApiKey):
 
 
 @router.get("/history", response_model=EventHistoryResponse)
-async def event_history(_key: str = ApiKey):
+async def event_history(_key: str = ViewerKey):
     """Retrieve the event history log.
 
     Returns a chronological list of all events that have been fired,

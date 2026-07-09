@@ -87,9 +87,7 @@ async def readiness():
     except (asyncio.TimeoutError, FileNotFoundError, OSError) as exc:
         detail = str(exc)
 
-    checks.append(
-        {"service": "accel-ppp", "reachable": accel_ok, "detail": detail}
-    )
+    checks.append({"service": "accel-ppp", "reachable": accel_ok, "detail": detail})
 
     ready = all(c["reachable"] for c in checks)
     body = ReadinessResponse(ready=ready, checks=checks)

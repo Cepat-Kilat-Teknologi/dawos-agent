@@ -14,8 +14,8 @@ import asyncio
 import logging
 import socket
 
-from ..constants import CONNTRACK_RECOMMENDED_MIN, SNMPD_PORT
 from ..config import settings
+from ..constants import CONNTRACK_RECOMMENDED_MIN, SNMPD_PORT
 
 log = logging.getLogger(__name__)
 

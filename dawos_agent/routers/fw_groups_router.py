@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     AddMembersRequest,
     CreateGroupRequest,
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/firewall/groups", tags=["firewall-groups"])
 
 
 @router.get("", response_model=FirewallGroupListResponse)
-async def list_groups(_key: str = ApiKey):
+async def list_groups(_key: str = ViewerKey):
     """List all firewall groups.
 
     Returns every named nftables set currently defined, including the

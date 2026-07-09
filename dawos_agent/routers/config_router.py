@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import AdminKey, ViewerKey
 from ..config import settings
 from ..models.schemas import (
     ConfigResponse,
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/config", tags=["config"])
 
 
 @router.get("", response_model=ConfigResponse)
-async def get_config(_key: str = ApiKey):
+async def get_config(_key: str = ViewerKey):
     """Read the current accel-ppp configuration file.
 
     Returns the full text content of the configuration file along with
@@ -54,7 +54,7 @@ async def get_config(_key: str = ApiKey):
 
 
 @router.put("", response_model=ConfigUpdateResponse)
-async def update_config(req: ConfigUpdateRequest, _key: str = ApiKey):
+async def update_config(req: ConfigUpdateRequest, _key: str = AdminKey):
     """Update the accel-ppp configuration file.
 
     Writes the provided content to the configuration file.  Optionally
@@ -103,7 +103,7 @@ async def update_config(req: ConfigUpdateRequest, _key: str = ApiKey):
 
 
 @router.get("/backups")
-async def list_backups(_key: str = ApiKey):
+async def list_backups(_key: str = ViewerKey):
     """List available configuration backups.
 
     Returns a list of all ``.bak`` and ``.checkpoint`` files in the

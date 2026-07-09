@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     SessionListResponse,
     SessionStatsResponse,
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/v1/sessions", tags=["sessions"])
 
 
 @router.get("", response_model=SessionListResponse)
-async def list_sessions(_key: str = ApiKey):
+async def list_sessions(_key: str = ViewerKey):
     """List all active PPPoE sessions.
 
     Runs ``accel-cmd show sessions`` and returns a structured list
@@ -44,7 +44,7 @@ async def list_sessions(_key: str = ApiKey):
 
 
 @router.get("/stats", response_model=SessionStatsResponse)
-async def session_stats(_key: str = ApiKey):
+async def session_stats(_key: str = ViewerKey):
     """Return session statistics and IP pool usage.
 
     Combines ``accel-cmd show stat`` and ``accel-cmd show ippool``
@@ -75,7 +75,7 @@ async def session_stats(_key: str = ApiKey):
 
 
 @router.get("/find/{username}", response_model=SessionListResponse)
-async def find_session(username: str, _key: str = ApiKey):
+async def find_session(username: str, _key: str = ViewerKey):
     """Find sessions for a specific username.
 
     Runs ``accel-cmd show sessions match username ^<user>$`` with

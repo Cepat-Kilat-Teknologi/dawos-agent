@@ -319,3 +319,123 @@ async def test_checkpoint_requires_auth(client, bad_headers):
         headers=bad_headers,
     )
     assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Revision content
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_revision_content(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.read_backup",
+        return_value=("[ppp]\nverbose=1\n", 18, "2025-01-01T12:00:00"),
+    ):
+        resp = await client.get(
+            "/api/v1/config/revisions/accel-ppp.conf.20250101_120000.bak/content",
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["name"] == "accel-ppp.conf.20250101_120000.bak"
+    assert data["size"] == 18
+    assert data["created"] == "2025-01-01T12:00:00"
+    assert "[ppp]" in data["content"]
+
+
+@pytest.mark.asyncio
+async def test_revision_content_not_found(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.read_backup",
+        side_effect=FileNotFoundError("not found"),
+    ):
+        resp = await client.get(
+            "/api/v1/config/revisions/missing.bak/content",
+            headers=headers,
+        )
+
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_revision_content_checkpoint(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.read_backup",
+        return_value=("[modules]\n", 10, "2025-01-02T08:00:00"),
+    ):
+        resp = await client.get(
+            "/api/v1/config/revisions/accel-ppp.conf.20250102_080000.checkpoint/content",
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["size"] == 10
+
+
+# ---------------------------------------------------------------------------
+# Compare two revisions
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_compare_revisions(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.diff_two_revisions",
+        return_value={
+            "from_name": "a.bak",
+            "to_name": "b.bak",
+            "diff": "-old\n+new\n",
+            "changed": True,
+        },
+    ):
+        resp = await client.get(
+            "/api/v1/config/compare",
+            params={"from_name": "a.bak", "to_name": "b.bak"},
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["from_name"] == "a.bak"
+    assert data["to_name"] == "b.bak"
+    assert data["changed"] is True
+    assert "-old" in data["diff"]
+
+
+@pytest.mark.asyncio
+async def test_compare_revisions_identical(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.diff_two_revisions",
+        return_value={
+            "from_name": "a.bak",
+            "to_name": "b.bak",
+            "diff": "",
+            "changed": False,
+        },
+    ):
+        resp = await client.get(
+            "/api/v1/config/compare",
+            params={"from_name": "a.bak", "to_name": "b.bak"},
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["changed"] is False
+
+
+@pytest.mark.asyncio
+async def test_compare_revisions_not_found(client, headers):
+    with patch(
+        "dawos_agent.routers.checkpoint.config_manager.diff_two_revisions",
+        side_effect=FileNotFoundError("Revision not found: missing.bak"),
+    ):
+        resp = await client.get(
+            "/api/v1/config/compare",
+            params={"from_name": "missing.bak", "to_name": "b.bak"},
+            headers=headers,
+        )
+
+    assert resp.status_code == 404
+    assert "missing.bak" in resp.json()["detail"]

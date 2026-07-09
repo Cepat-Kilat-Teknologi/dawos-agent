@@ -525,16 +525,20 @@ class InterfaceConfigRequest(BaseModel):
     """
 
     address: str | None = Field(
-        None, description="CIDR notation, e.g. 10.0.0.1/24",
+        None,
+        description="CIDR notation, e.g. 10.0.0.1/24",
         pattern=_RE_SAFE_IP,
     )
     remove_address: str | None = Field(
-        None, description="CIDR address to remove",
+        None,
+        description="CIDR address to remove",
         pattern=_RE_SAFE_IP,
     )
     mtu: int | None = Field(None, ge=68, le=65535, description="MTU value 68-65535")
     state: str | None = Field(
-        None, description="up or down", pattern=r"^(up|down)$",
+        None,
+        description="up or down",
+        pattern=r"^(up|down)$",
     )
 
 
@@ -566,10 +570,13 @@ class VlanCreateRequest(BaseModel):
         address: Optional IP address in CIDR notation to assign immediately.
     """
 
-    parent: str = Field(description="Parent interface, e.g. eth0", pattern=_RE_SAFE_IFACE)
+    parent: str = Field(
+        description="Parent interface, e.g. eth0", pattern=_RE_SAFE_IFACE
+    )
     vlan_id: int = Field(ge=1, le=4094, description="VLAN ID 1-4094")
     address: str | None = Field(
-        None, description="Optional IP in CIDR notation",
+        None,
+        description="Optional IP in CIDR notation",
         pattern=_RE_SAFE_IP,
     )
 
@@ -638,7 +645,8 @@ class RouteAddRequest(BaseModel):
     """
 
     destination: str = Field(
-        description="CIDR or 'default'", pattern=_RE_SAFE_ROUTE_DST,
+        description="CIDR or 'default'",
+        pattern=_RE_SAFE_ROUTE_DST,
     )
     gateway: str = Field(pattern=_RE_SAFE_IP)
     device: str | None = Field(None, pattern=_RE_SAFE_IFACE)
@@ -655,7 +663,8 @@ class RouteDeleteRequest(BaseModel):
     """
 
     destination: str = Field(
-        description="CIDR or 'default'", pattern=_RE_SAFE_ROUTE_DST,
+        description="CIDR or 'default'",
+        pattern=_RE_SAFE_ROUTE_DST,
     )
     gateway: str | None = Field(None, pattern=_RE_SAFE_IP)
 
@@ -935,7 +944,8 @@ class PppoeAddRequest(BaseModel):
         pattern=_RE_SAFE_IFACE,
     )
     options: str = Field(
-        "", description="Optional: comma-separated options like padi-limit=0",
+        "",
+        description="Optional: comma-separated options like padi-limit=0",
         pattern=_RE_SAFE_OPTIONS,
     )
 
@@ -998,8 +1008,6 @@ class MacFilterResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Traffic / SSE
 # ---------------------------------------------------------------------------
-
-
 
 
 class QueueStats(BaseModel):
@@ -1269,6 +1277,38 @@ class CheckpointRollbackResponse(BaseModel):
     safety_backup: str = ""
 
 
+class RevisionContentResponse(BaseModel):
+    """Content of a specific configuration revision.
+
+    Attributes:
+        name: Filename of the revision.
+        size: File size in bytes.
+        created: ISO-format creation timestamp.
+        content: Full text content of the revision file.
+    """
+
+    name: str = ""
+    size: int = 0
+    created: str = ""
+    content: str = ""
+
+
+class RevisionCompareResponse(BaseModel):
+    """Unified diff between two named configuration revisions.
+
+    Attributes:
+        from_name: Filename of the first (older) revision.
+        to_name: Filename of the second (newer) revision.
+        diff: Unified diff output (empty string if no differences).
+        changed: True if the two revisions differ.
+    """
+
+    from_name: str = ""
+    to_name: str = ""
+    diff: str = ""
+    changed: bool = False
+
+
 class GuardedApplyRequest(BaseModel):
     """Request to apply a new configuration with automatic rollback protection.
 
@@ -1488,7 +1528,8 @@ class NatPublicIpRequest(BaseModel):
 
     public_ip: str = Field(pattern=_RE_SAFE_IP)
     interface: str = Field(
-        "", description="Uplink interface (auto-detected if empty)",
+        "",
+        description="Uplink interface (auto-detected if empty)",
         pattern=r"^[a-zA-Z0-9._-]*$",
     )
 
@@ -1969,7 +2010,9 @@ class RestartSessionRequest(BaseModel):
     """
 
     username: str = Field(
-        ..., description="PPPoE username to restart", pattern=_RE_SAFE_NAME,
+        ...,
+        description="PPPoE username to restart",
+        pattern=_RE_SAFE_NAME,
     )
 
 
@@ -1997,7 +2040,9 @@ class DropByMacRequest(BaseModel):
     """
 
     mac: str = Field(
-        ..., description="MAC address (calling-station-id)", pattern=_RE_SAFE_MAC,
+        ...,
+        description="MAC address (calling-station-id)",
+        pattern=_RE_SAFE_MAC,
     )
 
 
@@ -2139,7 +2184,9 @@ class AddPoolRequest(BaseModel):
 
     name: str = Field(..., description="Pool name label", pattern=_RE_SAFE_NAME)
     ip_range: str = Field(
-        ..., description="CIDR range, e.g. 10.0.0.0/24", pattern=_RE_SAFE_IP,
+        ...,
+        description="CIDR range, e.g. 10.0.0.0/24",
+        pattern=_RE_SAFE_IP,
     )
 
 
@@ -2450,7 +2497,9 @@ class FireEventRequest(BaseModel):
     """
 
     event: str = Field(
-        ..., description="Event type to fire", pattern=_RE_SAFE_NAME,
+        ...,
+        description="Event type to fire",
+        pattern=_RE_SAFE_NAME,
     )
     payload: dict = {}
 
@@ -2625,7 +2674,8 @@ class CreateGroupRequest(BaseModel):
 
     name: str = Field(..., description="Group name", pattern=_RE_SAFE_IFACE)
     group_type: str = Field(
-        ..., description="address, network, or port",
+        ...,
+        description="address, network, or port",
         pattern=r"^(address|network|port)$",
     )
     elements: list[str] = []
@@ -2752,7 +2802,9 @@ class VrrpFailoverRequest(BaseModel):
     """
 
     group: str = Field(
-        ..., description="VRRP group name", pattern=_RE_SAFE_NAME,
+        ...,
+        description="VRRP group name",
+        pattern=_RE_SAFE_NAME,
     )
 
 
@@ -2838,7 +2890,9 @@ class ConfigureExporterRequest(BaseModel):
     """
 
     service: str = Field(
-        ..., description="Exporter service name", pattern=_RE_SAFE_IFACE,
+        ...,
+        description="Exporter service name",
+        pattern=_RE_SAFE_IFACE,
     )
     enable: bool = True
 
@@ -2871,3 +2925,221 @@ class ExporterRestartResponse(BaseModel):
     success: bool = False
     service: str = ""
     message: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Audit
+# ---------------------------------------------------------------------------
+
+
+class AuditEntry(BaseModel):
+    """A single audit log entry from the in-memory ring buffer.
+
+    Attributes:
+        timestamp: ISO-8601 UTC timestamp of the request.
+        method: HTTP method (POST, PUT, PATCH, DELETE).
+        path: Request path (no query string).
+        client_ip: Remote client IP address.
+        request_id: Trace ID assigned by the request-ID middleware.
+        role: RBAC role of the caller or ``-`` if unavailable.
+        status: HTTP response status code.
+        duration_ms: Response time in milliseconds.
+    """
+
+    timestamp: str = ""
+    method: str = ""
+    path: str = ""
+    client_ip: str = ""
+    request_id: str = ""
+    role: str = ""
+    status: int = 0
+    duration_ms: float = 0.0
+
+
+class AuditListResponse(BaseModel):
+    """Response for the audit log listing endpoint.
+
+    Attributes:
+        count: Number of entries returned.
+        buffer_size: Maximum capacity of the ring buffer.
+        entries: Audit log entries, newest first.
+    """
+
+    count: int = 0
+    buffer_size: int = 0
+    entries: list[AuditEntry] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Playbooks
+# ---------------------------------------------------------------------------
+
+
+class PlaybookInfo(BaseModel):
+    """Metadata for a single available playbook.
+
+    Attributes:
+        name: Machine-friendly playbook identifier.
+        description: Human-readable summary of what the playbook does.
+        role_required: Minimum RBAC role needed to run this playbook.
+    """
+
+    name: str = ""
+    description: str = ""
+    role_required: str = ""
+
+
+class PlaybookListResponse(BaseModel):
+    """Response for the playbook listing endpoint.
+
+    Attributes:
+        count: Number of available playbooks.
+        playbooks: List of playbook metadata.
+    """
+
+    count: int = 0
+    playbooks: list[PlaybookInfo] = Field(default_factory=list)
+
+
+class PlaybookStep(BaseModel):
+    """Result of a single step within a playbook execution.
+
+    Attributes:
+        step: Human-readable step name.
+        success: Whether the step completed without error.
+        detail: Outcome description or error message.
+    """
+
+    step: str = ""
+    success: bool = False
+    detail: str = ""
+
+
+class PlaybookRunResponse(BaseModel):
+    """Response for a playbook execution request.
+
+    Attributes:
+        playbook: Name of the playbook that was executed.
+        success: True if all steps completed successfully.
+        steps: Ordered list of step results.
+    """
+
+    playbook: str = ""
+    success: bool = False
+    steps: list[PlaybookStep] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Bulk operations
+# ---------------------------------------------------------------------------
+
+#: Hard ceiling for items in a single bulk request to prevent abuse.
+BULK_MAX_ITEMS = 100
+
+
+class BulkTerminateRequest(BaseModel):
+    """Request to terminate multiple subscriber sessions in one call.
+
+    Attributes:
+        usernames: List of subscriber usernames to disconnect.
+    """
+
+    usernames: list[str] = Field(
+        min_length=1,
+        max_length=BULK_MAX_ITEMS,
+        description="Usernames to terminate (1-100)",
+    )
+
+    @field_validator("usernames")
+    @classmethod
+    def _validate_names(cls, v: list[str]) -> list[str]:
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_NAME)
+        for name in v:
+            if not pat.match(name):
+                raise ValueError(f"Invalid username: {name}")
+        return v
+
+
+class BulkRateLimitItem(BaseModel):
+    """A single username-rate pair for bulk rate-limit changes.
+
+    Attributes:
+        username: Subscriber whose shaper should be changed.
+        rate: Bandwidth string in upload/download format.
+    """
+
+    username: str = Field(pattern=_RE_SAFE_NAME)
+    rate: str = Field(pattern=_RE_SAFE_RATE)
+
+
+class BulkRateLimitRequest(BaseModel):
+    """Request to change rate limits for multiple subscribers.
+
+    Attributes:
+        items: List of username-rate pairs to apply.
+    """
+
+    items: list[BulkRateLimitItem] = Field(
+        min_length=1,
+        max_length=BULK_MAX_ITEMS,
+        description="Rate-limit changes to apply (1-100)",
+    )
+
+
+class BulkShaperRestoreRequest(BaseModel):
+    """Request to restore original RADIUS-assigned shapers.
+
+    Attributes:
+        usernames: List of subscriber usernames to restore.
+    """
+
+    usernames: list[str] = Field(
+        min_length=1,
+        max_length=BULK_MAX_ITEMS,
+        description="Usernames to restore (1-100)",
+    )
+
+    @field_validator("usernames")
+    @classmethod
+    def _validate_names(cls, v: list[str]) -> list[str]:
+        import re  # pylint: disable=import-outside-toplevel
+
+        pat = re.compile(_RE_SAFE_NAME)
+        for name in v:
+            if not pat.match(name):
+                raise ValueError(f"Invalid username: {name}")
+        return v
+
+
+class BulkResultItem(BaseModel):
+    """Outcome of a single item within a bulk operation.
+
+    Attributes:
+        target: Identifier of the item (e.g. username).
+        success: Whether this individual operation succeeded.
+        message: Human-readable outcome or error detail.
+    """
+
+    target: str = ""
+    success: bool = False
+    message: str = ""
+
+
+class BulkOperationResponse(BaseModel):
+    """Aggregated result of a bulk operation.
+
+    Attributes:
+        operation: Name of the bulk operation performed.
+        total: Total number of items submitted.
+        succeeded: Count of items that completed successfully.
+        failed: Count of items that failed.
+        results: Per-item outcome details.
+    """
+
+    operation: str = ""
+    total: int = 0
+    succeeded: int = 0
+    failed: int = 0
+    results: list[BulkResultItem] = Field(default_factory=list)

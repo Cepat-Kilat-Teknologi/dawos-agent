@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     DhcpActionResponse,
     DhcpLeasesResponse,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/dhcp", tags=["dhcp"])
 
 
 @router.get("/status", response_model=DhcpStatusResponse)
-async def dhcp_status(_key: str = ApiKey):
+async def dhcp_status(_key: str = ViewerKey):
     """Retrieve the current DHCP server status.
 
     Checks whether the ISC DHCP server process is active and returns
@@ -46,7 +46,7 @@ async def dhcp_status(_key: str = ApiKey):
 
 
 @router.get("/leases", response_model=DhcpLeasesResponse)
-async def dhcp_leases(_key: str = ApiKey):
+async def dhcp_leases(_key: str = ViewerKey):
     """List all active DHCP leases.
 
     Parses the DHCP lease file and returns currently active leases
@@ -66,7 +66,7 @@ async def dhcp_leases(_key: str = ApiKey):
 
 
 @router.get("/relay/status", response_model=DhcpRelayStatusResponse)
-async def relay_status(_key: str = ApiKey):
+async def relay_status(_key: str = ViewerKey):
     """Retrieve the current DHCP relay agent status.
 
     Checks whether the DHCP relay process is active and returns its

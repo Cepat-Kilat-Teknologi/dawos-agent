@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     ConfigureExporterRequest,
     ExporterActionResponse,
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/monitoring", tags=["monitoring"])
 
 
 @router.get("/status", response_model=MonitoringStatusResponse)
-async def monitoring_status(_key: str = ApiKey):
+async def monitoring_status(_key: str = ViewerKey):
     """Retrieve the monitoring stack status.
 
     Returns the operational state of all configured monitoring
@@ -47,7 +47,7 @@ async def monitoring_status(_key: str = ApiKey):
 
 
 @router.get("/metrics/{service}", response_model=ExporterMetricsResponse)
-async def exporter_metrics(service: str, _key: str = ApiKey):
+async def exporter_metrics(service: str, _key: str = ViewerKey):
     """Get metrics from a specific monitoring exporter.
 
     Scrapes the named exporter's metrics endpoint and returns the

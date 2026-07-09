@@ -12,7 +12,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     QueueStats,
     RateLimitRequest,
@@ -34,7 +34,7 @@ router = APIRouter(prefix="/api/v1/traffic", tags=["traffic"])
 async def stream_user_traffic(
     username: str,
     interval: float = 2.0,
-    _key: str = ApiKey,
+    _key: str = ViewerKey,
 ):
     """Stream per-user throughput via Server-Sent Events (SSE).
 
@@ -59,7 +59,7 @@ async def stream_user_traffic(
 @router.get("/stream")
 async def stream_aggregate_traffic(
     interval: float = 2.0,
-    _key: str = ApiKey,
+    _key: str = ViewerKey,
 ):
     """Stream aggregate throughput via Server-Sent Events (SSE).
 
@@ -85,7 +85,7 @@ async def stream_aggregate_traffic(
 
 
 @router.get("/queue/{username}", response_model=QueueStats)
-async def queue_stats(username: str, _key: str = ApiKey):
+async def queue_stats(username: str, _key: str = ViewerKey):
     """Return tc shaper queue statistics for a user's session.
 
     Queries the Linux tc subsystem for the traffic-control qdisc

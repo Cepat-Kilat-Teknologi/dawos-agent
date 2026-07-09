@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from ..auth import ApiKey
+from ..auth import ViewerKey
 from ..models.schemas import MetricsResponse, SystemInfoResponse
 from ..services.system import get_metrics, get_system_info
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/v1/system", tags=["system"])
 
 
 @router.get("/info", response_model=SystemInfoResponse)
-async def system_info(_key: str = ApiKey):
+async def system_info(_key: str = ViewerKey):
     """Return full system information.
 
     Collects hardware details (CPU model, core count, total RAM),
@@ -31,7 +31,7 @@ async def system_info(_key: str = ApiKey):
 
 
 @router.get("/metrics", response_model=MetricsResponse)
-async def system_metrics(_key: str = ApiKey):
+async def system_metrics(_key: str = ViewerKey):
     """Return a quick resource-usage metrics snapshot.
 
     Samples current CPU utilisation, memory usage, and disk usage

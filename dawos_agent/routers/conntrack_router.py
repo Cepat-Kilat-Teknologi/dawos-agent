@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     ConntrackConfigResponse,
     ConntrackHelperResponse,
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/api/v1/conntrack", tags=["conntrack"])
 
 
 @router.get("/config", response_model=ConntrackConfigResponse)
-async def get_config(_key: str = ApiKey):
+async def get_config(_key: str = ViewerKey):
     """Read current conntrack table configuration.
 
     Returns the ``nf_conntrack_max`` value, current entry count, and
@@ -74,7 +74,7 @@ async def set_table_size(req: ConntrackTableSizeRequest, _key: str = ApiKey):
 
 
 @router.get("/timeouts", response_model=ConntrackTimeoutsResponse)
-async def get_timeouts(_key: str = ApiKey):
+async def get_timeouts(_key: str = ViewerKey):
     """Read all conntrack protocol timeouts.
 
     Returns the current timeout values for all tracked protocols
@@ -121,7 +121,7 @@ async def set_timeout(req: ConntrackTimeoutRequest, _key: str = ApiKey):
 
 
 @router.get("/helpers", response_model=ConntrackHelpersListResponse)
-async def list_helpers(_key: str = ApiKey):
+async def list_helpers(_key: str = ViewerKey):
     """List loaded conntrack helper (ALG) modules.
 
     Enumerates kernel modules that provide application-layer gateway
@@ -144,7 +144,7 @@ async def list_helpers(_key: str = ApiKey):
 
 
 @router.get("/profiles")
-async def list_profiles(_key: str = ApiKey):
+async def list_profiles(_key: str = ViewerKey):
     """List available conntrack tuning profiles.
 
     Returns the names of predefined timeout profiles (e.g. ``bng``,

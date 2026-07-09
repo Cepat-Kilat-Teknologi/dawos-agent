@@ -13,7 +13,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     AddPoolRequest,
     IpPoolListResponse,
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1/ip-pool", tags=["ip-pool"])
 
 
 @router.get("", response_model=IpPoolListResponse)
-async def list_pools(_key: str = ApiKey):
+async def list_pools(_key: str = ViewerKey):
     """List all configured IP address pools.
 
     Reads the ``[ip-pool]`` section of the accel-ppp configuration
@@ -115,7 +115,7 @@ async def remove_pool(name: str, _key: str = ApiKey):
 
 
 @router.get("/usage", response_model=PoolUsageResponse)
-async def pool_usage(_key: str = ApiKey):
+async def pool_usage(_key: str = ViewerKey):
     """Get real-time IP pool utilisation statistics.
 
     Queries accel-ppp via ``accel-cmd show ippool`` and returns per-pool

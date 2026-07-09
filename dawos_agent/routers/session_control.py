@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     DropByMacRequest,
     DropByMacResponse,
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1/sessions/control", tags=["session-control"])
 
 
 @router.get("/by-sid/{sid}", response_model=SessionByIdResponse)
-async def get_session_by_sid(sid: str, _key: str = ApiKey):
+async def get_session_by_sid(sid: str, _key: str = ViewerKey):
     """Look up a PPPoE session by accel-ppp session ID.
 
     Searches active sessions for the given SID and returns the
@@ -55,7 +55,7 @@ async def get_session_by_sid(sid: str, _key: str = ApiKey):
 
 
 @router.get("/by-ip/{ip}", response_model=SessionByIdResponse)
-async def get_session_by_ip(ip: str, _key: str = ApiKey):
+async def get_session_by_ip(ip: str, _key: str = ViewerKey):
     """Look up a PPPoE session by assigned IP address.
 
     Searches active sessions for the given IP and returns the
@@ -81,7 +81,7 @@ async def get_session_by_ip(ip: str, _key: str = ApiKey):
 
 
 @router.get("/snapshot/{username}", response_model=SessionSnapshotResponse)
-async def session_snapshot(username: str, _key: str = ApiKey):
+async def session_snapshot(username: str, _key: str = ViewerKey):
     """Get a detailed session snapshot with traffic counters.
 
     Returns comprehensive session information including interface

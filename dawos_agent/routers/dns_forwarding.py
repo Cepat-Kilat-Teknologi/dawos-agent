@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey
+from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     DnsForwardingConfigResponse,
     DnsForwardingFlushResponse,
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/dns/forwarding", tags=["dns-forwarding"])
 
 
 @router.get("/status", response_model=DnsForwardingStatusResponse)
-async def dns_fwd_status(_key: str = ApiKey):
+async def dns_fwd_status(_key: str = ViewerKey):
     """Check the dnsmasq service status.
 
     Verifies whether the dnsmasq process is running and returns its
@@ -46,7 +46,7 @@ async def dns_fwd_status(_key: str = ApiKey):
 
 
 @router.get("/config", response_model=DnsForwardingConfigResponse)
-async def dns_fwd_config(_key: str = ApiKey):
+async def dns_fwd_config(_key: str = ViewerKey):
     """Read the current DNS forwarding configuration.
 
     Returns the list of upstream DNS servers and the configured cache
