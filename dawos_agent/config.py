@@ -18,6 +18,8 @@ codebase:
 
 from __future__ import annotations
 
+import logging
+import os
 import socket
 from pathlib import Path
 
@@ -115,3 +117,74 @@ settings = Settings()
 # Derived paths
 ACCEL_CONFIG = Path(settings.accel_config_path)
 BACKUP_DIR = ACCEL_CONFIG.parent / "accel-ppp.d"
+
+# ---------------------------------------------------------------------------
+# Config completeness check
+# ---------------------------------------------------------------------------
+
+# Settings that are safe to leave at defaults and should NOT trigger warnings.
+# These have sensible defaults that work out-of-the-box on standard installs.
+_SILENT_DEFAULTS: frozenset[str] = frozenset(
+    {
+        "host",
+        "port",
+        "node_name",
+        "accel_cmd",
+        "accel_cli_port",
+        "accel_config_path",
+        "accel_service_name",
+        "log_level",
+        "log_format",
+        "ping_target",
+        "rate_limit",
+        "retry_max",
+        "retry_delay",
+    }
+)
+
+
+def check_config(logger: logging.Logger | None = None) -> list[str]:
+    """Check configuration completeness and return a list of warnings.
+
+    Inspects the active :data:`settings` singleton and reports:
+
+    * **Security warning** if ``DAWOS_API_KEY`` is still the insecure
+      default placeholder.
+    * **Info messages** for optional settings that haven't been
+      explicitly set via environment variables — helps operators
+      discover new configuration knobs after an upgrade.
+
+    Args:
+        logger: If provided, warnings and info messages are emitted
+            via this logger.  If ``None``, the function only returns
+            the message list (useful for testing).
+
+    Returns:
+        A list of human-readable diagnostic strings.
+    """
+    messages: list[str] = []
+
+    # Critical: API key must be changed in production
+    if settings.api_key == "changeme-generate-a-strong-key":
+        msg = (
+            "DAWOS_API_KEY is using the default placeholder — "
+            "generate a strong key for production: "
+            "python3 -c \"import secrets; print(secrets.token_urlsafe(32))\""
+        )
+        messages.append(msg)
+        if logger:
+            logger.warning(msg)
+
+    # Informational: detect settings that could be customised
+    env_prefix = Settings.model_config.get("env_prefix", "DAWOS_")
+    for field_name in Settings.model_fields:  # pylint: disable=not-an-iterable
+        if field_name in _SILENT_DEFAULTS or field_name == "api_key":
+            continue
+        env_var = f"{env_prefix}{field_name.upper()}"
+        if env_var not in os.environ:
+            msg = f"Optional setting {env_var} not set — using default"
+            messages.append(msg)
+            if logger:
+                logger.info(msg)
+
+    return messages

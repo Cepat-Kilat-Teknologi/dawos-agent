@@ -23,7 +23,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from . import __version__
-from .config import settings
+from .config import settings, check_config
 from .logging import setup_logging
 from .middleware import AuditLogMiddleware, RequestIdMiddleware, limiter
 from .routers import (
@@ -81,6 +81,7 @@ async def lifespan(
         settings.port,
         settings.node_name,
     )
+    check_config(logger=log)
     yield
     log.info("dawos-agent shutting down")
 
