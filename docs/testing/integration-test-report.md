@@ -1,7 +1,7 @@
 # Integration Test Report
 
 **Project:** dawos-agent + dawos-cli
-**Version:** dawos-agent 0.2.0 / dawos-cli 0.3.0
+**Version:** dawos-agent 0.3.0 / dawos-cli 0.3.0
 **Date:** 2026-07-08 (Phase 1–4), 2026-07-09 (Phase 5)
 **Environment:** Lab BNG node (10.0.0.1)
 **Tester:** Manual — CLI commands + direct curl against live hardware
