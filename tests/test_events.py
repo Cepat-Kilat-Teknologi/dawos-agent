@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-
 import pytest
 
 from dawos_agent.events import CHANNELS, Event, EventBus, bus
@@ -164,4 +162,4 @@ class TestModuleSingleton:
 
     def test_channels_constant(self):
         """CHANNELS contains the expected event channel names."""
-        assert CHANNELS == {"session", "config", "audit", "system"}
+        assert {"session", "config", "audit", "system"} == CHANNELS

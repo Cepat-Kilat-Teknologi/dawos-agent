@@ -44,6 +44,7 @@ Use ``all`` to receive events from every channel.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 
@@ -159,10 +160,8 @@ async def ws_events(
 
         for task in pending:
             task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await task
-            except asyncio.CancelledError:
-                pass
 
         # Re-raise any exception from completed tasks.
         for task in done:

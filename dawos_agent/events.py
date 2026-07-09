@@ -20,7 +20,7 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Set
+from typing import Any
 
 log = logging.getLogger(__name__)
 
@@ -34,14 +34,14 @@ class Event:
 
     channel: str
     event_type: str
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     timestamp: str = ""
 
     def __post_init__(self) -> None:
         if not self.timestamp:
             self.timestamp = datetime.now(timezone.utc).isoformat()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to a JSON-compatible dictionary."""
         return {
             "channel": self.channel,
@@ -59,12 +59,12 @@ class EventBus:
     """
 
     def __init__(self, max_queue: int = 100) -> None:
-        self._subscribers: Dict[str, Set[asyncio.Queue]] = {}
+        self._subscribers: dict[str, set[asyncio.Queue]] = {}
         self._max_queue = max_queue
 
     def subscribe(
         self,
-        channels: Optional[Set[str]] = None,
+        channels: set[str] | None = None,
     ) -> asyncio.Queue:
         """Create a new subscription queue for the given channels.
 
@@ -129,7 +129,7 @@ class EventBus:
     @property
     def subscriber_count(self) -> int:
         """Return total unique subscriber queues."""
-        unique: Set[int] = set()
+        unique: set[int] = set()
         for queues in self._subscribers.values():
             for q in queues:
                 unique.add(id(q))

@@ -46,13 +46,13 @@ class TestWsAuth:
 
     def test_reject_missing_key(self, sync_client):
         """Missing API key closes the connection."""
-        with pytest.raises(Exception):  # pylint: disable=broad-exception-caught
+        with pytest.raises(Exception):
             with sync_client.websocket_connect("/ws/events"):
                 pass  # pragma: no cover
 
     def test_reject_invalid_key(self, sync_client):
         """Invalid API key closes the connection."""
-        with pytest.raises(Exception):  # pylint: disable=broad-exception-caught
+        with pytest.raises(Exception):
             with sync_client.websocket_connect(f"/ws/events?key={_TEST_INVALID_KEY}"):
                 pass  # pragma: no cover
 
@@ -142,8 +142,6 @@ class TestWsEventDelivery:
         """Published event is received by the WebSocket client."""
         with sync_client.websocket_connect(f"/ws/events?key={_TEST_PRIMARY_KEY}") as ws:
             # Publish an event from a background task.
-            import asyncio
-
             async def _publish():
                 await bus.publish(
                     Event(

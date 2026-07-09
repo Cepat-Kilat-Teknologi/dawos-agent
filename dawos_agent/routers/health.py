@@ -75,7 +75,9 @@ async def readiness():
         proc = await asyncio.create_subprocess_exec(
             settings.accel_cmd,
             "-H",
-            f"127.0.0.1:{settings.accel_cli_port}",
+            "127.0.0.1",
+            "-p",
+            str(settings.accel_cli_port),
             "show",
             "version",
             stdout=asyncio.subprocess.PIPE,
