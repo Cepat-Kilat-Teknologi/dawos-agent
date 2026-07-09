@@ -281,6 +281,32 @@ async def ifname_of(username: str) -> str | None:
 # ---------------------------------------------------------------------------
 
 
+async def shutdown(mode: str = "soft") -> str:
+    """Initiate accel-ppp daemon shutdown.
+
+    Args:
+        mode: Shutdown strategy — ``"soft"`` stops accepting new
+            connections and waits for all sessions to disconnect
+            naturally (drain mode); ``"hard"`` terminates immediately.
+
+    Returns:
+        Command output confirming the shutdown initiation.
+    """
+    return await run_cmd(f"shutdown {shlex.quote(mode)}")
+
+
+async def shutdown_cancel() -> str:
+    """Cancel a soft shutdown and resume normal operation.
+
+    Only effective after a ``shutdown soft`` — a hard shutdown cannot
+    be cancelled because the daemon exits immediately.
+
+    Returns:
+        Command output confirming the cancellation.
+    """
+    return await run_cmd("shutdown cancel")
+
+
 async def shaper_change(ifname: str, rate: str) -> str:
     """Temporarily change the traffic shaper rate for a live session.
 

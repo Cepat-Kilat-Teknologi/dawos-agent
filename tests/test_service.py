@@ -343,3 +343,232 @@ async def test_command_error(client, headers):
 
     assert resp.status_code == 200
     assert resp.json()["success"] is False
+
+
+# ---------------------------------------------------------------------------
+# Shutdown endpoints
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_shutdown_soft_confirmed(client, headers):
+    """POST /shutdown with mode=soft and confirm=true succeeds."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 5}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown",
+            new_callable=AsyncMock,
+            return_value="",
+        ) as mock_shutdown,
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown",
+            headers=headers,
+            json={"mode": "soft", "confirm": True},
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["mode"] == "soft"
+    assert data["active_sessions"] == 5
+    assert "drain" in data["message"]
+    mock_shutdown.assert_awaited_once_with("soft")
+
+
+@pytest.mark.asyncio
+async def test_shutdown_hard_confirmed(client, headers):
+    """POST /shutdown with mode=hard and confirm=true succeeds."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 3}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown",
+            new_callable=AsyncMock,
+            return_value="",
+        ) as mock_shutdown,
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown",
+            headers=headers,
+            json={"mode": "hard", "confirm": True},
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["mode"] == "hard"
+    assert data["active_sessions"] == 3
+    assert "immediate" in data["message"]
+    mock_shutdown.assert_awaited_once_with("hard")
+
+
+@pytest.mark.asyncio
+async def test_shutdown_without_confirm_rejected(client, headers):
+    """POST /shutdown without confirm=true returns 400."""
+    resp = await client.post(
+        "/api/v1/service/shutdown",
+        headers=headers,
+        json={"mode": "soft", "confirm": False},
+    )
+
+    assert resp.status_code == 400
+    assert "confirm" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_shutdown_default_mode_is_soft(client, headers):
+    """POST /shutdown with only confirm=true defaults to soft mode."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 0}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown",
+            new_callable=AsyncMock,
+            return_value="",
+        ) as mock_shutdown,
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown",
+            headers=headers,
+            json={"confirm": True},
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["mode"] == "soft"
+    mock_shutdown.assert_awaited_once_with("soft")
+
+
+@pytest.mark.asyncio
+async def test_shutdown_accel_cmd_failure(client, headers):
+    """POST /shutdown returns 500 when accel-cmd fails."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 2}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("connection refused"),
+        ),
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown",
+            headers=headers,
+            json={"mode": "soft", "confirm": True},
+        )
+
+    assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_shutdown_stat_failure_still_proceeds(client, headers):
+    """Session count failure should not block shutdown execution."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("stat failed"),
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown",
+            new_callable=AsyncMock,
+            return_value="",
+        ),
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown",
+            headers=headers,
+            json={"mode": "soft", "confirm": True},
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["active_sessions"] == 0
+
+
+@pytest.mark.asyncio
+async def test_shutdown_cancel(client, headers):
+    """POST /shutdown/cancel succeeds and resumes normal operation."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 7}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown_cancel",
+            new_callable=AsyncMock,
+            return_value="",
+        ) as mock_cancel,
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown/cancel",
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["mode"] == "cancel"
+    assert data["active_sessions"] == 7
+    assert "cancelled" in data["message"].lower()
+    mock_cancel.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_shutdown_cancel_failure(client, headers):
+    """POST /shutdown/cancel returns 500 when accel-cmd fails."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            return_value={"sessions": {"active": 1}},
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown_cancel",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("not in shutdown"),
+        ),
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown/cancel",
+            headers=headers,
+        )
+
+    assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_shutdown_cancel_stat_failure(client, headers):
+    """Stat failure during cancel should not block the cancel itself."""
+    with (
+        patch(
+            "dawos_agent.routers.service.accel.show_stat",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("stat failed"),
+        ),
+        patch(
+            "dawos_agent.routers.service.accel.shutdown_cancel",
+            new_callable=AsyncMock,
+            return_value="",
+        ),
+    ):
+        resp = await client.post(
+            "/api/v1/service/shutdown/cancel",
+            headers=headers,
+        )
+
+    assert resp.status_code == 200
+    assert resp.json()["active_sessions"] == 0

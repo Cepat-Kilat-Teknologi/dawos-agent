@@ -371,6 +371,72 @@ Execute a whitelisted accel-cmd command.
 | `200`  | Command executed |
 | `403`  | Command not in whitelist |
 
+### POST /api/v1/service/shutdown
+
+Initiate graceful or hard shutdown of the accel-ppp daemon.
+
+- **Soft** (drain): stops accepting new PPPoE connections, waits for all existing sessions to disconnect naturally, then exits. Ideal for planned maintenance.
+- **Hard**: drops all sessions and exits immediately. Use only in emergencies.
+
+A soft shutdown can be cancelled with `/shutdown/cancel` before the last session disconnects.
+
+**Auth:** Required (admin)
+
+**Request body:**
+
+```json
+{
+  "mode": "soft",
+  "confirm": true
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `mode` | string | `"soft"` | `"soft"` (drain) or `"hard"` (immediate) |
+| `confirm` | boolean | `false` | Must be `true` to execute — safety guard |
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "mode": "soft",
+  "message": "Shutdown (drain) initiated, 5 session(s) active",
+  "active_sessions": 5
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Shutdown initiated |
+| `400`  | Missing `confirm: true` |
+| `500`  | accel-cmd shutdown command failed |
+
+### POST /api/v1/service/shutdown/cancel
+
+Cancel a soft shutdown and resume accepting new connections.
+
+Has no effect if no soft shutdown is in progress. A hard shutdown cannot be cancelled because the daemon exits immediately.
+
+**Auth:** Required (admin)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "mode": "cancel",
+  "message": "Shutdown cancelled, normal operation resumed",
+  "active_sessions": 7
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Shutdown cancelled |
+| `500`  | accel-cmd cancel command failed |
+
 ---
 
 ## 5. Sessions

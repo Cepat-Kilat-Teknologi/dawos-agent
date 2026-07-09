@@ -253,6 +253,58 @@ class ServiceActionResponse(BaseModel):
     message: str
 
 
+class ShutdownMode(str, Enum):
+    """Shutdown strategy for the accel-ppp daemon.
+
+    Attributes:
+        soft: Drain mode — stop accepting new connections, wait for all
+            existing sessions to disconnect naturally, then exit.  Best
+            for planned maintenance windows.
+        hard: Immediate exit — drop all sessions and terminate now.
+            Use only in emergencies.
+    """
+
+    soft = "soft"
+    hard = "hard"
+
+
+class ShutdownRequest(BaseModel):
+    """Request to initiate accel-ppp daemon shutdown.
+
+    Attributes:
+        mode: Shutdown strategy — ``soft`` (drain) or ``hard`` (immediate).
+        confirm: Safety flag — must be ``True`` to execute.  Prevents
+            accidental shutdown from malformed or exploratory requests.
+    """
+
+    mode: ShutdownMode = Field(
+        ShutdownMode.soft,
+        description="Shutdown strategy: 'soft' (drain) or 'hard' (immediate)",
+    )
+    confirm: bool = Field(
+        False,
+        description="Must be true to execute — safety guard against accidental shutdown",
+    )
+
+
+class ShutdownResponse(BaseModel):
+    """Result of a shutdown or shutdown-cancel operation.
+
+    Attributes:
+        success: Whether the command was accepted by accel-ppp.
+        mode: The shutdown mode that was applied (``soft``, ``hard``,
+            or ``cancel``).
+        message: Human-readable description of the outcome.
+        active_sessions: Number of sessions that were active at the
+            time the request was processed.
+    """
+
+    success: bool
+    mode: str
+    message: str
+    active_sessions: int
+
+
 # ---------------------------------------------------------------------------
 # Sessions
 # ---------------------------------------------------------------------------

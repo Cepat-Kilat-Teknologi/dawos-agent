@@ -10,6 +10,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ---
 
+## v0.3.2 (2026-07-09)
+
+### Added
+
+- Graceful shutdown endpoints for controlled accel-ppp daemon shutdown:
+    - `POST /api/v1/service/shutdown` — soft (drain) or hard (immediate) mode with `confirm` safety guard
+    - `POST /api/v1/service/shutdown/cancel` — cancel a pending soft shutdown and resume normal operation
+- `ShutdownMode` enum, `ShutdownRequest`, and `ShutdownResponse` Pydantic models
+- `shutdown(mode)` and `shutdown_cancel()` async service functions
+
+---
+
 ## v0.3.1 (2026-07-09)
 
 ### Fixed

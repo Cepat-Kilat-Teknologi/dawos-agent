@@ -15,6 +15,8 @@ from dawos_agent.services.accel import (
     show_sessions,
     show_stat,
     show_version,
+    shutdown,
+    shutdown_cancel,
     terminate_session,
 )
 
@@ -245,3 +247,44 @@ async def test_mac_filter_add():
         result = await mac_filter("add", "AA:BB:CC:DD:EE:FF")
 
     assert result == "ok"
+
+
+# ---------------------------------------------------------------------------
+# shutdown / shutdown_cancel
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_shutdown_soft():
+    proc = _mock_process(stdout=b"")
+
+    with patch(
+        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+    ):
+        result = await shutdown("soft")
+
+    assert result == ""
+
+
+@pytest.mark.asyncio
+async def test_shutdown_hard():
+    proc = _mock_process(stdout=b"")
+
+    with patch(
+        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+    ):
+        result = await shutdown("hard")
+
+    assert result == ""
+
+
+@pytest.mark.asyncio
+async def test_shutdown_cancel():
+    proc = _mock_process(stdout=b"")
+
+    with patch(
+        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+    ):
+        result = await shutdown_cancel()
+
+    assert result == ""

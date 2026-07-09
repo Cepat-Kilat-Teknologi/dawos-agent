@@ -24,6 +24,8 @@ from ..models.schemas import (
     ServiceActionResponse,
     ServiceStatus,
     ServiceStatusResponse,
+    ShutdownRequest,
+    ShutdownResponse,
 )
 from ..services import accel
 
@@ -165,6 +167,107 @@ async def run_command(req: CommandRequest, _key: str = AdminKey):
         return CommandResponse(success=True, output=output, command=req.command)
     except Exception as exc:
         return CommandResponse(success=False, output=str(exc), command=req.command)
+
+
+@router.post("/shutdown", response_model=ShutdownResponse)
+async def initiate_shutdown(req: ShutdownRequest, _key: str = AdminKey):
+    """Initiate graceful or hard shutdown of the accel-ppp daemon.
+
+    In **soft** (drain) mode, accel-ppp stops accepting new PPPoE
+    connections but keeps all existing sessions alive.  The daemon
+    exits only after every session disconnects naturally — ideal for
+    planned maintenance windows.
+
+    In **hard** mode, all sessions are dropped and the daemon exits
+    immediately.  Use only in emergencies.
+
+    A soft shutdown can be cancelled with the ``/shutdown/cancel``
+    endpoint before the last session disconnects.
+
+    The ``confirm`` field in the request body must be ``True`` to
+    execute.  This prevents accidental shutdown from malformed or
+    exploratory requests.
+
+    Args:
+        req: Request body with shutdown mode and confirmation flag.
+
+    Returns:
+        ShutdownResponse: Success flag, mode, message, and the
+            number of sessions that were active at request time.
+
+    Raises:
+        HTTPException(400): If the ``confirm`` flag is not set.
+        HTTPException(500): If the accel-cmd shutdown command fails.
+    """
+    if not req.confirm:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Shutdown requires explicit confirmation. "
+                "Set 'confirm': true in the request body."
+            ),
+        )
+
+    # Capture session count before shutdown
+    active_sessions = 0
+    try:
+        stat = await accel.show_stat()
+        active_sessions = stat.get("sessions", {}).get("active", 0)
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    try:
+        await accel.shutdown(req.mode.value)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    mode_label = "drain" if req.mode.value == "soft" else "immediate"
+    return ShutdownResponse(
+        success=True,
+        mode=req.mode.value,
+        message=(
+            f"Shutdown ({mode_label}) initiated, "
+            f"{active_sessions} session(s) active"
+        ),
+        active_sessions=active_sessions,
+    )
+
+
+@router.post("/shutdown/cancel", response_model=ShutdownResponse)
+async def cancel_shutdown(_key: str = AdminKey):
+    """Cancel a soft shutdown and resume normal operation.
+
+    Reverses the effect of a prior ``shutdown soft`` request so that
+    accel-ppp starts accepting new PPPoE connections again.  Has no
+    effect if no soft shutdown is in progress.
+
+    A hard shutdown cannot be cancelled because the daemon exits
+    immediately.
+
+    Returns:
+        ShutdownResponse: Success flag and confirmation message.
+
+    Raises:
+        HTTPException(500): If the accel-cmd cancel command fails.
+    """
+    active_sessions = 0
+    try:
+        stat = await accel.show_stat()
+        active_sessions = stat.get("sessions", {}).get("active", 0)
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    try:
+        await accel.shutdown_cancel()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return ShutdownResponse(
+        success=True,
+        mode="cancel",
+        message="Shutdown cancelled, normal operation resumed",
+        active_sessions=active_sessions,
+    )
 
 
 @router.post("/{action}", response_model=ServiceActionResponse)

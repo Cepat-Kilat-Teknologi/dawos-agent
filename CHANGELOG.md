@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-09
+
+### Added
+
+- **Graceful shutdown endpoints** -- Two new admin-only endpoints for controlled accel-ppp daemon shutdown:
+  - `POST /api/v1/service/shutdown` — Initiate soft (drain) or hard (immediate) shutdown. Soft mode stops accepting new PPPoE connections while keeping all existing sessions alive; the daemon exits only after every session disconnects naturally. Hard mode drops all sessions and exits immediately. Requires `"confirm": true` in the request body as a safety guard against accidental invocation. Reports the number of active sessions at request time.
+  - `POST /api/v1/service/shutdown/cancel` — Cancel a pending soft shutdown and resume accepting new connections. Has no effect if no soft shutdown is in progress.
+- **Shutdown models** -- `ShutdownMode` enum (`soft`/`hard`), `ShutdownRequest` (with confirm safety flag), and `ShutdownResponse` Pydantic models.
+- **Shutdown service functions** -- `shutdown(mode)` and `shutdown_cancel()` async functions wrapping `accel-cmd shutdown` with `shlex.quote()` input sanitisation.
+
 ## [0.3.1] - 2026-07-09
 
 ### Fixed
