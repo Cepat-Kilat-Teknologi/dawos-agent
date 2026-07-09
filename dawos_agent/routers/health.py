@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 
 from .. import __version__
 from ..config import settings
+from ..middleware import limiter
 from ..models.schemas import HealthResponse, ReadinessResponse
 
 router = APIRouter(tags=["health"])
@@ -30,6 +31,7 @@ _start_time = time.time()
 
 
 @router.get("/health", response_model=HealthResponse)
+@limiter.exempt
 async def health():
     """Perform a basic health check.
 
@@ -53,6 +55,7 @@ async def health():
     response_model=ReadinessResponse,
     responses={503: {"model": ReadinessResponse}},
 )
+@limiter.exempt
 async def readiness():
     """Check whether the agent is ready to serve requests.
 
