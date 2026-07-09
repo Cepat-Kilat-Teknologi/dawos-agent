@@ -1118,6 +1118,16 @@ _install_package() {
 
     # ── ownership ──
     chown -R "${APP_USER}:${APP_GROUP}" "$INSTALL_DIR"
+
+    # ── accel-ppp config ownership ──
+    # dawos-agent needs write access to accel-ppp config for checkpoint/rollback
+    if [[ -f /etc/accel-ppp.conf ]]; then
+        chown "${APP_USER}:${APP_GROUP}" /etc/accel-ppp.conf
+    fi
+    if [[ -d /etc/accel-ppp.d ]]; then
+        chown -R "${APP_USER}:${APP_GROUP}" /etc/accel-ppp.d/
+    fi
+
     _ok "Permissions set"
 
     # ── configuration file ──
@@ -1200,8 +1210,8 @@ Description=dawos-agent — PPP router management daemon
 Documentation=https://github.com/Cepat-Kilat-Teknologi/dawos-agent
 After=network-online.target accel-ppp.service
 Wants=network-online.target
-StartLimitBurst=3
-StartLimitIntervalSec=60
+StartLimitBurst=5
+StartLimitIntervalSec=300
 
 [Service]
 Type=simple
@@ -1209,13 +1219,14 @@ User=dawos
 Group=dawos
 EnvironmentFile=-/etc/dawos-agent/agent.env
 ExecStart=/opt/dawos-agent/venv/bin/dawos-agent
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=3
+WatchdogSec=30
 
 NoNewPrivileges=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf
+ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf -/etc/systemd/resolved.conf.d -/etc/dnsmasq.d -/etc/dnsmasq.conf
 PrivateTmp=true
 
 StandardOutput=journal

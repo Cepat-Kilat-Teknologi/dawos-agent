@@ -3,8 +3,8 @@ Description=dawos-agent — PPP router management daemon
 Documentation=https://github.com/Cepat-Kilat-Teknologi/dawos-agent
 After=network-online.target accel-ppp.service
 Wants=network-online.target
-StartLimitBurst=3
-StartLimitIntervalSec=60
+StartLimitBurst=5
+StartLimitIntervalSec=300
 
 [Service]
 Type=simple
@@ -12,8 +12,9 @@ User=dawos
 Group=dawos
 EnvironmentFile=-/etc/dawos-agent/agent.env
 ExecStart=/opt/dawos-agent/venv/bin/dawos-agent
-Restart=on-failure
-RestartSec=5
+Restart=always
+RestartSec=3
+WatchdogSec=30
 
 # Security hardening
 NoNewPrivileges=false
