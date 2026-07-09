@@ -88,4 +88,4 @@ exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:"]
 [tool.pylint."messages_control"]
 # R0801 (duplicate-code) fires on the _run() shell helper that every
 # service module defines identically by design.
-disable = ["duplicate-code"]
+disable = ["duplicate-code", "too-few-public-methods"]
