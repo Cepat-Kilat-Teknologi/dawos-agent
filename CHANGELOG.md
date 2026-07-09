@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-09
+
 ### Added
 
 - **WebSocket event bus** -- Real-time event streaming via `WS /ws/events` with API key authentication (query parameter). Four channels: `session`, `config`, `audit`, `system`. Per-subscriber `asyncio.Queue` with configurable max size prevents slow consumers from blocking publishers. Supports `subscribe`, `unsubscribe`, and `ping` control messages.
@@ -39,6 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Installer: accel-ppp config ownership** -- The installer now sets ownership of `/etc/accel-ppp.conf` and `/etc/accel-ppp.d/` to the `dawos` service user after package installation. Without this, config checkpoint and rollback operations fail with HTTP 500 on fresh installs.
 - **Installer: ReadWritePaths sync** -- The inline systemd unit fallback now includes `/etc/systemd/resolved.conf.d`, `/etc/dnsmasq.d`, and `/etc/dnsmasq.conf` in `ReadWritePaths`, matching the main unit file.
+- **httpx missing from main dependencies** -- `POST /api/v1/service/command` returned HTTP 500 (`ModuleNotFoundError: httpx`) on fresh installs because `httpx` was listed only in dev dependencies. Moved to main `dependencies` in `pyproject.toml`. (BUG-8)
+- **Health readiness probe accel-cmd flags** -- `GET /health/ready` returned HTTP 503 even when accel-ppp was running. The `-H` flag accepts host only; port requires a separate `-p` flag. Changed from `-H 127.0.0.1:2001` to `-H 127.0.0.1 -p 2001`. (BUG-9)
+- **Pylint R0903 false positives** -- Disabled `too-few-public-methods` globally for middleware and logging dataclasses that intentionally have few methods.
 
 ### Removed
 
@@ -119,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.1.0
