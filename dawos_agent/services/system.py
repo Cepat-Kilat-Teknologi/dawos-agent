@@ -21,6 +21,12 @@ from ..models.schemas import (
     SystemInfoResponse,
 )
 
+_BYTES_PER_MB: int = 1024 * 1024
+"""One mebibyte in bytes — used for memory size conversions."""
+
+_BYTES_PER_GB: int = 1024**3
+"""One gibibyte in bytes — used for disk size conversions."""
+
 
 def get_system_info() -> SystemInfoResponse:
     """Gather comprehensive system information.
@@ -58,15 +64,15 @@ def get_system_info() -> SystemInfoResponse:
             load_avg=load,
         ),
         memory=MemoryInfo(
-            total_mb=mem.total // (1024 * 1024),
-            used_mb=mem.used // (1024 * 1024),
-            available_mb=mem.available // (1024 * 1024),
+            total_mb=mem.total // _BYTES_PER_MB,
+            used_mb=mem.used // _BYTES_PER_MB,
+            available_mb=mem.available // _BYTES_PER_MB,
             percent=mem.percent,
         ),
         disk=DiskInfo(
-            total_gb=round(disk.total / (1024**3), 1),
-            used_gb=round(disk.used / (1024**3), 1),
-            free_gb=round(disk.free / (1024**3), 1),
+            total_gb=round(disk.total / _BYTES_PER_GB, 1),
+            used_gb=round(disk.used / _BYTES_PER_GB, 1),
+            free_gb=round(disk.free / _BYTES_PER_GB, 1),
             percent=disk.percent,
         ),
         interfaces=interfaces,
@@ -94,15 +100,15 @@ def get_metrics() -> MetricsResponse:
             load_avg=load,
         ),
         memory=MemoryInfo(
-            total_mb=mem.total // (1024 * 1024),
-            used_mb=mem.used // (1024 * 1024),
-            available_mb=mem.available // (1024 * 1024),
+            total_mb=mem.total // _BYTES_PER_MB,
+            used_mb=mem.used // _BYTES_PER_MB,
+            available_mb=mem.available // _BYTES_PER_MB,
             percent=mem.percent,
         ),
         disk=DiskInfo(
-            total_gb=round(disk.total / (1024**3), 1),
-            used_gb=round(disk.used / (1024**3), 1),
-            free_gb=round(disk.free / (1024**3), 1),
+            total_gb=round(disk.total / _BYTES_PER_GB, 1),
+            used_gb=round(disk.used / _BYTES_PER_GB, 1),
+            free_gb=round(disk.free / _BYTES_PER_GB, 1),
             percent=disk.percent,
         ),
     )
