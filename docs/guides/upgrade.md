@@ -71,7 +71,7 @@ sudo journalctl -u dawos-agent --since '2 minutes ago' --no-pager -p err
 To upgrade to a specific version instead of the latest:
 
 ```bash
-sudo /opt/dawos-agent/venv/bin/pip install dawos-agent==0.2.0
+sudo /opt/dawos-agent/venv/bin/pip install dawos-agent==0.3.1
 sudo systemctl restart dawos-agent
 ```
 

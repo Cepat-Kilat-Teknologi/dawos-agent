@@ -85,7 +85,7 @@ Lightweight liveness check for load balancers and orchestrators. Always returns 
 {
   "status": "ok",
   "node_name": "bng-node-01",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "uptime_seconds": 3621.5,
   "timestamp": "2026-07-07T00:00:00Z"
 }

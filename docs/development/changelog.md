@@ -8,6 +8,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## Unreleased
 
+---
+
+## v0.3.1 (2026-07-09)
+
+### Fixed
+
+- Version reporting -- `/health` endpoint and `__version__` now read from package metadata via `importlib.metadata.version()` instead of a hardcoded string. Single source of truth is `pyproject.toml`.
+- httpx missing from main dependencies -- `POST /api/v1/service/command` returned HTTP 500 on fresh installs (BUG-8)
+- Health readiness probe accel-cmd flags -- `-H` accepts host only; port needs separate `-p` flag (BUG-9)
+- Pylint R0903 false positives on middleware/logging dataclasses
+
+---
+
+## v0.3.0 (2026-07-09)
+
 ### Added
 
 - WebSocket event bus with 4 channels (session, config, audit, system) for real-time streaming
