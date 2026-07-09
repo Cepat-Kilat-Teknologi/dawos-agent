@@ -24,6 +24,7 @@ from slowapi.errors import RateLimitExceeded
 
 from . import __version__
 from .config import settings
+from .logging import setup_logging
 from .middleware import RequestIdMiddleware, limiter
 from .routers import (
     checkpoint,
@@ -64,10 +65,13 @@ async def lifespan(
 ):
     """Manage application startup and shutdown lifecycle events.
 
-    On startup, logs the agent version, listening port, and node name to
-    aid operational debugging.  On shutdown, emits a clean log line so
-    log aggregators can distinguish graceful stops from crashes.
+    On startup, configures structured logging and logs the agent version,
+    listening port, and node name to aid operational debugging.  On
+    shutdown, emits a clean log line so log aggregators can distinguish
+    graceful stops from crashes.
     """
+    setup_logging(level=settings.log_level, fmt=settings.log_format)
+
     import logging  # pylint: disable=import-outside-toplevel
 
     log = logging.getLogger("dawos_agent")
