@@ -9,14 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Request ID middleware** -- Every HTTP request is assigned a UUID v4 trace ID, returned in the `X-Request-ID` response header. Client-supplied `X-Request-ID` values are preserved. The trace ID is injected into all log records for end-to-end request tracing.
+- **Health readiness probe** -- New `GET /health/ready` endpoint checks accel-ppp connectivity and returns HTTP 200 (all dependencies reachable) or HTTP 503 (dependency down). The existing `/health` endpoint remains a lightweight liveness check.
+- **Rate limiting** -- Global per-IP rate limiting via slowapi. Default: 120 requests/minute per IP. Configurable via `DAWOS_RATE_LIMIT` environment variable. Health endpoints are exempt. Set to empty string to disable.
+- **Structured JSON logging** -- Opt-in JSON log format via `DAWOS_LOG_FORMAT=json`. Each log line is a valid JSON object with `timestamp`, `level`, `name`, `message`, and `request_id` fields. Default remains human-readable text format.
+- **Configurable ping target** -- Internet reachability diagnostic check now uses `DAWOS_PING_TARGET` (default: `8.8.8.8`). Override for air-gapped networks or custom DNS.
+- **PEP 561 type marker** -- Added `py.typed` marker file for downstream type-checking support.
+- **Named constants** -- Extracted magic numbers to `dawos_agent/constants.py` (shared) and module-level constants (local). Improves readability and single-source-of-truth for conntrack thresholds, port numbers, and byte conversion factors.
 - **Comprehensive input validation** -- All request models now validate user-supplied fields against regex patterns and type constraints at the Pydantic layer (HTTP 422 rejection). Covers 30+ fields across session, network, firewall, NAT, PPPoE, conntrack, DNS, routing, zone, VRRP, scheduler, event, IP pool, and monitoring endpoints.
 - **Shell injection defense-in-depth** -- Added `shlex.quote()` wrapping in 5 service modules (`accel.py`, `monitoring.py`, `zone_firewall.py`, `firewall_groups.py`, `network.py`) for all user-supplied values interpolated into shell commands.
 - **Input validation reference** -- New documentation page (`docs/api/validation-rules.md`) with per-endpoint field constraints, regex patterns, and shell quoting details.
-- **Validation tests** -- 17 new unit tests covering regex rejection, list field validation, and service-level error paths (841 total).
+- **Validation tests** -- 17 new unit tests covering regex rejection, list field validation, and service-level error paths.
+- **New dependencies** -- `slowapi>=0.1.9,<1` (rate limiting), `python-json-logger>=3,<5` (structured logging). Both pip-audit clean.
 
 ### Changed
 
-- **API reference updated** -- Common Patterns section now documents HTTP 422 validation errors and links to the validation reference.
+- **API reference updated** -- Common Patterns section now documents HTTP 422 validation errors, rate limiting (HTTP 429), request tracing (X-Request-ID), and readiness probe usage.
+- **Configuration documentation updated** -- New settings reference sections for `DAWOS_LOG_FORMAT`, `DAWOS_PING_TARGET`, and `DAWOS_RATE_LIMIT`. Logging section expanded with JSON format examples and request tracing guide.
 
 ### Removed
 

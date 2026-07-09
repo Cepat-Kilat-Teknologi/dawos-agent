@@ -94,6 +94,19 @@ sudo systemctl restart dawos-agent
 | Variable | Default | Type | Description |
 |----------|---------|------|-------------|
 | `DAWOS_LOG_LEVEL` | `info` | `string` | Uvicorn / Python log level. Valid values: `debug`, `info`, `warning`, `error`. |
+| `DAWOS_LOG_FORMAT` | `text` | `string` | Log output format. `text` for human-readable output (development), `json` for structured JSON lines (production log aggregators). |
+
+### Diagnostics
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_PING_TARGET` | `8.8.8.8` | `string` | Host used by the internet reachability diagnostic check. Override when the BNG node cannot reach Google DNS (e.g. air-gapped networks). |
+
+### Rate Limiting
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_RATE_LIMIT` | `120/minute` | `string` | Global per-IP rate limit in slowapi format (e.g. `120/minute`, `5/second`). Set to an empty string to disable rate limiting. Health endpoints are exempt. |
 
 ### Example Configuration File
 
@@ -118,6 +131,13 @@ DAWOS_ACCEL_SERVICE_NAME=accel-ppp
 
 # Logging
 DAWOS_LOG_LEVEL=info
+DAWOS_LOG_FORMAT=text
+
+# Diagnostics
+DAWOS_PING_TARGET=8.8.8.8
+
+# Rate limiting (empty string to disable)
+DAWOS_RATE_LIMIT=120/minute
 ```
 
 ---
@@ -324,6 +344,60 @@ Set via `DAWOS_LOG_LEVEL` in the configuration file:
 | `warning` | Potential issues that don't prevent operation | Production (recommended) |
 | `error` | Errors that affect functionality | Quiet production environments |
 
+### Log Formats
+
+Set via `DAWOS_LOG_FORMAT` in the configuration file:
+
+**Text format** (default) — human-readable output for development and interactive use:
+
+```
+2026-07-09 10:00:00,123 INFO [req-abc123] dawos_agent: Request processed
+```
+
+**JSON format** — structured output for log aggregation systems (Loki, Elasticsearch, Datadog):
+
+```
+DAWOS_LOG_FORMAT=json
+```
+
+Each log line is a valid JSON object:
+
+```json
+{"timestamp": "2026-07-09T10:00:00.123Z", "level": "INFO", "name": "dawos_agent", "message": "Request processed", "request_id": "abc123-def456"}
+```
+
+JSON fields:
+
+| Field | Description |
+|-------|-------------|
+| `timestamp` | ISO 8601 timestamp |
+| `level` | Log level (DEBUG, INFO, WARNING, ERROR) |
+| `name` | Logger name (Python module path) |
+| `message` | Log message text |
+| `request_id` | Trace ID for the current HTTP request (empty outside request context) |
+
+### Request Tracing
+
+Every HTTP request is assigned a unique trace ID (UUID v4). This ID is:
+
+1. **Returned in the response** as the `X-Request-ID` header
+2. **Injected into all log records** produced during that request's lifecycle
+3. **Accepted from the client** — if the incoming request includes an `X-Request-ID` header, the agent uses that value instead of generating a new one
+
+This allows end-to-end tracing from client through the agent to log aggregation:
+
+```bash
+# Send a request with a custom trace ID
+curl -H "X-API-Key: $KEY" -H "X-Request-ID: my-trace-123" \
+  http://localhost:8470/api/v1/sessions
+
+# The response includes the same ID
+# X-Request-ID: my-trace-123
+
+# Filter logs for that specific request
+journalctl -u dawos-agent | grep "my-trace-123"
+```
+
 ### Access Logs
 
 The agent runs on Uvicorn with `access_log=True`, so every HTTP request is logged with method, path, status code, and response time. These appear in the journal alongside application logs.
@@ -423,29 +497,39 @@ DAWOS_HOST=127.0.0.1
    DAWOS_LOG_LEVEL=warning
    ```
 
-6. **Configure log rotation** — systemd journal handles this automatically via `/etc/systemd/journald.conf`. Set `SystemMaxUse` to control disk usage.
+6. **Enable JSON logging** when forwarding to a log aggregator (Loki, Elasticsearch, Datadog):
+   ```
+   DAWOS_LOG_FORMAT=json
+   ```
+
+7. **Configure log rotation** — systemd journal handles this automatically via `/etc/systemd/journald.conf`. Set `SystemMaxUse` to control disk usage.
 
 ### Monitoring
 
-7. **Monitor the `/health` endpoint** — it is unauthenticated and returns the agent version, node name, and status. Use it as a health check target in your monitoring system (Prometheus blackbox exporter, Uptime Kuma, etc.):
+8. **Monitor the `/health` endpoint** — it is unauthenticated and returns the agent version, node name, and status. Use it as a liveness check target in your monitoring system (Prometheus blackbox exporter, Uptime Kuma, etc.):
    ```bash
    curl -sf http://localhost:8470/health
    ```
 
-8. **Set up alerting** on systemd service failures:
+9. **Use `/health/ready` for readiness checks** — verifies accel-ppp connectivity in addition to agent health. Returns HTTP 200 when all dependencies are reachable, HTTP 503 when a dependency is down:
    ```bash
-   # Check if the service is active
-   systemctl is-active dawos-agent
+   curl -sf http://localhost:8470/health/ready
    ```
+
+10. **Set up alerting** on systemd service failures:
+    ```bash
+    # Check if the service is active
+    systemctl is-active dawos-agent
+    ```
 
 ### Backup
 
-9. **Back up the configuration file** — it contains your API key and node-specific settings:
-   ```bash
-   cp /etc/dawos-agent/agent.env /etc/dawos-agent/agent.env.bak
-   ```
+11. **Back up the configuration file** — it contains your API key and node-specific settings:
+    ```bash
+    cp /etc/dawos-agent/agent.env /etc/dawos-agent/agent.env.bak
+    ```
 
-10. **Include in your infrastructure-as-code** — the `agent.env` file is the only node-specific state. Everything else can be reinstalled from the repository.
+12. **Include in your infrastructure-as-code** — the `agent.env` file is the only node-specific state. Everything else can be reinstalled from the repository.
 
 ### Resource Usage
 

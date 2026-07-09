@@ -10,7 +10,7 @@ REST API reference for dawos-agent.
 
 ## Authentication
 
-All endpoints except `GET /health` require an API key passed via the `X-API-Key` header.
+All endpoints except `GET /health` and `GET /health/ready` require an API key passed via the `X-API-Key` header.
 
 ```
 X-API-Key: your-secret-api-key
@@ -35,17 +35,31 @@ Requests without a valid key receive:
 - **Success responses** return the documented response model with HTTP 200 (or 201/204 where noted).
 - **Error responses** return `{"detail": "<message>"}` with an appropriate HTTP status code.
 - **Validation errors** return HTTP 422 with a JSON array describing the invalid field and constraint. All request body fields are validated against type constraints and regex patterns before reaching service logic. See [Input Validation Reference](validation-rules.md) for the complete list of patterns and per-field constraints.
+- **Rate limiting** — All API endpoints are subject to per-IP rate limiting (default: 120 requests/minute). Health endpoints are exempt. Exceeding the limit returns HTTP 429 with a `Retry-After` header indicating when the client can retry.
+- **Request tracing** — Every response includes an `X-Request-ID` header containing a UUID v4 trace ID. Clients can send their own `X-Request-ID` to correlate requests across services. The same ID appears in server logs when JSON logging is enabled.
 - **SSE endpoints** return `text/event-stream` content type for real-time streaming.
+
+### Interactive API Documentation
+
+The agent serves built-in API documentation powered by OpenAPI:
+
+| URL | Format | Description |
+|-----|--------|-------------|
+| `/docs` | Swagger UI | Interactive API explorer with "Try it out" functionality |
+| `/redoc` | ReDoc | Read-friendly API reference with nested schemas |
+| `/openapi.json` | OpenAPI 3.x | Machine-readable schema for code generation and tooling |
+
+These endpoints are public (no authentication required).
 
 ---
 
 ## 1. Health
 
-Public liveness probe — no authentication required.
+Public probes for liveness and readiness checks — no authentication required.
 
 ### GET /health
 
-Basic health check for load balancers and orchestrators.
+Lightweight liveness check for load balancers and orchestrators. Always returns HTTP 200 if the agent process is running.
 
 **Auth:** Not required
 
@@ -63,7 +77,40 @@ Basic health check for load balancers and orchestrators.
 
 | Status | Meaning |
 |--------|---------|
-| `200`  | Agent is healthy |
+| `200`  | Agent process is running |
+
+### GET /health/ready
+
+Readiness probe that verifies the agent can communicate with its dependencies. Checks accel-ppp CLI connectivity via `accel-cmd show version` with a 5-second timeout.
+
+**Auth:** Not required
+
+**Response (ready):**
+
+```json
+{
+  "ready": true,
+  "checks": [
+    {"name": "accel-ppp", "status": "ok", "detail": "1.13.0-git-f4014a4"}
+  ]
+}
+```
+
+**Response (not ready):**
+
+```json
+{
+  "ready": false,
+  "checks": [
+    {"name": "accel-ppp", "status": "error", "detail": "Connection refused"}
+  ]
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | All dependencies reachable |
+| `503`  | One or more dependencies unreachable |
 
 ---
 
