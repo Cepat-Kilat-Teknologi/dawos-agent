@@ -53,6 +53,22 @@ These endpoints are public (no authentication required).
 
 ---
 
+## API Versioning
+
+All API endpoints are served under the `/api/v1/` prefix. The versioning strategy follows these principles:
+
+| Aspect | Policy |
+|--------|--------|
+| **Scheme** | URI path prefix (`/api/v1/`, `/api/v2/`, ...) |
+| **Backward compatibility** | Minor and patch releases never break existing request/response contracts within the same major version |
+| **New fields** | New optional fields may be added to response models without a version bump (additive changes are non-breaking) |
+| **Deprecation** | If a v2 is introduced, v1 endpoints remain available for at least two minor release cycles with deprecation notices in response headers |
+| **Health endpoints** | `/health` and `/health/ready` are unversioned — they are stable, public contracts |
+
+Current version: **v1** (stable since 0.1.0).
+
+---
+
 ## 1. Health
 
 Public probes for liveness and readiness checks — no authentication required.
