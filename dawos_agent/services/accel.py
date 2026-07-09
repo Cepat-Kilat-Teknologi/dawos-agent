@@ -14,6 +14,7 @@ import shlex
 from typing import Any
 
 from ..config import settings
+from ..retry import with_retry
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +23,9 @@ async def run_cmd(args: str) -> str:
     """Execute an accel-cmd command and return its standard output.
 
     Constructs the full command as ``accel-cmd -p <port> <args>`` using
-    the configured binary path and CLI port.
+    the configured binary path and CLI port.  Transient failures
+    (connection refused, timeout) are retried with exponential backoff
+    according to ``DAWOS_RETRY_MAX`` and ``DAWOS_RETRY_DELAY`` settings.
 
     Args:
         args: Arguments to pass to ``accel-cmd``.
@@ -31,8 +34,19 @@ async def run_cmd(args: str) -> str:
         The stripped stdout text from the command.
 
     Raises:
-        RuntimeError: If the command exits with a non-zero return code.
+        RuntimeError: If the command exits with a non-zero return code
+            after all retry attempts are exhausted.
     """
+    return await with_retry(
+        _run_cmd_once,
+        args,
+        max_retries=settings.retry_max,
+        base_delay=settings.retry_delay,
+    )
+
+
+async def _run_cmd_once(args: str) -> str:
+    """Execute a single accel-cmd attempt (no retry)."""
     full_cmd = f"{settings.accel_cmd} -p {settings.accel_cli_port} {args}"
     log.debug("exec: %s", full_cmd)
 

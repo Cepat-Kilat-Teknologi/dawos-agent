@@ -62,6 +62,13 @@ class Settings(BaseSettings):
             format (e.g. ``"120/minute"``, ``"5/second"``).  Override
             via ``DAWOS_RATE_LIMIT``.  Set to an empty string to
             disable rate limiting entirely.
+        retry_max: Maximum number of retry attempts for transient shell
+            command failures (e.g. accel-cmd connection refused).
+            Set to ``0`` to disable retries.  Override via
+            ``DAWOS_RETRY_MAX``.
+        retry_delay: Base delay in seconds between retry attempts.
+            Uses exponential backoff (1s, 2s, 4s, ...).  Override
+            via ``DAWOS_RETRY_DELAY``.
     """
 
     # --- agent identity -------------------------------------------------------
@@ -89,6 +96,10 @@ class Settings(BaseSettings):
 
     # --- rate limiting --------------------------------------------------------
     rate_limit: str = "120/minute"
+
+    # --- retry ----------------------------------------------------------------
+    retry_max: int = 3
+    retry_delay: float = 1.0
 
     model_config = {
         "env_prefix": "DAWOS_",
