@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-09
+
+### Fixed
+
+- **Version reporting** -- Health endpoint and `__version__` now read from package metadata via `importlib.metadata.version()` instead of a hardcoded string. Previously, bumping `pyproject.toml` without updating `__init__.py` caused `/health` to report stale version numbers. Single source of truth is now `pyproject.toml`.
+
 ## [0.3.0] - 2026-07-09
 
 ### Added
@@ -124,7 +130,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.1.0
