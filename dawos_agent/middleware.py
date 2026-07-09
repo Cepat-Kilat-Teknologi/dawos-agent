@@ -11,9 +11,13 @@ import contextvars
 import logging
 import uuid
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+from .config import settings
 
 log = logging.getLogger(__name__)
 
@@ -33,7 +37,7 @@ Accessible from any coroutine running inside a request lifecycle via::
 """
 
 
-class RequestIdMiddleware(BaseHTTPMiddleware):
+class RequestIdMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """Attach a unique trace ID to every request/response cycle.
 
     Processing logic:
@@ -53,3 +57,21 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         response: Response = await call_next(request)
         response.headers["X-Request-ID"] = rid
         return response
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting
+# ---------------------------------------------------------------------------
+
+_default_limits = [settings.rate_limit] if settings.rate_limit else []
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=_default_limits,
+)
+"""Global rate limiter instance.
+
+Applies ``DAWOS_RATE_LIMIT`` (default ``120/minute``) per remote IP
+to every endpoint except those explicitly exempted.  Health endpoints
+are exempted by marking them with ``@limiter.exempt``.
+"""
