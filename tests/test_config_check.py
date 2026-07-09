@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from dawos_agent import config as config_module
 from dawos_agent.config import check_config, settings
 
 
@@ -65,3 +66,27 @@ def test_check_config_returns_list():
     assert isinstance(result, list)
     for item in result:
         assert isinstance(item, str)
+
+
+def test_info_logged_for_non_silent_setting(monkeypatch, caplog):
+    """Settings not in _SILENT_DEFAULTS should produce info messages."""
+    # Temporarily shrink _SILENT_DEFAULTS so 'retry_max' is detected
+    original_silent = config_module._SILENT_DEFAULTS
+    monkeypatch.setattr(
+        config_module,
+        "_SILENT_DEFAULTS",
+        original_silent - {"retry_max"},
+    )
+    # Also ensure the env var is NOT set
+    monkeypatch.delenv("DAWOS_RETRY_MAX", raising=False)
+
+    with caplog.at_level(logging.INFO):
+        msgs = check_config(logger=logging.getLogger("test"))
+
+    assert any("DAWOS_RETRY_MAX" in m for m in msgs)
+    info_records = [
+        r for r in caplog.records
+        if r.levelno == logging.INFO and "DAWOS_RETRY_MAX" in r.message
+    ]
+    assert len(info_records) >= 1
+
