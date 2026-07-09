@@ -70,6 +70,22 @@ class HealthResponse(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class ReadinessResponse(BaseModel):
+    """Response payload for the ``GET /health/ready`` readiness probe.
+
+    Checks whether the agent can communicate with the accel-ppp daemon.
+    Returns HTTP 200 when ready, HTTP 503 when one or more dependencies
+    are unreachable.
+
+    Attributes:
+        ready: True when all dependency checks pass.
+        checks: Per-dependency results (service name, reachable flag, detail).
+    """
+
+    ready: bool
+    checks: list[dict]
+
+
 # ---------------------------------------------------------------------------
 # System
 # ---------------------------------------------------------------------------
