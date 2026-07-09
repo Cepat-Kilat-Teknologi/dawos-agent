@@ -12,6 +12,8 @@ import logging
 import re
 import shlex
 
+from ..constants import NODE_EXPORTER_PORT, SNMPD_PORT
+
 log = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ async def monitoring_status() -> dict:
     """
     exporters: list[dict] = []
 
-    for svc, port in [("node_exporter", 9100), ("snmpd", 161)]:
+    for svc, port in [("node_exporter", NODE_EXPORTER_PORT), ("snmpd", SNMPD_PORT)]:
         out, rc = await _run(f"systemctl is-active {svc}")
         active = rc == 0 and "active" in out
         exporters.append(
@@ -83,8 +85,8 @@ async def exporter_metrics(service: str = "node_exporter") -> dict:
         A dictionary with ``service``, ``available`` (bool),
         ``metrics`` (list of name/value dicts), and ``raw_output``.
     """
-    port_map = {"node_exporter": 9100, "snmpd": 161}
-    port = port_map.get(service, 9100)
+    port_map = {"node_exporter": NODE_EXPORTER_PORT, "snmpd": SNMPD_PORT}
+    port = port_map.get(service, NODE_EXPORTER_PORT)
 
     if service == "node_exporter":
         out, rc = await _run(
@@ -114,7 +116,7 @@ async def exporter_metrics(service: str = "node_exporter") -> dict:
         }
 
     # SNMP — just check if listening
-    out, rc = await _run("ss -lnup | grep :161")
+    out, rc = await _run(f"ss -lnup | grep :{SNMPD_PORT}")
     return {
         "service": service,
         "available": rc == 0,
