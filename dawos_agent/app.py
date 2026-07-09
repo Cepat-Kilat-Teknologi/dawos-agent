@@ -25,7 +25,7 @@ from slowapi.errors import RateLimitExceeded
 from . import __version__
 from .config import settings
 from .logging import setup_logging
-from .middleware import RequestIdMiddleware, limiter
+from .middleware import AuditLogMiddleware, RequestIdMiddleware, limiter
 from .routers import (
     checkpoint,
     config_router,
@@ -95,6 +95,7 @@ app = FastAPI(
 )
 
 # Middleware (executes in reverse order — last added runs first) -------------
+app.add_middleware(AuditLogMiddleware)
 app.add_middleware(RequestIdMiddleware)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
