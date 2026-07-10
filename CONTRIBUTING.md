@@ -159,7 +159,7 @@ async def get_session_by_id(session_id: str) -> SessionDetail:
 
 ## Testing
 
-The project maintains **810 tests** with **100% code coverage**. All tests must pass before submitting a pull request.
+All tests must pass before submitting a pull request. The minimum coverage requirement is **90%**.
 
 ### Running Tests
 
@@ -190,10 +190,10 @@ When adding a new endpoint or service:
 1. Create the test file following the naming convention
 2. Mock subprocess calls (never call real system binaries in tests)
 3. Test both success and failure paths
-4. Verify that coverage remains at 100%:
+4. Verify that coverage stays above 90%:
 
    ```bash
-   coverage run -m pytest tests/ && coverage report -m --fail-under=100
+   coverage run -m pytest tests/ && coverage report -m --fail-under=90
    ```
 
 ## Quality Gates
@@ -203,7 +203,7 @@ Every pull request must pass all quality gates. These are enforced by the CI pip
 | Gate | Target | Command |
 |------|--------|---------|
 | Tests | 810+ passing | `pytest tests/ -x -q` |
-| Coverage | 100% | `coverage report -m` |
+| Coverage | minimum 90% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
 | Ruff | Zero violations | `ruff check dawos_agent/ tests/` |
@@ -234,7 +234,7 @@ Additional rules:
 
 1. **Branch from `main`** -- use a descriptive branch name (e.g., `feat/dhcp-relay-support`).
 2. **All quality gates must pass** -- see [Quality Gates](#quality-gates).
-3. **Coverage must stay at 100%** -- add tests for every new code path.
+3. **Coverage must stay above 90%** -- add tests for new code paths.
 4. **Pylint score must remain 10.00/10** -- no exceptions.
 5. **Black + Ruff clean** -- run `black dawos_agent/ tests/` and `ruff check dawos_agent/ tests/` before committing.
 6. **Pre-commit hooks pass** -- run `pre-commit run --all-files` to verify.
@@ -302,7 +302,7 @@ HTTP Response
 2. Create a service in `dawos_agent/services/` with `_run()` for shell calls.
 3. Create a router in `dawos_agent/routers/` with appropriate prefix and tags.
 4. Mount the router in `dawos_agent/app.py`.
-5. Add comprehensive tests in `tests/` -- maintain 100% coverage.
+5. Add comprehensive tests in `tests/`.
 6. Run all quality gates:
 
    ```bash

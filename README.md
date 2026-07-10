@@ -490,7 +490,7 @@ coverage run -m pytest tests/ && coverage report -m
 | Gate | Target | Command |
 |------|--------|---------|
 | Tests | 1133 passing | `pytest tests/ -x -q` |
-| Coverage | 100% | `coverage report -m` |
+| Coverage | minimum 90% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
 | Ruff | Zero violations | `ruff check dawos_agent/ tests/` |

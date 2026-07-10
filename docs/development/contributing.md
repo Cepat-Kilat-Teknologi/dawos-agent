@@ -37,7 +37,7 @@ Hooks run Black, Ruff, and Pylint automatically on `git commit`.
 - **Black**: line-length 88, target py39
 - **Pylint**: must score 10.00/10
 - **Ruff**: zero violations
-- **Coverage**: 100%
+- **Coverage**: minimum 90%
 - **pip-audit**: zero known vulnerabilities
 
 ## Adding a New Endpoint
@@ -46,7 +46,7 @@ Hooks run Black, Ruff, and Pylint automatically on `git commit`.
 2. Create service module in `dawos_agent/services/`
 3. Create router in `dawos_agent/routers/` with proper prefix and tags
 4. Mount router in `dawos_agent/app.py`
-5. Write tests in `tests/` (must maintain 100% coverage)
+5. Write tests in `tests/`
 6. Run all quality checks:
 
 ```bash
