@@ -78,7 +78,8 @@ sudo systemctl restart dawos-agent
 
 | Variable | Default | Type | Description |
 |----------|---------|------|-------------|
-| `DAWOS_API_KEY` | `changeme-generate-a-strong-key` | `string` | Shared secret for `X-API-Key` header authentication. **Must be replaced in production.** All API endpoints except `/health` require this key. |
+| `DAWOS_API_KEY` | `changeme-generate-a-strong-key` | `string` | Shared secret for `X-API-Key` header authentication. **Must be replaced in production.** All API endpoints except `/health`, `/health/ready`, and `/metrics` require this key. |
+| `DAWOS_API_KEYS_FILE` | *(disabled)* | `string` | Path to a JSON file mapping multiple API keys to RBAC roles (`viewer`, `operator`, `admin`). When set, enables multi-key authentication with role-based access control. See [RBAC Multi-Key Auth](#rbac-multi-key-auth) below. |
 
 ### accel-ppp Integration
 
@@ -115,6 +116,19 @@ sudo systemctl restart dawos-agent
 | `DAWOS_RETRY_MAX` | `3` | `integer` | Maximum retry attempts for transient accel-cmd failures (connection refused, timeout). Set to `0` to disable retries. |
 | `DAWOS_RETRY_DELAY` | `1.0` | `float` | Base delay in seconds between retry attempts. Uses exponential backoff (1s, 2s, 4s, ...). |
 
+### Audit and Observability
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_AUDIT_BUFFER_SIZE` | `1000` | `integer` | Maximum number of entries in the in-memory audit ring buffer. The audit log records all write operations (POST/PUT/DELETE) with timestamp, method, path, and client IP. Oldest entries are evicted when the buffer is full. |
+
+### Webhooks
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_WEBHOOK_URL` | *(disabled)* | `string` | HTTP(S) endpoint to receive event notifications (session up/down, config changes, service restarts). When set, the agent fires asynchronous POST requests with JSON payloads on relevant events. |
+| `DAWOS_WEBHOOK_SECRET` | *(disabled)* | `string` | HMAC-SHA256 secret for webhook payload signing. When set, a `X-Webhook-Signature` header is included in each webhook request. Receivers should validate this signature to verify payload authenticity. |
+
 ### Example Configuration File
 
 ```bash
@@ -149,9 +163,64 @@ DAWOS_RATE_LIMIT=120/minute
 # Retry (for transient accel-cmd failures)
 DAWOS_RETRY_MAX=3
 DAWOS_RETRY_DELAY=1.0
+
+# Audit buffer size
+DAWOS_AUDIT_BUFFER_SIZE=1000
+
+# Webhooks (optional — comment out to disable)
+# DAWOS_WEBHOOK_URL=https://hooks.example.com/dawos
+# DAWOS_WEBHOOK_SECRET=your-hmac-sha256-secret
+
+# RBAC multi-key auth (optional — comment out to use single-key mode)
+# DAWOS_API_KEYS_FILE=/etc/dawos-agent/api-keys.json
 ```
 
 ---
+
+## RBAC Multi-Key Auth
+
+By default, DawOS Agent uses a single API key (`DAWOS_API_KEY`) which grants **admin** access. For production environments with multiple operators, enable RBAC by setting `DAWOS_API_KEYS_FILE` to point to a JSON file that maps API keys to roles.
+
+### Roles
+
+| Role | Access | Typical Use Case |
+|------|--------|------------------|
+| `viewer` | `GET` endpoints only | Monitoring dashboards, read-only scripts, NOC displays |
+| `operator` | `GET` + `POST` / `PUT` / `DELETE` | Day-to-day session management, firewall updates, network changes |
+| `admin` | Full access including service restart, config apply, audit log, playbooks, shutdown | Senior engineers, automation platforms |
+
+### Configuration
+
+1. Create the API keys file:
+
+```json
+{
+  "M5ydfeMbEFU0wala6I0yictAi_vGmDT8DVESQr2qIGQ": "admin",
+  "viewer-key-for-grafana-dashboards": "viewer",
+  "operator-key-for-noc-team": "operator"
+}
+```
+
+2. Set file permissions:
+
+```bash
+sudo chown root:dawos /etc/dawos-agent/api-keys.json
+sudo chmod 0640 /etc/dawos-agent/api-keys.json
+```
+
+3. Add to agent.env:
+
+```bash
+DAWOS_API_KEYS_FILE=/etc/dawos-agent/api-keys.json
+```
+
+4. Restart the agent:
+
+```bash
+sudo systemctl restart dawos-agent
+```
+
+> **Note:** When `DAWOS_API_KEYS_FILE` is set, the primary `DAWOS_API_KEY` still works and always grants admin access. Keys in the file are checked first; if no match is found, the primary key is tried as a fallback.
 
 ## File Locations
 
@@ -285,10 +354,10 @@ The service unit at `/etc/systemd/system/dawos-agent.service` controls how the a
 | `Group` | `dawos` | Primary group for file access |
 | `EnvironmentFile` | `-/etc/dawos-agent/agent.env` | Load configuration from this file. The `-` prefix means "don't fail if the file is missing" |
 | `ExecStart` | `/opt/dawos-agent/venv/bin/dawos-agent` | Command to start the agent (Uvicorn ASGI server) |
-| `Restart` | `on-failure` | Automatically restart the agent if it exits with a non-zero code |
-| `RestartSec` | `5` | Wait 5 seconds between restart attempts |
-| `StartLimitBurst` | `3` | Allow at most 3 restart attempts... |
-| `StartLimitIntervalSec` | `60` | ...within a 60-second window. Prevents crash-loop storms |
+| `Restart` | `always` | Automatically restart the agent on any exit (clean or crash). Ensures the management API remains available after transient failures |
+| `RestartSec` | `3` | Wait 3 seconds between restart attempts to avoid tight crash loops while keeping recovery fast |
+| `StartLimitBurst` | `5` | Allow at most 5 restart attempts... |
+| `StartLimitIntervalSec` | `300` | ...within a 300-second (5-minute) window. Prevents indefinite crash-loop storms while giving enough headroom for transient issues |
 
 ### Security Hardening Directives
 
