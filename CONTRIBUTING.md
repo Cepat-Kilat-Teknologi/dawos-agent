@@ -202,7 +202,7 @@ Every pull request must pass all quality gates. These are enforced by the CI pip
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 810+ passing | `pytest tests/ -x -q` |
+| Tests | 1133 passing | `pytest tests/ -x -q` |
 | Coverage | minimum 90% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
