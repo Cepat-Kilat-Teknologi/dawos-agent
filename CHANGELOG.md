@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Internal error details no longer leaked to API clients** -- All 27 router
+  modules now return a generic `"Internal server error"` message for HTTP 500
+  responses instead of forwarding raw exception text (`str(exc)`). Client-facing
+  4xx errors (400, 404, 409) retain descriptive messages since those contain
+  controlled, non-sensitive text. 106 error handlers updated across the codebase.
+- **X-Request-ID header validated** -- Caller-supplied `X-Request-ID` values are
+  now validated against `[\x20-\x7E]{1,128}` (printable ASCII, max 128 chars).
+  Invalid or missing values are replaced with a generated UUID v4. Prevents
+  header injection and log pollution from malformed trace IDs.
+- **WebSocket authentication prefers header over query parameter** -- The
+  `/ws/events` endpoint now checks the `X-API-Key` header first and falls back
+  to the `key` query parameter only when the header is absent. This reduces the
+  risk of API key exposure in server access logs and browser history.
+
+### Fixed
+
+- **SNMP health check reliability** -- Replaced unreliable UDP socket probe
+  (`socket.sendto` to port 161) with `ss -lun sport = :161` to verify SNMP
+  daemon is actually listening. The socket probe returned false positives when
+  the kernel accepted the datagram into a buffer even though no SNMP daemon was
+  running.
+- **IP pool CIDR validation returns HTTP 422** -- `POST /api/v1/ip-pool` with
+  an invalid CIDR range now returns HTTP 422 (Unprocessable Entity) instead of
+  HTTP 409 (Conflict). Duplicate pool names still return 409. The error code is
+  selected based on the `ValueError` message content.
+- **Session restart reports terminate failures** -- `restart_session()` now
+  catches `RuntimeError` from `accel.terminate_session()` and returns
+  `{"success": false}` with a descriptive message instead of silently reporting
+  success when the terminate step fails.
+- **Event handler webhook execution** -- `fire_event()` now sends actual HTTP
+  POST requests to webhook URLs via `httpx.AsyncClient` instead of simulating
+  success without network activity. The response status code is captured and
+  `success` is set based on whether the status is below 400.
+- **Event history bounded** -- The in-memory event log is now backed by
+  `collections.deque(maxlen=1000)` to prevent unbounded memory growth on
+  long-running agent instances. Oldest entries are automatically evicted when
+  the buffer is full.
+- **parse_stat ValueError protection** -- `accel.parse_stat()` now handles
+  malformed output from `accel-cmd show stat` gracefully instead of raising
+  an unhandled `ValueError`.
+- **Misleading variable name** -- Renamed internal `cache_size` variable to
+  accurately reflect its purpose, improving code readability.
+
+### Changed
+
+- **Test suite expanded** -- 1133 tests (up from 1117), 100% coverage
+  maintained. New tests cover session restart failure path and IP pool CIDR
+  validation error codes.
+
 ## [0.3.2] - 2026-07-09
 
 ### Added
@@ -140,7 +191,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/releases/tag/v0.2.0

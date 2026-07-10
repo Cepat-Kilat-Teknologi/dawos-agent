@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey, ViewerKey
+from ..auth import AdminKey, ApiKey, ViewerKey
 from ..models.schemas import (
     EventHistoryResponse,
     EventHookListResponse,
@@ -42,7 +42,7 @@ async def list_hooks(_key: str = ViewerKey):
 
 
 @router.post("/hooks", status_code=201, response_model=EventHookResponse)
-async def add_hook(req: EventHookRequest, _key: str = ApiKey):
+async def add_hook(req: EventHookRequest, _key: str = AdminKey):
     """Register a new event hook.
 
     Creates a hook that will execute the specified action (webhook URL
@@ -88,7 +88,7 @@ async def remove_hook(name: str, _key: str = ApiKey):
 
 
 @router.post("/fire", response_model=FireEventResponse)
-async def fire_event(req: FireEventRequest, _key: str = ApiKey):
+async def fire_event(req: FireEventRequest, _key: str = AdminKey):
     """Fire an event manually.
 
     Triggers all enabled hooks registered for the specified event type,
@@ -110,7 +110,8 @@ async def fire_event(req: FireEventRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/history", response_model=EventHistoryResponse)

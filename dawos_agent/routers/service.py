@@ -219,7 +219,8 @@ async def initiate_shutdown(req: ShutdownRequest, _key: str = AdminKey):
     try:
         await accel.shutdown(req.mode.value)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
     mode_label = "drain" if req.mode.value == "soft" else "immediate"
     return ShutdownResponse(
@@ -260,7 +261,8 @@ async def cancel_shutdown(_key: str = AdminKey):
     try:
         await accel.shutdown_cancel()
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
     return ShutdownResponse(
         success=True,
@@ -297,7 +299,10 @@ async def service_action(action: ServiceAction, _key: str = AdminKey):
                 action=action, success=True, message="Config reloaded"
             )
         except Exception as exc:
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+            log.error("Operation failed: %s", exc)
+            raise HTTPException(
+                status_code=500, detail="Internal server error"
+            ) from exc
 
     # systemctl start/stop/restart
     try:
@@ -325,4 +330,5 @@ async def service_action(action: ServiceAction, _key: str = AdminKey):
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

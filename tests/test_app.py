@@ -4,8 +4,29 @@ import socket
 from unittest.mock import MagicMock, patch
 
 import pytest
+from starlette.requests import Request
 
+from dawos_agent.app import _unhandled_exception_handler
 from dawos_agent.services.system import get_system_info
+
+
+@pytest.mark.asyncio
+async def test_unhandled_exception_handler_sanitizes():
+    """Catch-all handler returns a generic 500 without leaking detail (DA-M03)."""
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/x",
+        "headers": [(b"x-request-id", b"req-abc")],
+    }
+    resp = await _unhandled_exception_handler(
+        Request(scope), RuntimeError("secret cmd nft leaked output")
+    )
+    assert resp.status_code == 500
+    body = resp.body.decode()
+    assert "internal" in body
+    assert "req-abc" in body
+    assert "secret cmd" not in body
 
 
 def test_system_info_interface_down():

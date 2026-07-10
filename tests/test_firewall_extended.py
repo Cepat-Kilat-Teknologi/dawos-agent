@@ -106,7 +106,23 @@ async def test_clear_egress_error(client, headers):
             headers=headers,
         )
 
-    assert resp.status_code == 400
+    assert resp.status_code == 500
+    assert resp.json()["detail"] == "Internal server error"
+
+
+@pytest.mark.asyncio
+async def test_clear_egress_not_found(client, headers):
+    with patch(
+        "dawos_agent.routers.firewall.nat.clear_egress",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("No such file or directory"),
+    ):
+        resp = await client.delete(
+            "/api/v1/firewall/nat/egress/10.0.0.2",
+            headers=headers,
+        )
+
+    assert resp.status_code == 404
 
 
 # ---------------------------------------------------------------------------

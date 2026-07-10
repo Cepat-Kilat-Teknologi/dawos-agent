@@ -51,6 +51,45 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     return out, proc.returncode
 
 
+_RULE_SKIP_PREFIXES = (
+    "table ",
+    "chain ",
+    "set ",
+    "map ",
+    "type ",
+    "policy ",
+    "hook ",
+    "elements",
+    "flags ",
+    "comment",
+    "#",
+)
+
+
+def _count_rules(ruleset: str) -> int:
+    """Count actual nftables rules in ``nft list ruleset`` output.
+
+    Structural lines (table/chain/set/map headers, braces, and
+    type/policy/hook/comment declarations) are excluded so the count
+    reflects real firewall rules rather than every output line (DA-L03).
+
+    Args:
+        ruleset: Raw text from ``nft list ruleset``.
+
+    Returns:
+        The number of rule lines.
+    """
+    count = 0
+    for line in ruleset.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped in ("{", "}"):
+            continue
+        if stripped.startswith(_RULE_SKIP_PREFIXES):
+            continue
+        count += 1
+    return count
+
+
 async def _run_ok(cmd: str, *, sudo: bool = False) -> str:
     """Execute a shell command, raising on failure.
 
@@ -144,7 +183,7 @@ async def get_firewall_status() -> FirewallStatus:
     if enabled:
         out, rc2 = await _run("nft list ruleset", sudo=True)
         if rc2 == 0:
-            rules_count = out.count("\n") + 1 if out else 0
+            rules_count = _count_rules(out)
             nat_enabled = "masquerade" in out
 
     sysctl = await get_sysctl()

@@ -10,6 +10,7 @@ from __future__ import annotations
 import collections
 import contextvars
 import logging
+import re
 import time
 import uuid
 from datetime import datetime, timezone
@@ -39,14 +40,21 @@ Accessible from any coroutine running inside a request lifecycle via::
     rid = request_id_var.get()
 """
 
+#: Validate caller-supplied request IDs: printable ASCII, 1–128 chars,
+#: no control characters or whitespace beyond plain space.  Rejects
+#: oversized or malformed values that could pollute logs (DA-M05).
+_RE_VALID_REQUEST_ID = re.compile(r"^[\x20-\x7E]{1,128}$")
+
 
 class RequestIdMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """Attach a unique trace ID to every request/response cycle.
 
     Processing logic:
 
-    1. If the caller supplies an ``X-Request-ID`` header, that value is
-       reused (enables distributed tracing from an upstream gateway).
+    1. If the caller supplies an ``X-Request-ID`` header **and** it
+       passes format validation (printable ASCII, ≤128 chars), that
+       value is reused (enables distributed tracing from an upstream
+       gateway).
     2. Otherwise a random UUID-4 is generated.
     3. The ID is stored in :data:`request_id_var` so downstream code
        (services, logging filters) can read it without parameter passing.
@@ -55,7 +63,12 @@ class RequestIdMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public
 
     async def dispatch(self, request: Request, call_next):
         """Process the request and attach the trace ID."""
-        rid = request.headers.get("x-request-id") or uuid.uuid4().hex
+        supplied = request.headers.get("x-request-id", "")
+        rid = (
+            supplied
+            if supplied and _RE_VALID_REQUEST_ID.match(supplied)
+            else uuid.uuid4().hex
+        )
         request_id_var.set(rid)
         response: Response = await call_next(request)
         response.headers["X-Request-ID"] = rid

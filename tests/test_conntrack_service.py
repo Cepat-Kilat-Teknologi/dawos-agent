@@ -110,6 +110,54 @@ async def test_set_timeout_invalid_key():
         await conntrack.set_timeout("bogus_key", 60)
 
 
+@pytest.mark.asyncio
+async def test_set_table_size_failure():
+    """A non-zero sysctl exit must raise, not report a false success."""
+    proc = _mock_proc("", 1)
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        with pytest.raises(RuntimeError, match="nf_conntrack_max"):
+            await conntrack.set_table_size(500000)
+
+
+@pytest.mark.asyncio
+async def test_set_table_size_persist_failure():
+    """A failed persist (tee) must raise even if the live sysctl succeeded."""
+    procs = [_mock_proc("500000", 0), _mock_proc("", 1)]
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        side_effect=procs,
+    ):
+        with pytest.raises(RuntimeError, match="persist"):
+            await conntrack.set_table_size(500000)
+
+
+@pytest.mark.asyncio
+async def test_set_timeout_failure():
+    """A non-zero sysctl exit must raise, not report a false success."""
+    proc = _mock_proc("", 1)
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        with pytest.raises(RuntimeError, match="tcp_timeout_established"):
+            await conntrack.set_timeout("tcp_timeout_established", 600)
+
+
+@pytest.mark.asyncio
+async def test_apply_profile_failure():
+    """A non-zero sysctl exit while applying a profile must raise."""
+    proc = _mock_proc("", 1)
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        return_value=proc,
+    ):
+        with pytest.raises(RuntimeError, match="Failed to apply profile"):
+            await conntrack.apply_profile("gaming")
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

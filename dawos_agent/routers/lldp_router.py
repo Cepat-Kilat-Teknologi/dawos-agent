@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 
 from ..auth import ViewerKey
+from ..constants import RE_SAFE_IFACE
 from ..models.schemas import (
     LldpInterfaceResponse,
     LldpNeighborsResponse,
@@ -41,7 +42,8 @@ async def lldp_status(_key: str = ViewerKey):
         data = await lldp.lldp_status()
         return LldpStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/neighbors", response_model=LldpNeighborsResponse)
@@ -61,11 +63,14 @@ async def lldp_neighbors(_key: str = ViewerKey):
         data = await lldp.lldp_neighbors()
         return LldpNeighborsResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/neighbors/{name}", response_model=LldpInterfaceResponse)
-async def lldp_interface(name: str, _key: str = ViewerKey):
+async def lldp_interface(
+    name: str = Path(pattern=RE_SAFE_IFACE), _key: str = ViewerKey
+):
     """Get LLDP neighbors for a specific interface.
 
     Returns neighbor information discovered on the named network
@@ -84,4 +89,5 @@ async def lldp_interface(name: str, _key: str = ViewerKey):
         data = await lldp.lldp_interface(name)
         return LldpInterfaceResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

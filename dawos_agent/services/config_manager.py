@@ -19,6 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ..config import ACCEL_CONFIG, BACKUP_DIR
+from . import accel
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,48 @@ log = logging.getLogger(__name__)
 
 _rollback_task: asyncio.Task | None = None  # pylint: disable=invalid-name
 _checkpoint_path: Path | None = None  # pylint: disable=invalid-name
+
+#: Serializes guarded config-apply so concurrent ``POST /config/apply``
+#: calls cannot interleave the checkpoint → write → reload → timer sequence
+#: and corrupt the rollback baseline (DA-M06).
+apply_lock = asyncio.Lock()
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _safe_backup_path(name: str) -> Path:
+    """Resolve a backup filename to a path contained within ``BACKUP_DIR``.
+
+    Backups are flat files with no path separators.  Any name that
+    contains a separator or resolves outside ``BACKUP_DIR`` is rejected —
+    this blocks path-traversal reads such as ``../../etc/passwd`` on the
+    checkpoint diff/compare/rollback endpoints (DA-H01).
+
+    Args:
+        name: The backup filename supplied by the caller.
+
+    Returns:
+        The resolved path inside ``BACKUP_DIR``.
+
+    Raises:
+        FileNotFoundError: If the name is empty, contains a path
+            separator, or escapes ``BACKUP_DIR``.  Raised as
+            ``FileNotFoundError`` so callers return HTTP 404 without
+            disclosing that traversal was attempted.
+    """
+    base = BACKUP_DIR.resolve()
+    candidate = (base / name).resolve()
+    if (
+        "/" in name
+        or "\\" in name
+        or candidate == base
+        or not candidate.is_relative_to(base)
+    ):
+        raise FileNotFoundError(f"Backup not found: {name}")
+    return candidate
 
 
 # ---------------------------------------------------------------------------
@@ -133,7 +176,7 @@ def read_backup(backup_name: str) -> tuple[str, int, str]:
     Raises:
         FileNotFoundError: If the named backup does not exist.
     """
-    bak_path = BACKUP_DIR / backup_name
+    bak_path = _safe_backup_path(backup_name)
     if not bak_path.exists():
         raise FileNotFoundError(f"Backup not found: {backup_name}")
 
@@ -161,8 +204,8 @@ def diff_two_revisions(name_a: str, name_b: str) -> dict:
     Raises:
         FileNotFoundError: If either revision does not exist.
     """
-    path_a = BACKUP_DIR / name_a
-    path_b = BACKUP_DIR / name_b
+    path_a = _safe_backup_path(name_a)
+    path_b = _safe_backup_path(name_b)
     if not path_a.exists():
         raise FileNotFoundError(f"Revision not found: {name_a}")
     if not path_b.exists():
@@ -219,7 +262,7 @@ def diff_with_backup(backup_name: str) -> dict:
     Raises:
         FileNotFoundError: If the named backup does not exist.
     """
-    bak_path = BACKUP_DIR / backup_name
+    bak_path = _safe_backup_path(backup_name)
     if not bak_path.exists():
         raise FileNotFoundError(f"Backup not found: {backup_name}")
 
@@ -249,7 +292,7 @@ def rollback_to(backup_name: str) -> str:
     Raises:
         FileNotFoundError: If the named backup does not exist.
     """
-    bak_path = BACKUP_DIR / backup_name
+    bak_path = _safe_backup_path(backup_name)
     if not bak_path.exists():
         raise FileNotFoundError(f"Backup not found: {backup_name}")
 
@@ -306,6 +349,9 @@ async def _auto_rollback(seconds: int) -> None:
         if _checkpoint_path and _checkpoint_path.exists():
             content = _checkpoint_path.read_text(encoding="utf-8")
             ACCEL_CONFIG.write_text(content, encoding="utf-8")
+            # Reload so the restored config actually takes effect on the
+            # running daemon, not just on disk (DA-H05).
+            await accel.reload_config()
             log.warning(
                 "Auto-rollback triggered after %ds — config restored from %s",
                 seconds,

@@ -16,7 +16,7 @@ These numbers are measured from a live deployment on a 2 vCPU / 2 GB RAM / 12 GB
 | accel-ppp daemon (0 sessions) | 6 MB | 0% | varies |
 | Combined management stack | **70 MB** | **< 0.2%** | **< 3%** |
 
-The 138 API endpoints are function registrations, not running processes. At runtime, only the endpoint being called executes. Each request spawns a single lightweight subprocess (`accel-cmd`, `nft`, `ip`, etc.), collects the output, and returns JSON. The entire cycle typically completes in under 100 milliseconds.
+The 149 API endpoints are function registrations, not running processes. At runtime, only the endpoint being called executes. Each request spawns a single lightweight subprocess (`accel-cmd`, `nft`, `ip`, etc.), collects the output, and returns JSON. The entire cycle typically completes in under 100 milliseconds.
 
 ### Sizing by Scale
 

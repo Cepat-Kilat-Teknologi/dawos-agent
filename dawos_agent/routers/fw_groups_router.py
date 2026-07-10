@@ -43,7 +43,8 @@ async def list_groups(_key: str = ViewerKey):
         data = await firewall_groups.list_groups()
         return FirewallGroupListResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("", status_code=201, response_model=GroupActionResponse)
@@ -71,7 +72,12 @@ async def create_group(req: CreateGroupRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        if "exists" in str(exc).lower():
+            raise HTTPException(
+                status_code=409, detail=f"Group '{req.name}' already exists"
+            ) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete("/{name}", status_code=204)
@@ -89,7 +95,13 @@ async def delete_group(name: str, _key: str = ApiKey):
     try:
         await firewall_groups.delete_group(name)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        msg = str(exc).lower()
+        if "no such" in msg or "does not exist" in msg:
+            raise HTTPException(
+                status_code=404, detail=f"Group '{name}' not found"
+            ) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/{name}/members", response_model=MemberActionResponse)
@@ -113,4 +125,5 @@ async def add_members(name: str, req: AddMembersRequest, _key: str = ApiKey):
         data = await firewall_groups.add_members(name, req.elements)
         return MemberActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import logging
 
+import pytest
+
 from dawos_agent import config as config_module
-from dawos_agent.config import check_config, settings
+from dawos_agent.config import check_config, require_secure_api_key, settings
 
 
 def test_warns_on_default_api_key(caplog):
@@ -70,6 +72,27 @@ def test_check_config_returns_list():
     assert isinstance(result, list)
     for item in result:
         assert isinstance(item, str)
+
+
+def test_require_secure_api_key_rejects_placeholder():
+    """require_secure_api_key must refuse the shipped placeholder key."""
+    original = settings.api_key
+    try:
+        settings.api_key = "changeme-generate-a-strong-key"
+        with pytest.raises(RuntimeError, match="Refusing to start"):
+            require_secure_api_key()
+    finally:
+        settings.api_key = original
+
+
+def test_require_secure_api_key_accepts_custom_key():
+    """A custom production key must pass without raising."""
+    original = settings.api_key
+    try:
+        settings.api_key = "my-secure-production-key-abc123"
+        require_secure_api_key()
+    finally:
+        settings.api_key = original
 
 
 def test_info_logged_for_non_silent_setting(monkeypatch, caplog):

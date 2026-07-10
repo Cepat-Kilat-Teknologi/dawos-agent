@@ -174,6 +174,23 @@ async def test_list_ruleset():
     assert count > 0
 
 
+def test_count_rules_excludes_structural_lines():
+    """_count_rules counts real rules, not headers/braces/comments (DA-L03)."""
+    ruleset = (
+        "table ip filter {\n"
+        "    chain input {\n"
+        "\n"
+        "        type filter hook input priority 0; policy drop;\n"
+        "        # a comment\n"
+        "        ip saddr 10.0.0.0/8 accept\n"
+        "        tcp dport 22 accept\n"
+        "    }\n"
+        "}\n"
+    )
+    assert firewall._count_rules(ruleset) == 2
+    assert firewall._count_rules("") == 0
+
+
 @pytest.mark.asyncio
 async def test_list_ruleset_error():
     proc = _mock_proc("error", returncode=1)

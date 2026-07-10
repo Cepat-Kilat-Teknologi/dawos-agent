@@ -4,8 +4,9 @@
 
 | Version | Supported |
 |---------|-----------|
+| 0.3.x   | Yes       |
 | 0.2.x   | Yes       |
-| 0.1.x   | Yes       |
+| 0.1.x   | No        |
 
 ## Reporting a Vulnerability
 
@@ -41,7 +42,7 @@ ask for additional information or guidance during the process.
 - All API endpoints (except `/health`, `/health/ready`, and `/metrics`) require an `X-API-Key` header.
 - Missing or invalid keys receive a **401 Unauthorized** response.
 - Always use **strong, randomly generated** API keys (minimum 32 characters).
-- The WebSocket endpoint at `/ws/events` accepts the key as a `key` query parameter.
+- The WebSocket endpoint at `/ws/events` accepts the key via the `X-API-Key` header (preferred) or as a `key` query parameter (fallback). Header-based auth is preferred to avoid key exposure in server logs.
 
 ### Role-Based Access Control (RBAC)
 

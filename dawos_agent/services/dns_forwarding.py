@@ -49,15 +49,15 @@ async def status() -> dict:
     _out, rc = await _run("systemctl is-active dnsmasq")
     running = rc == 0
 
-    cache_size = 0
+    upstream_count = 0
     if running:
         cfg, _ = await _run("grep -c '^server=' /etc/dnsmasq.conf")
-        cache_size = _safe_int(cfg)
+        upstream_count = _safe_int(cfg)
 
     return {
         "running": running,
         "backend": "dnsmasq",
-        "upstream_count": cache_size,
+        "upstream_count": upstream_count,
     }
 
 

@@ -50,7 +50,8 @@ async def get_config(_key: str = ViewerKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("", response_model=ConfigUpdateResponse)
@@ -99,7 +100,8 @@ async def update_config(req: ConfigUpdateRequest, _key: str = AdminKey):
 
         return ConfigUpdateResponse(success=True, message=msg, backup_path=backup_path)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/backups")

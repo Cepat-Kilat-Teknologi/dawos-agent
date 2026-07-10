@@ -9,9 +9,13 @@ and terminating PPPoE sessions.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+import logging
+import shlex
+
+from fastapi import APIRouter, HTTPException, Path
 
 from ..auth import ApiKey, ViewerKey
+from ..constants import RE_SAFE_NAME
 from ..models.schemas import (
     SessionListResponse,
     SessionStatsResponse,
@@ -19,6 +23,8 @@ from ..models.schemas import (
     TerminateResponse,
 )
 from ..services import accel
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/sessions", tags=["sessions"])
 
@@ -40,7 +46,8 @@ async def list_sessions(_key: str = ViewerKey):
         sessions = await accel.show_sessions()
         return SessionListResponse(count=len(sessions), sessions=sessions)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/stats", response_model=SessionStatsResponse)
@@ -71,11 +78,14 @@ async def session_stats(_key: str = ViewerKey):
             uptime=stat["uptime"],
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/find/{username}", response_model=SessionListResponse)
-async def find_session(username: str, _key: str = ViewerKey):
+async def find_session(
+    username: str = Path(pattern=RE_SAFE_NAME), _key: str = ViewerKey
+):
     """Find sessions for a specific username.
 
     Runs ``accel-cmd show sessions match username ^<user>$`` with
@@ -93,12 +103,13 @@ async def find_session(username: str, _key: str = ViewerKey):
     try:
         cols = "ifname,username,ip,calling-sid,rate-limit,type,state,uptime,rx-bytes,tx-bytes"
         output = await accel.run_cmd(
-            f"show sessions match username ^{username}$ {cols}"
+            f"show sessions match username ^{shlex.quote(username)}$ {cols}"
         )
         sessions = accel.parse_table(output)
         return SessionListResponse(count=len(sessions), sessions=sessions)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/terminate", response_model=TerminateResponse)
@@ -116,6 +127,7 @@ async def terminate_session(req: TerminateRequest, _key: str = ApiKey):
 
     Raises:
         HTTPException(400): If neither username nor ifname is provided.
+        HTTPException(500): If the terminate command fails.
     """
     if not req.username and not req.ifname:
         raise HTTPException(status_code=400, detail="Provide username or ifname")
@@ -125,4 +137,7 @@ async def terminate_session(req: TerminateRequest, _key: str = ApiKey):
         target = req.username or req.ifname
         return TerminateResponse(success=True, message=f"Session {target} terminated")
     except Exception as exc:
-        return TerminateResponse(success=False, message=str(exc))
+        # Raise 500 on failure (consistent with the session-control endpoints)
+        # instead of a false 200 + success:false that callers miss (DA-M08).
+        log.error("Session terminate failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -120,7 +120,7 @@ async def create_zone(name: str, *, interfaces: list[str] | None = None) -> dict
     for chain in ("input", "forward", "output"):
         hook_type = "filter"
         await _run(
-            f"nft add chain inet {name} {chain} "
+            f"nft add chain inet {shlex.quote(name)} {chain} "
             f"{{ type {hook_type} hook {chain} priority 0 \\; policy accept \\; }}",
             sudo=True,
         )

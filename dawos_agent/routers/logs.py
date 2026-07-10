@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from ..auth import ViewerKey
+from ..constants import RE_SAFE_NAME
 from ..models.schemas import LogResponse
 from ..services import logs
 
@@ -23,8 +24,8 @@ router = APIRouter(prefix="/api/v1/logs", tags=["logs"])
 
 @router.get("/tail", response_model=LogResponse)
 async def tail_logs(
-    lines: int = 100,
-    unit: str = "accel-ppp",
+    lines: int = Query(default=100, ge=1, le=10000),
+    unit: str = Query(default="accel-ppp", pattern=RE_SAFE_NAME),
     _key: str = ViewerKey,
 ):
     """Return the last N log lines from a systemd journal unit.
@@ -46,12 +47,13 @@ async def tail_logs(
         data = await logs.get_logs(lines=lines, unit=unit)
         return LogResponse(**data)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/stream")
 async def stream_logs(
-    unit: str = "accel-ppp",
+    unit: str = Query(default="accel-ppp", pattern=RE_SAFE_NAME),
     _key: str = ViewerKey,
 ):
     """Stream live log lines via Server-Sent Events (SSE).

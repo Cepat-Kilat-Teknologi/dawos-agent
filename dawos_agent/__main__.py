@@ -14,16 +14,18 @@ from __future__ import annotations
 
 import uvicorn
 
-from .config import settings
+from .config import require_secure_api_key, settings
 
 
 def main() -> None:
     """Launch the Uvicorn ASGI server with the dawos-agent FastAPI app.
 
-    Reads ``host``, ``port``, and ``log_level`` from the global
+    Refuses to start while ``DAWOS_API_KEY`` is the insecure placeholder,
+    then reads ``host``, ``port``, and ``log_level`` from the global
     :class:`~dawos_agent.config.Settings` singleton and starts the server
     in the foreground with access-log output enabled.
     """
+    require_secure_api_key()
     uvicorn.run(
         "dawos_agent.app:app",
         host=settings.host,

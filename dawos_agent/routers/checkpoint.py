@@ -30,7 +30,7 @@ from ..models.schemas import (
     RevisionCompareResponse,
     RevisionContentResponse,
 )
-from ..services import config_manager
+from ..services import accel, config_manager
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +93,8 @@ async def diff_revision(backup_name: str, _key: str = ViewerKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -128,7 +129,8 @@ async def rollback(backup_name: str, _key: str = AdminKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -210,25 +212,39 @@ async def guarded_apply(req: GuardedApplyRequest, _key: str = AdminKey):
     The operator must call ``POST /confirm`` within *confirm_minutes*
     or the config will automatically revert to the checkpoint.
     """
-    try:
-        # 1. Create checkpoint of current config
-        cp = config_manager.create_checkpoint()
+    # Serialize the whole checkpoint→write→reload→timer sequence so
+    # concurrent applies cannot corrupt the rollback baseline (DA-M06).
+    async with config_manager.apply_lock:
+        try:
+            # 1. Create checkpoint of current config
+            cp = config_manager.create_checkpoint()
 
-        # 2. Write new config (with standard backup)
-        config_manager.write_config(req.content, backup=True)
+            # 2. Write new config (with standard backup)
+            config_manager.write_config(req.content, backup=True)
 
-        # 3. Start auto-rollback timer
-        deadline_seconds = req.confirm_minutes * 60
-        config_manager.start_guarded_timer(deadline_seconds)
+            # 3. Reload accel-ppp so the change actually takes effect during
+            #    the confirm window — otherwise the operator "verifies" the
+            #    old running config and auto-rollback is meaningless (DA-H05).
+            await accel.reload_config()
 
-        return GuardedApplyResponse(
-            success=True,
-            message=f"Config applied — confirm within {req.confirm_minutes}m or auto-rollback",
-            checkpoint=cp or "",
-            confirm_deadline_seconds=deadline_seconds,
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+            # 4. Start auto-rollback timer
+            deadline_seconds = req.confirm_minutes * 60
+            config_manager.start_guarded_timer(deadline_seconds)
+
+            return GuardedApplyResponse(
+                success=True,
+                message=(
+                    f"Config applied — confirm within {req.confirm_minutes}m "
+                    "or auto-rollback"
+                ),
+                checkpoint=cp or "",
+                confirm_deadline_seconds=deadline_seconds,
+            )
+        except Exception as exc:
+            log.error("Operation failed: %s", exc)
+            raise HTTPException(
+                status_code=500, detail="Internal server error"
+            ) from exc
 
 
 @router.post("/confirm", response_model=ConfirmApplyResponse)

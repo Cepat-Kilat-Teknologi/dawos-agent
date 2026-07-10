@@ -95,6 +95,49 @@ async def test_set_egress_error():
 
 
 @pytest.mark.asyncio
+async def test_set_egress_snat_rule_not_duplicated():
+    """An already-present SNAT rule is not re-added on each call (DA-H04)."""
+    added = 0
+
+    async def mock_shell(cmd, **kw):
+        nonlocal added
+        if "list chain" in cmd:
+            return _mock_proc("snat to ip saddr map @cust_egress")
+        if "add rule" in cmd:
+            added += 1
+        return _mock_proc("")
+
+    with patch(
+        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        side_effect=mock_shell,
+    ):
+        await nat.set_egress("10.0.0.2", "1.2.3.4")
+
+    assert added == 0
+
+
+@pytest.mark.asyncio
+async def test_ensure_egress_snat_rule_failure():
+    """A failure adding the SNAT rule must raise (DA-H04)."""
+
+    async def mock_shell(cmd, **kw):
+        if "list chain" in cmd:
+            return _mock_proc("")  # rule absent → attempt add
+        if "add rule" in cmd:
+            return _mock_proc("err", returncode=1)  # add fails
+        return _mock_proc("")
+
+    with (
+        patch(
+            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            side_effect=mock_shell,
+        ),
+        pytest.raises(RuntimeError, match="SNAT rule"),
+    ):
+        await nat.set_egress("10.0.0.2", "1.2.3.4")
+
+
+@pytest.mark.asyncio
 async def test_clear_egress():
     proc = _mock_proc("")
     with patch(

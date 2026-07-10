@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from fastapi.responses import StreamingResponse
 
 from ..auth import ApiKey, ViewerKey
+from ..constants import RE_SAFE_NAME
 from ..models.schemas import (
     QueueStats,
     RateLimitRequest,
@@ -32,7 +33,7 @@ router = APIRouter(prefix="/api/v1/traffic", tags=["traffic"])
 
 @router.get("/stream/{username}")
 async def stream_user_traffic(
-    username: str,
+    username: str = Path(pattern=RE_SAFE_NAME),
     interval: float = 2.0,
     _key: str = ViewerKey,
 ):
@@ -85,7 +86,9 @@ async def stream_aggregate_traffic(
 
 
 @router.get("/queue/{username}", response_model=QueueStats)
-async def queue_stats(username: str, _key: str = ViewerKey):
+async def queue_stats(
+    username: str = Path(pattern=RE_SAFE_NAME), _key: str = ViewerKey
+):
     """Return tc shaper queue statistics for a user's session.
 
     Queries the Linux tc subsystem for the traffic-control qdisc
@@ -108,7 +111,8 @@ async def queue_stats(username: str, _key: str = ViewerKey):
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -121,8 +125,8 @@ async def queue_stats(username: str, _key: str = ViewerKey):
     response_model=RateLimitResponse,
 )
 async def change_ratelimit(
-    username: str,
     req: RateLimitRequest,
+    username: str = Path(pattern=RE_SAFE_NAME),
     _key: str = ApiKey,
 ):
     """Temporarily override a session's shaper rate.
@@ -155,14 +159,17 @@ async def change_ratelimit(
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete(
     "/ratelimit/{username}",
     status_code=204,
 )
-async def restore_ratelimit(username: str, _key: str = ApiKey):
+async def restore_ratelimit(
+    username: str = Path(pattern=RE_SAFE_NAME), _key: str = ApiKey
+):
     """Restore a session's shaper to the RADIUS-assigned value.
 
     Reverts any temporary rate-limit override applied via the
@@ -180,4 +187,5 @@ async def restore_ratelimit(username: str, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -42,7 +42,8 @@ async def flow_status(_key: str = ViewerKey):
         data = await flow_accounting.flow_status()
         return FlowStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/collectors", response_model=FlowCollectorsResponse)
@@ -62,7 +63,8 @@ async def flow_collectors(_key: str = ViewerKey):
         data = await flow_accounting.flow_collectors()
         return FlowCollectorsResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/stats", response_model=FlowStatsResponse)
@@ -82,7 +84,8 @@ async def flow_stats(_key: str = ViewerKey):
         data = await flow_accounting.flow_stats()
         return FlowStatsResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/restart", response_model=FlowRestartResponse)
@@ -102,4 +105,5 @@ async def flow_restart(_key: str = ApiKey):
         data = await flow_accounting.flow_restart()
         return FlowRestartResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

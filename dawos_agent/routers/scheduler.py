@@ -11,7 +11,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from ..auth import ApiKey, ViewerKey
+from ..auth import AdminKey, ApiKey, ViewerKey
 from ..models.schemas import (
     SchedulerJobRequest,
     SchedulerJobResponse,
@@ -43,7 +43,7 @@ async def list_jobs(_key: str = ViewerKey):
 
 
 @router.post("/jobs", response_model=SchedulerJobResponse, status_code=201)
-async def add_job(req: SchedulerJobRequest, _key: str = ApiKey):
+async def add_job(req: SchedulerJobRequest, _key: str = AdminKey):
     """Register a new scheduled job.
 
     Creates a job that runs the given shell command at the specified
@@ -71,7 +71,8 @@ async def add_job(req: SchedulerJobRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete("/jobs/{name}", status_code=204)
@@ -93,7 +94,7 @@ async def remove_job(name: str, _key: str = ApiKey):
 
 
 @router.post("/jobs/{name}/run", response_model=SchedulerRunResponse)
-async def run_job(name: str, _key: str = ApiKey):
+async def run_job(name: str, _key: str = AdminKey):
     """Execute a scheduled job immediately.
 
     Runs the job's command right now regardless of its interval
@@ -120,4 +121,5 @@ async def run_job(name: str, _key: str = ApiKey):
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

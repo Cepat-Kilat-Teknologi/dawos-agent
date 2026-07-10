@@ -178,7 +178,12 @@ async def _loop(name: str) -> None:
         while name in _jobs and _jobs[name]["enabled"]:
             await asyncio.sleep(_jobs[name]["interval_seconds"])
             if name in _jobs and _jobs[name]["enabled"]:
-                await _execute(name)
+                try:
+                    await _execute(name)
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    # A single execution failure must not kill the loop and
+                    # leave the job silently stuck as "enabled" (DA-M12).
+                    log.error("Scheduled job '%s' execution failed: %s", name, exc)
     except asyncio.CancelledError:
         pass
 

@@ -42,7 +42,8 @@ async def vrrp_status(_key: str = ViewerKey):
         data = await vrrp.vrrp_status()
         return VrrpStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/groups/{group}", response_model=VrrpGroupDetailResponse)
@@ -65,7 +66,8 @@ async def vrrp_group_detail(group: str, _key: str = ViewerKey):
         data = await vrrp.vrrp_group_detail(group)
         return VrrpGroupDetailResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/failover", response_model=VrrpActionResponse)
@@ -88,7 +90,8 @@ async def vrrp_failover(req: VrrpFailoverRequest, _key: str = ApiKey):
         data = await vrrp.vrrp_failover(req.group)
         return VrrpActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/restart", response_model=VrrpActionResponse)
@@ -108,4 +111,5 @@ async def vrrp_restart(_key: str = ApiKey):
         data = await vrrp.vrrp_restart()
         return VrrpActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

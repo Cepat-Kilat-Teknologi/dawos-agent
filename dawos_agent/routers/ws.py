@@ -6,8 +6,14 @@ trail, system lifecycle) to connected clients in real time.
 
 Authentication
 --------------
-WebSocket connections authenticate via the ``key`` query parameter::
+WebSocket connections authenticate via the ``X-API-Key`` header
+(preferred) or the ``key`` query parameter (browser fallback)::
 
+    # Header (preferred — does not leak to access logs)
+    ws = new WebSocket("ws://host:8470/ws/events")
+    // with custom headers via a library that supports it
+
+    # Query parameter (browser WebSocket API fallback)
     ws://host:8470/ws/events?key=YOUR_API_KEY
 
 The minimum required role is **viewer** (read-only access).
@@ -62,15 +68,30 @@ router = APIRouter(tags=["websocket"])
 async def _authenticate(websocket: WebSocket, key: str | None) -> bool:
     """Validate the API key and accept or reject the connection.
 
+    Resolution order (DA-M02), preferring transports that do **not**
+    leak the key into access logs:
+
+    1. ``X-API-Key`` header — non-browser clients (CLI, server proxy).
+    2. ``Sec-WebSocket-Protocol`` header — browsers, which cannot set
+       custom headers but *can* pass a subprotocol token.
+    3. ``key`` query parameter — legacy fallback (visible in access logs).
+
     Returns ``True`` if the connection was accepted, ``False`` if
     rejected (the socket is closed with 1008 Policy Violation).
     """
-    if not key:
+    # Prefer header/subprotocol auth to avoid query-string log exposure.
+    resolved_key = (
+        websocket.headers.get("x-api-key")
+        or websocket.headers.get("sec-websocket-protocol")
+        or key
+    )
+
+    if not resolved_key:
         await websocket.close(code=1008, reason="Missing API key")
         return False
 
     resolver = get_resolver()
-    role = resolver.resolve(key)
+    role = resolver.resolve(resolved_key)
 
     if role is None:
         await websocket.close(code=1008, reason="Invalid API key")
@@ -134,9 +155,10 @@ async def ws_events(
 ) -> None:
     """Stream real-time events over WebSocket.
 
-    Authenticates via the ``key`` query parameter, then subscribes
-    to all channels by default.  Clients can refine subscriptions
-    with JSON control messages after connection.
+    Authenticates via the ``X-API-Key`` header (preferred) or the
+    ``key`` query parameter (browser fallback), then subscribes to
+    all channels by default.  Clients can refine subscriptions with
+    JSON control messages after connection.
     """
     if not await _authenticate(websocket, key):
         return

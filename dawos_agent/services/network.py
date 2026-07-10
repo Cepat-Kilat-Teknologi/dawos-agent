@@ -231,19 +231,21 @@ async def configure_interface(
     actions: list[str] = []
 
     if address:
-        await _run_ok(f"ip addr add {address} dev {name}", sudo=True)
+        await _run_ok(f"ip addr add {address} dev {shlex.quote(name)}", sudo=True)
         actions.append(f"added {address}")
 
     if remove_address:
-        await _run_ok(f"ip addr del {remove_address} dev {name}", sudo=True)
+        await _run_ok(
+            f"ip addr del {remove_address} dev {shlex.quote(name)}", sudo=True
+        )
         actions.append(f"removed {remove_address}")
 
     if mtu is not None:
-        await _run_ok(f"ip link set {name} mtu {mtu}", sudo=True)
+        await _run_ok(f"ip link set {shlex.quote(name)} mtu {mtu}", sudo=True)
         actions.append(f"mtu={mtu}")
 
     if state in ("up", "down"):
-        await _run_ok(f"ip link set {name} {state}", sudo=True)
+        await _run_ok(f"ip link set {shlex.quote(name)} {state}", sudo=True)
         actions.append(f"state={state}")
 
     if not actions:
@@ -299,7 +301,7 @@ async def delete_vlan(name: str) -> str:
     Raises:
         RuntimeError: If the ``ip`` command fails.
     """
-    await _run_ok(f"ip link delete {name}", sudo=True)
+    await _run_ok(f"ip link delete {shlex.quote(name)}", sudo=True)
     return f"Deleted {name}"
 
 
@@ -369,7 +371,7 @@ async def set_vlan_state(name: str, state: str) -> str:
     if state not in ("up", "down"):
         raise ValueError(f"Invalid state '{state}', must be 'up' or 'down'")
 
-    await _run_ok(f"ip link set {name} {state}", sudo=True)
+    await _run_ok(f"ip link set {shlex.quote(name)} {state}", sudo=True)
     return f"VLAN {name} set to {state}"
 
 

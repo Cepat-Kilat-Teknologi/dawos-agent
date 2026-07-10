@@ -127,17 +127,18 @@ async def create_group(
     await _ensure_table()
 
     flags = "flags interval \\;" if group_type == "network" else ""
+    safe_name = shlex.quote(name)
     out, rc = await _run(
-        f"nft add set {TABLE} {name} {{ type {nft_type} \\; {flags} }}",
+        f"nft add set {TABLE} {safe_name} {{ type {nft_type} \\; {flags} }}",
         sudo=True,
     )
     if rc != 0:
         raise RuntimeError(f"Failed to create group '{name}': {out}")
 
     if elements:
-        elem_str = ", ".join(elements)
+        elem_str = ", ".join(shlex.quote(e) for e in elements)
         eout, erc = await _run(
-            f"nft add element {TABLE} {name} {{ {elem_str} }}",
+            f"nft add element {TABLE} {safe_name} {{ {elem_str} }}",
             sudo=True,
         )
         if erc != 0:

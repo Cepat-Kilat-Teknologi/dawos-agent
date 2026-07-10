@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import socket
 
 from ..config import settings
 from ..constants import CONNTRACK_RECOMMENDED_MIN, SNMPD_PORT
@@ -184,7 +183,11 @@ async def check_internet() -> dict:
 
 
 async def check_snmp() -> dict:
-    """Check whether the SNMP daemon is running and UDP port 161 is reachable.
+    """Check whether the SNMP daemon is running and UDP port 161 is listening.
+
+    Uses ``ss -lun`` to reliably detect whether a process is actually
+    bound to the SNMP port, instead of the previous UDP sendto approach
+    which always succeeds for connectionless sockets (DA-L05).
 
     Returns:
         A diagnostic result dict with ``name``, ``status``, and ``detail``.
@@ -192,15 +195,10 @@ async def check_snmp() -> dict:
     _, rc = await _run("systemctl is-active snmpd")
     running = rc == 0
 
-    port_open = False
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.settimeout(1)
-            s.bind(("127.0.0.1", 0))
-            s.sendto(b"\x00", ("127.0.0.1", SNMPD_PORT))
-            port_open = True
-    except OSError:
-        pass
+    # Use ss to check if anything is actually listening on the UDP port.
+    # UDP sendto() always succeeds (connectionless) — unreliable (DA-L05).
+    ss_out, ss_rc = await _run(f"ss -lun sport = :{SNMPD_PORT}")
+    port_open = ss_rc == 0 and str(SNMPD_PORT) in ss_out
 
     if running and port_open:
         return {

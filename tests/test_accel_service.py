@@ -69,6 +69,14 @@ pppoe:
     assert result["sessions"]["active"] == 3
 
 
+def test_parse_stat_non_numeric_value():
+    """A non-numeric session count must not raise; default is kept (DA-L02)."""
+    text = "sessions:\n  active: -\n  starting: 2\n"
+    result = parse_stat(text)
+    assert result["sessions"]["active"] == 0  # int('-') fails → default kept
+    assert result["sessions"]["starting"] == 2
+
+
 def test_parse_ippool():
     text = """\
 ippool:

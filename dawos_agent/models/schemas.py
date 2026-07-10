@@ -23,24 +23,47 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
-from ..constants import CONNTRACK_RECOMMENDED_MIN
+from ..constants import (
+    CONNTRACK_RECOMMENDED_MIN,
+)
+from ..constants import (
+    RE_SAFE_ACCEL_CMD as _RE_SAFE_ACCEL_CMD,
+)
+from ..constants import (
+    RE_SAFE_DOMAIN as _RE_SAFE_DOMAIN,
+)
+from ..constants import (
+    RE_SAFE_ELEMENT as _RE_SAFE_ELEMENT,
+)
+from ..constants import (
+    RE_SAFE_IFACE as _RE_SAFE_IFACE,
+)
+from ..constants import (
+    RE_SAFE_IP as _RE_SAFE_IP,
+)
+from ..constants import (
+    RE_SAFE_MAC as _RE_SAFE_MAC,
+)
+from ..constants import (
+    RE_SAFE_NAME as _RE_SAFE_NAME,
+)
+from ..constants import (
+    RE_SAFE_OPTIONS as _RE_SAFE_OPTIONS,
+)
+from ..constants import (
+    RE_SAFE_RATE as _RE_SAFE_RATE,
+)
+from ..constants import (
+    RE_SAFE_ROUTE_DST as _RE_SAFE_ROUTE_DST,
+)
+from ..constants import (
+    RE_SAFE_SYSCTL as _RE_SAFE_SYSCTL,
+)
 
-# ---------------------------------------------------------------------------
-# Shell-safety regex patterns for request fields interpolated into commands.
-# Applied via ``pattern=`` on ``Field`` or ``@field_validator`` to reject
-# shell metacharacters before they reach ``create_subprocess_shell``.
-# ---------------------------------------------------------------------------
-_RE_SAFE_NAME = r"^[a-zA-Z0-9._@-]+$"
-_RE_SAFE_IFACE = r"^[a-zA-Z0-9._-]+$"
-_RE_SAFE_MAC = r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
-_RE_SAFE_RATE = r"^[0-9]+[KMGkmg]?/[0-9]+[KMGkmg]?$"
-_RE_SAFE_IP = r"^[0-9A-Fa-f.:/%]+$"
-_RE_SAFE_ROUTE_DST = r"^(default|[0-9A-Fa-f.:/%]+)$"
-_RE_SAFE_DOMAIN = r"^[a-zA-Z0-9._-]+$"
-_RE_SAFE_SYSCTL = r"^[a-z0-9_]+$"
-_RE_SAFE_OPTIONS = r"^[a-zA-Z0-9._,=/ -]*$"
-_RE_SAFE_ACCEL_CMD = r"^[a-zA-Z0-9 ._=:,/-]+$"
-_RE_SAFE_ELEMENT = r"^[0-9A-Fa-f.:/-]+$"
+# Shell-safety regex patterns (canonical definitions in ``constants.py``)
+# are re-exported here under their historical ``_RE_SAFE_*`` names and
+# applied via ``pattern=`` on ``Field``/``@field_validator`` to reject shell
+# metacharacters in request bodies before they reach a subprocess.
 
 
 # ---------------------------------------------------------------------------

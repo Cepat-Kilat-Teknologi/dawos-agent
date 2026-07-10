@@ -80,16 +80,20 @@ async def set_table_size(size: int) -> dict:
     Returns:
         The updated conntrack configuration (same as :func:`get_config`).
     """
-    await _run(
+    _, rc = await _run(
         f"sysctl -w net.netfilter.nf_conntrack_max={size}",
         sudo=True,
     )
+    if rc != 0:
+        raise RuntimeError(f"Failed to set nf_conntrack_max to {size}")
     # Persist
-    await _run(
+    _, rc = await _run(
         f"tee /etc/sysctl.d/91-dawos-conntrack.conf "
         f"<<< 'net.netfilter.nf_conntrack_max = {size}'",
         sudo=True,
     )
+    if rc != 0:
+        raise RuntimeError("Failed to persist nf_conntrack_max to /etc/sysctl.d")
     return await get_config()
 
 
@@ -144,7 +148,9 @@ async def set_timeout(key: str, seconds: int) -> dict:
     full_key = f"net.netfilter.nf_conntrack_{key}"
     if full_key not in set(_TIMEOUT_KEYS):
         raise ValueError(f"Unknown timeout key: {key}")
-    await _run(f"sysctl -w {full_key}={seconds}", sudo=True)
+    _, rc = await _run(f"sysctl -w {full_key}={seconds}", sudo=True)
+    if rc != 0:
+        raise RuntimeError(f"Failed to set {full_key}")
     return await get_timeouts()
 
 
@@ -230,10 +236,12 @@ async def apply_profile(name: str) -> dict:
         raise ValueError(f"Unknown profile: {name}")
 
     for key, val in _PROFILES[name].items():
-        await _run(
+        _, rc = await _run(
             f"sysctl -w net.netfilter.nf_conntrack_{key}={val}",
             sudo=True,
         )
+        if rc != 0:
+            raise RuntimeError(f"Failed to apply profile '{name}' at {key}")
     return await get_timeouts()
 
 

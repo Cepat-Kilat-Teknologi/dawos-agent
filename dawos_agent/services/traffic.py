@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shlex
 from datetime import datetime, timezone
 
 from . import accel
@@ -33,7 +34,8 @@ async def sample_session_bytes(username: str) -> tuple[int, int] | None:
         session does not exist.
     """
     output = await accel.run_cmd(
-        f"show sessions match username ^{username}$ rx-bytes-raw,tx-bytes-raw",
+        f"show sessions match username ^{shlex.quote(username)}$ "
+        "rx-bytes-raw,tx-bytes-raw",
     )
     rows = accel.parse_table(output)
     if not rows:

@@ -46,7 +46,8 @@ async def get_config(_key: str = ViewerKey):
         data = await conntrack.get_config()
         return ConntrackConfigResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/table-size", response_model=ConntrackConfigResponse)
@@ -70,7 +71,8 @@ async def set_table_size(req: ConntrackTableSizeRequest, _key: str = ApiKey):
         data = await conntrack.set_table_size(req.size)
         return ConntrackConfigResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/timeouts", response_model=ConntrackTimeoutsResponse)
@@ -90,7 +92,8 @@ async def get_timeouts(_key: str = ViewerKey):
         data = await conntrack.get_timeouts()
         return ConntrackTimeoutsResponse(timeouts=data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/timeouts", response_model=ConntrackTimeoutsResponse)
@@ -117,7 +120,8 @@ async def set_timeout(req: ConntrackTimeoutRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/helpers", response_model=ConntrackHelpersListResponse)
@@ -140,7 +144,8 @@ async def list_helpers(_key: str = ViewerKey):
             helpers=[ConntrackHelperResponse(**h) for h in helpers],
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/profiles")
@@ -180,4 +185,5 @@ async def apply_profile(req: ConntrackProfileRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

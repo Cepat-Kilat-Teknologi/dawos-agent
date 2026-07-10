@@ -33,10 +33,10 @@ Requests without a valid key receive:
 ## Common Patterns
 
 - **Success responses** return the documented response model with HTTP 200 (or 201/204 where noted).
-- **Error responses** return `{"detail": "<message>"}` with an appropriate HTTP status code.
+- **Error responses** return `{"detail": "<message>"}` with an appropriate HTTP status code. Client-facing errors (400, 404, 409, 422) include descriptive messages. Server errors (500) return a generic `"Internal server error"` message to prevent information disclosure; full error details are logged server-side.
 - **Validation errors** return HTTP 422 with a JSON array describing the invalid field and constraint. All request body fields are validated against type constraints and regex patterns before reaching service logic. See [Input Validation Reference](validation-rules.md) for the complete list of patterns and per-field constraints.
 - **Rate limiting** — All API endpoints are subject to per-IP rate limiting (default: 120 requests/minute). Health endpoints are exempt. Exceeding the limit returns HTTP 429 with a `Retry-After` header indicating when the client can retry.
-- **Request tracing** — Every response includes an `X-Request-ID` header containing a UUID v4 trace ID. Clients can send their own `X-Request-ID` to correlate requests across services. The same ID appears in server logs when JSON logging is enabled.
+- **Request tracing** — Every response includes an `X-Request-ID` header containing a UUID v4 trace ID. Clients can send their own `X-Request-ID` to correlate requests across services; the value must be printable ASCII (32–126) and at most 128 characters — invalid values are silently replaced with a generated UUID. The same ID appears in server logs when JSON logging is enabled.
 - **SSE endpoints** return `text/event-stream` content type for real-time streaming.
 
 ### Interactive API Documentation
@@ -85,7 +85,7 @@ Lightweight liveness check for load balancers and orchestrators. Always returns 
 {
   "status": "ok",
   "node_name": "bng-node-01",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "uptime_seconds": 3621.5,
   "timestamp": "2026-07-07T00:00:00Z"
 }

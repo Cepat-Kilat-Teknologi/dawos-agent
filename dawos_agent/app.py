@@ -16,11 +16,14 @@ Router layout
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from . import __version__
 from .config import check_config, settings
@@ -81,10 +84,6 @@ async def lifespan(
     graceful stops from crashes.
     """
     setup_logging(level=settings.log_level, fmt=settings.log_format)
-
-    import logging  # pylint: disable=import-outside-toplevel
-
-    log = logging.getLogger("dawos_agent")
     log.info(
         "dawos-agent %s starting on %s (node=%s)",
         __version__,
@@ -94,6 +93,29 @@ async def lifespan(
     check_config(logger=log)
     yield
     log.info("dawos-agent shutting down")
+
+
+log = logging.getLogger("dawos_agent")
+
+
+async def _unhandled_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Return a sanitized 500 for any exception not handled by a route.
+
+    Prevents raw command output, stack traces, or file paths from reaching
+    clients: the real error is logged server-side, keyed by request ID,
+    while the response body carries only ``{"error", "request_id"}``
+    (DA-M03).
+    """
+    rid = getattr(request.state, "request_id", "") or request.headers.get(
+        "x-request-id", ""
+    )
+    log.error("Unhandled exception [%s]: %s", rid, exc)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "internal", "request_id": rid},
+    )
 
 
 app = FastAPI(
@@ -111,6 +133,11 @@ app.add_middleware(AuditLogMiddleware)
 app.add_middleware(RequestIdMiddleware)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Catch-all so uncaught exceptions never leak internal detail (DA-M03).
+app.add_exception_handler(Exception, _unhandled_exception_handler)
+# Added last so it runs first on the request path: reject over-limit
+# callers before any downstream work. Inert when DAWOS_RATE_LIMIT is empty.
+app.add_middleware(SlowAPIMiddleware)
 
 # Public (no auth) ----------------------------------------------------------
 app.include_router(health.router)

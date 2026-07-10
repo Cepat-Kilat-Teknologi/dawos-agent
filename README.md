@@ -373,10 +373,10 @@ dawos-agent/
 │   ├── retry.py             # Exponential backoff retry for accel-cmd
 │   ├── webhooks.py          # Fire-and-forget webhook delivery
 │   ├── models/
-│   │   └── schemas.py       # 185 Pydantic v2 request/response models
+│   │   └── schemas.py       # 188 Pydantic v2 request/response models
 │   ├── routers/             # 34 API router modules (HTTP layer only)
-│   └── services/            # 30 service modules (business logic + shell calls)
-├── tests/                   # 1088 tests
+│   └── services/            # 29 service modules (business logic + shell calls)
+├── tests/                   # 1133 tests
 ├── docs/                    # MkDocs Material documentation
 ├── .github/
 │   └── workflows/
@@ -489,7 +489,7 @@ coverage run -m pytest tests/ && coverage report -m
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 1088 passing | `pytest tests/ -x -q` |
+| Tests | 1133 passing | `pytest tests/ -x -q` |
 | Coverage | 100% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |

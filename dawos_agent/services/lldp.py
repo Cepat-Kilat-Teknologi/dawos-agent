@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ async def lldp_interface(name: str) -> dict:
         ``neighbors`` (list), and ``raw_output``.
     """
     out, rc = await _run(
-        f"lldpcli show neighbors ports {name} -f json",
+        f"lldpcli show neighbors ports {shlex.quote(name)} -f json",
         sudo=True,
     )
     if rc != 0:

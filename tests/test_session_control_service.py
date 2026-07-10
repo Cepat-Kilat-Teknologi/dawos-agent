@@ -148,6 +148,26 @@ async def test_restart_session_not_found():
     assert result["success"] is False
 
 
+@pytest.mark.asyncio
+async def test_restart_session_terminate_fails():
+    with (
+        patch.object(
+            session_control.accel,
+            "ifname_of",
+            AsyncMock(return_value="ppp0"),
+        ),
+        patch.object(
+            session_control.accel,
+            "terminate_session",
+            AsyncMock(side_effect=RuntimeError("accel-cmd timeout")),
+        ),
+    ):
+        result = await session_control.restart_session("user1")
+
+    assert result["success"] is False
+    assert "Terminate failed" in result["message"]
+
+
 # ---------------------------------------------------------------------------
 # drop_by_mac
 # ---------------------------------------------------------------------------

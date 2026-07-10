@@ -38,4 +38,5 @@ async def doctor(_key: str = ViewerKey):
         data = await diagnostics.run_doctor()
         return DiagnosticsResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

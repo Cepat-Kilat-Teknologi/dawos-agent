@@ -83,6 +83,20 @@ async def test_add_pool_duplicate(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_add_pool_invalid_cidr(client, headers):
+    with patch(
+        "dawos_agent.routers.ip_pool_router.ip_pool.add_pool",
+        side_effect=ValueError("Invalid CIDR notation"),
+    ):
+        resp = await client.post(
+            "/api/v1/ip-pool",
+            json={"name": "bad", "ip_range": "not-cidr"},
+            headers=headers,
+        )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_add_pool_reload_failure(client, headers):
     with (
         patch(

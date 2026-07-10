@@ -8,6 +8,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## Unreleased
 
+### Security
+
+- Internal error details no longer leaked to API clients (27 router modules, 106 handlers)
+- `X-Request-ID` header validated against printable ASCII regex before acceptance
+- WebSocket `/ws/events` now prefers `X-API-Key` header over query parameter
+
+### Fixed
+
+- SNMP health check: replaced UDP socket probe with `ss -lun` for reliability
+- IP pool CIDR validation returns HTTP 422 instead of 409
+- `restart_session()` catches `RuntimeError` and reports `success: false`
+- Event handler webhooks now fire actual HTTP POST via `httpx.AsyncClient`
+- Event history bounded to 1000 entries via `deque(maxlen=1000)`
+- `parse_stat()` handles malformed accel-cmd output gracefully
+- Renamed misleading `cache_size` variable
+
+### Changed
+
+- Test suite: 1133 tests, 100% coverage maintained
+
 ---
 
 ## v0.3.2 (2026-07-09)

@@ -57,7 +57,8 @@ async def list_pppoe_interfaces(_key: str = ViewerKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/interfaces", response_model=PppoeResponse)
@@ -97,7 +98,8 @@ async def add_pppoe_interface(req: PppoeAddRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete("/interfaces/{name}", status_code=204)
@@ -125,7 +127,8 @@ async def remove_pppoe_interface(name: str, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -151,7 +154,8 @@ async def list_mac_filter(_key: str = ViewerKey):
         count = len([ln for ln in raw.splitlines() if ln.strip() and ":" in ln])
         return MacFilterListResponse(raw_output=raw, count=count)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/mac-filter", response_model=MacFilterResponse)
@@ -176,7 +180,8 @@ async def add_mac(req: MacFilterRequest, _key: str = ApiKey):
             message=f"Added {req.mac}",
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete("/mac-filter/{mac}", status_code=204)
@@ -194,4 +199,5 @@ async def delete_mac(mac: str, _key: str = ApiKey):
     try:
         await mac_filter("del", mac)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -48,7 +48,8 @@ async def list_pools(_key: str = ViewerKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("", status_code=201, response_model=RemovePoolResponse)
@@ -67,6 +68,7 @@ async def add_pool(req: AddPoolRequest, _key: str = ApiKey):
     Raises:
         HTTPException(404): If the configuration file is not found.
         HTTPException(409): If a pool with the same name already exists.
+        HTTPException(422): If the IP range is not valid CIDR notation.
         HTTPException(500): If the write or reload fails.
     """
     try:
@@ -81,9 +83,13 @@ async def add_pool(req: AddPoolRequest, _key: str = ApiKey):
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
+        # Distinguish CIDR validation (422) from duplicate name (409).
+        msg = str(exc)
+        code = 422 if "Invalid CIDR" in msg else 409
+        raise HTTPException(status_code=code, detail=msg) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Failed to add pool: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.delete("/{name}", status_code=204)
@@ -111,7 +117,8 @@ async def remove_pool(name: str, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/usage", response_model=PoolUsageResponse)
@@ -131,4 +138,5 @@ async def pool_usage(_key: str = ViewerKey):
         data = await ip_pool.pool_usage()
         return PoolUsageResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

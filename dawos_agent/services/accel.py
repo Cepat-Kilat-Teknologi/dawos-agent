@@ -9,6 +9,7 @@ MAC filtering, and configuration reloads.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import shlex
 from typing import Any
@@ -226,7 +227,10 @@ def parse_stat(text: str) -> dict[str, Any]:
             key, val = stripped.split(":", 1)
             key = key.strip()
             if key in ("starting", "active", "finishing"):
-                result["sessions"][key] = int(val.strip())
+                # A different accel-ppp build may emit a non-numeric value
+                # (e.g. "-"); keep the pre-initialised 0 default (DA-L02).
+                with contextlib.suppress(ValueError):
+                    result["sessions"][key] = int(val.strip())
 
     return result
 

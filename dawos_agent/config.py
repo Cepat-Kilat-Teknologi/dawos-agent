@@ -25,6 +25,10 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
+#: Insecure default API key shipped with the code.  The server refuses to
+#: start while this value is in effect (see :func:`require_secure_api_key`).
+_PLACEHOLDER_API_KEY = "changeme-generate-a-strong-key"
+
 
 class Settings(BaseSettings):
     """Central configuration for the dawos-agent process.
@@ -100,7 +104,7 @@ class Settings(BaseSettings):
     port: int = 8470
 
     # --- auth -----------------------------------------------------------------
-    api_key: str = "changeme-generate-a-strong-key"
+    api_key: str = _PLACEHOLDER_API_KEY
     api_keys_file: str = ""
 
     # --- accel-ppp paths ------------------------------------------------------
@@ -196,7 +200,7 @@ def check_config(logger: logging.Logger | None = None) -> list[str]:
     messages: list[str] = []
 
     # Critical: API key must be changed in production
-    if settings.api_key == "changeme-generate-a-strong-key":
+    if settings.api_key == _PLACEHOLDER_API_KEY:
         msg = (
             "DAWOS_API_KEY is using the default placeholder — "
             "generate a strong key for production: "
@@ -219,3 +223,21 @@ def check_config(logger: logging.Logger | None = None) -> list[str]:
                 logger.info(msg)
 
     return messages
+
+
+def require_secure_api_key() -> None:
+    """Abort startup if the API key is still the insecure placeholder.
+
+    Called from the process entry point
+    (:func:`dawos_agent.__main__.main`) so the agent fails closed rather
+    than serving the entire control plane under a publicly known key.
+
+    Raises:
+        RuntimeError: If ``DAWOS_API_KEY`` equals the shipped placeholder.
+    """
+    if settings.api_key == _PLACEHOLDER_API_KEY:
+        raise RuntimeError(
+            "Refusing to start: DAWOS_API_KEY is the insecure default "
+            "placeholder. Generate a strong key, e.g. "
+            'python3 -c "import secrets; print(secrets.token_urlsafe(32))"'
+        )

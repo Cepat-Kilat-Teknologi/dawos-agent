@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -233,17 +233,15 @@ async def test_check_internet_fail():
 
 @pytest.mark.asyncio
 async def test_check_snmp_running():
-    proc = _mock_proc("active")
-    with (
-        patch(
-            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-            return_value=proc,
-        ),
-        patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock,
+    # systemctl → active (rc=0), ss → shows port 161 (rc=0)
+    proc_active = _mock_proc("active")
+    proc_ss = _mock_proc(
+        "Netid  State  Recv-Q Send-Q  Local Address:Port\nudp    UNCONN 0      0      0.0.0.0:161"
+    )
+    with patch(
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        side_effect=[proc_active, proc_ss],
     ):
-        sock_inst = MagicMock()
-        mock_sock.return_value.__enter__ = MagicMock(return_value=sock_inst)
-        mock_sock.return_value.__exit__ = MagicMock(return_value=False)
         result = await diagnostics.check_snmp()
 
     assert result["status"] == "ok"
@@ -251,16 +249,12 @@ async def test_check_snmp_running():
 
 @pytest.mark.asyncio
 async def test_check_snmp_not_running():
-    proc = _mock_proc("inactive", returncode=3)
-    with (
-        patch(
-            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-            return_value=proc,
-        ),
-        patch(
-            "dawos_agent.services.diagnostics.socket.socket",
-            side_effect=OSError("bind fail"),
-        ),
+    # systemctl → inactive (rc=3), ss → no output (rc=1)
+    proc_inactive = _mock_proc("inactive", returncode=3)
+    proc_ss = _mock_proc("", returncode=1)
+    with patch(
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        side_effect=[proc_inactive, proc_ss],
     ):
         result = await diagnostics.check_snmp()
 
@@ -270,16 +264,12 @@ async def test_check_snmp_not_running():
 
 @pytest.mark.asyncio
 async def test_check_snmp_running_port_closed():
-    proc = _mock_proc("active")
-    with (
-        patch(
-            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-            return_value=proc,
-        ),
-        patch(
-            "dawos_agent.services.diagnostics.socket.socket",
-            side_effect=OSError("bind fail"),
-        ),
+    # systemctl → active (rc=0), ss → empty/no 161 (rc=0)
+    proc_active = _mock_proc("active")
+    proc_ss = _mock_proc("Netid  State  Recv-Q Send-Q  Local Address:Port")
+    with patch(
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        side_effect=[proc_active, proc_ss],
     ):
         result = await diagnostics.check_snmp()
 
@@ -350,17 +340,14 @@ async def test_set_conntrack():
 
 @pytest.mark.asyncio
 async def test_snmp_status():
-    proc = _mock_proc("active")
-    with (
-        patch(
-            "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
-            return_value=proc,
-        ),
-        patch("dawos_agent.services.diagnostics.socket.socket") as mock_sock,
+    proc_active = _mock_proc("active")
+    proc_ss = _mock_proc(
+        "Netid  State  Recv-Q Send-Q  Local Address:Port\nudp    UNCONN 0      0      0.0.0.0:161"
+    )
+    with patch(
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        side_effect=[proc_active, proc_ss],
     ):
-        sock_inst = MagicMock()
-        mock_sock.return_value.__enter__ = MagicMock(return_value=sock_inst)
-        mock_sock.return_value.__exit__ = MagicMock(return_value=False)
         result = await diagnostics.snmp_status()
 
     assert result["name"] == "snmp"

@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 
 from ..auth import ApiKey, ViewerKey
+from ..constants import RE_SAFE_IFACE
 from ..models.schemas import (
     DnsConfig,
     DnsResponse,
@@ -61,7 +62,8 @@ async def list_interfaces(_key: str = ViewerKey):
         interfaces = await network.list_interfaces()
         return InterfaceListResponse(count=len(interfaces), interfaces=interfaces)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/interfaces/{name}", response_model=InterfaceDetail)
@@ -88,7 +90,9 @@ async def get_interface(name: str, _key: str = ViewerKey):
 
 @router.put("/interfaces/{name}", response_model=InterfaceConfigResponse)
 async def configure_interface(
-    name: str, req: InterfaceConfigRequest, _key: str = ApiKey
+    req: InterfaceConfigRequest,
+    name: str = Path(pattern=RE_SAFE_IFACE),
+    _key: str = ApiKey,
 ):
     """Configure a network interface.
 
@@ -115,7 +119,10 @@ async def configure_interface(
         )
         return InterfaceConfigResponse(success=True, message=msg, interface=name)
     except RuntimeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(
+            status_code=400, detail="Interface configuration failed"
+        ) from exc
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +162,7 @@ async def create_vlan(req: VlanCreateRequest, _key: str = ApiKey):
 
 
 @router.delete("/vlans/{name}", status_code=204)
-async def delete_vlan(name: str, _key: str = ApiKey):
+async def delete_vlan(name: str = Path(pattern=RE_SAFE_IFACE), _key: str = ApiKey):
     """Delete a VLAN sub-interface.
 
     Removes the named VLAN interface from the system.
@@ -164,12 +171,24 @@ async def delete_vlan(name: str, _key: str = ApiKey):
         name: The VLAN interface name to delete (e.g. ``eth0.100``).
 
     Raises:
-        HTTPException(400): If the VLAN cannot be deleted.
+        HTTPException(404): If the VLAN does not exist.
+        HTTPException(500): If the delete otherwise fails.
     """
     try:
         await network.delete_vlan(name)
     except RuntimeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        msg = str(exc).lower()
+        if (
+            "cannot find" in msg
+            or "no such" in msg
+            or "does not exist" in msg
+            or "not found" in msg
+        ):
+            raise HTTPException(
+                status_code=404, detail=f"VLAN '{name}' not found"
+            ) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/vlans", response_model=VlanListResponse)
@@ -183,11 +202,16 @@ async def list_vlans(_key: str = ViewerKey):
         vlans = await network.list_vlans()
         return VlanListResponse(count=len(vlans), vlans=vlans)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/vlans/{name}", response_model=VlanStateResponse)
-async def set_vlan_state(name: str, req: VlanStateRequest, _key: str = ApiKey):
+async def set_vlan_state(
+    req: VlanStateRequest,
+    name: str = Path(pattern=RE_SAFE_IFACE),
+    _key: str = ApiKey,
+):
     """Enable or disable a VLAN interface (bring up/down)."""
     try:
         msg = await network.set_vlan_state(name, req.state)
@@ -225,7 +249,8 @@ async def list_routes(_key: str = ViewerKey):
         routes = await network.list_routes()
         return RouteListResponse(count=len(routes), routes=routes)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/routes", response_model=RouteResponse)
@@ -300,7 +325,8 @@ async def get_dns(_key: str = ViewerKey):
         config = network.get_dns()
         return DnsResponse(success=True, message="OK", config=config)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/dns", response_model=DnsResponse)
@@ -330,4 +356,5 @@ async def set_dns(req: DnsUpdateRequest, _key: str = ApiKey):
         )
         return DnsResponse(success=True, message="DNS updated", config=config)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

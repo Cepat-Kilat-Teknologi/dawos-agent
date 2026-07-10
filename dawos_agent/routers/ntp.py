@@ -36,7 +36,8 @@ async def ntp_status_endpoint(_key: str = ViewerKey):
         data = await ntp.ntp_status()
         return NtpStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/sources", response_model=NtpSourcesResponse)
@@ -56,4 +57,5 @@ async def ntp_sources_endpoint(_key: str = ViewerKey):
         data = await ntp.ntp_sources()
         return NtpSourcesResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

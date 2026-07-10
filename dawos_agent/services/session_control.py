@@ -10,6 +10,7 @@ MAC-based bulk termination for BNG session management.
 from __future__ import annotations
 
 import logging
+import shlex
 
 from . import accel
 
@@ -26,7 +27,7 @@ async def session_by_sid(sid: str) -> dict | None:
         A dictionary with session fields, or ``None`` if not found.
     """
     cols = "sid,ifname,username,ip,calling-sid,rate-limit,type,state,uptime"
-    output = await accel.run_cmd(f"show sessions match sid ^{sid}$ {cols}")
+    output = await accel.run_cmd(f"show sessions match sid ^{shlex.quote(sid)}$ {cols}")
     rows = accel.parse_table(output)
     return rows[0] if rows else None
 
@@ -41,7 +42,7 @@ async def session_by_ip(ip: str) -> dict | None:
         A dictionary with session fields, or ``None`` if not found.
     """
     cols = "sid,ifname,username,ip,calling-sid,type,state,uptime"
-    output = await accel.run_cmd(f"show sessions match ip ^{ip}$ {cols}")
+    output = await accel.run_cmd(f"show sessions match ip ^{shlex.quote(ip)}$ {cols}")
     rows = accel.parse_table(output)
     return rows[0] if rows else None
 
@@ -61,7 +62,7 @@ async def session_snapshot(username: str) -> dict:
         "type,state,uptime,rx-bytes,tx-bytes,rx-pkts,tx-pkts"
     )
     output = await accel.run_cmd(
-        f"show sessions match username ^{username}$ {cols}",
+        f"show sessions match username ^{shlex.quote(username)}$ {cols}",
     )
     rows = accel.parse_table(output)
     return {
@@ -90,7 +91,16 @@ async def restart_session(username: str) -> dict:
             "message": f"No active session for {username}",
         }
 
-    await accel.terminate_session(username=username)
+    try:
+        await accel.terminate_session(username=username)
+    except RuntimeError as exc:
+        log.warning("Failed to terminate session for %s: %s", username, exc)
+        return {
+            "success": False,
+            "username": username,
+            "message": f"Terminate failed for {username}",
+        }
+
     log.info("Restarted session for %s (was on %s)", username, ifname)
 
     return {

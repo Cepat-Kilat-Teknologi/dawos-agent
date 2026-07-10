@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 
 from ..auth import ApiKey, ViewerKey
+from ..constants import RE_SAFE_IP
 from ..models.schemas import (
     BoxEgressRequest,
     BoxEgressResponse,
@@ -59,7 +60,8 @@ async def firewall_status(_key: str = ViewerKey):
     try:
         return await firewall.get_firewall_status()
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/rules", response_model=FirewallRulesetResponse)
@@ -79,7 +81,8 @@ async def list_rules(_key: str = ViewerKey):
         raw, count = await firewall.list_ruleset()
         return FirewallRulesetResponse(raw_output=raw, rules_count=count)
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +140,8 @@ async def save_rules(_key: str = ApiKey):
         msg = await firewall.save_ruleset()
         return {"success": True, "message": msg}
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -162,7 +166,8 @@ async def validate_ruleset(
         result = await firewall.validate_ruleset(ruleset)
         return NftValidateResponse(**result)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -187,7 +192,8 @@ async def get_sysctl(_key: str = ViewerKey):
         status = await firewall.get_sysctl()
         return SysctlResponse(success=True, message="OK", status=status)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/sysctl", response_model=SysctlResponse)
@@ -219,7 +225,8 @@ async def set_sysctl(req: SysctlUpdateRequest, _key: str = ApiKey):
             status=status,
         )
     except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -244,7 +251,8 @@ async def get_egress_map(_key: str = ViewerKey):
         entries = await nat.get_egress_map()
         return NatEgressMapResponse(entries=entries, count=len(entries))
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/nat/egress", response_model=NatEgressResponse)
@@ -271,7 +279,7 @@ async def set_egress(req: NatEgressSetRequest, _key: str = ApiKey):
 
 
 @router.delete("/nat/egress/{customer_ip}", status_code=204)
-async def clear_egress(customer_ip: str, _key: str = ApiKey):
+async def clear_egress(customer_ip: str = Path(pattern=RE_SAFE_IP), _key: str = ApiKey):
     """Remove a subscriber's egress NAT mapping.
 
     Deletes the nftables map entry for the given subscriber IP,
@@ -281,12 +289,25 @@ async def clear_egress(customer_ip: str, _key: str = ApiKey):
         customer_ip: The subscriber IP whose mapping should be removed.
 
     Raises:
-        HTTPException(400): If the mapping removal fails.
+        HTTPException(404): If the egress mapping does not exist.
+        HTTPException(500): If the removal otherwise fails.
     """
     try:
         await nat.clear_egress(customer_ip)
     except RuntimeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        msg = str(exc).lower()
+        if (
+            "no such" in msg
+            or "does not exist" in msg
+            or "cannot" in msg
+            or "not found" in msg
+        ):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Egress mapping for '{customer_ip}' not found",
+            ) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/nat/public-ip", response_model=NatEgressResponse)
@@ -316,7 +337,9 @@ async def add_public_ip(req: NatPublicIpRequest, _key: str = ApiKey):
     "/nat/public-ip/{public_ip}",
     status_code=204,
 )
-async def remove_public_ip(public_ip: str, _key: str = ApiKey):
+async def remove_public_ip(
+    public_ip: str = Path(pattern=RE_SAFE_IP), _key: str = ApiKey
+):
     """Remove a public IP address from the uplink interface.
 
     Removes a secondary IP address previously bound for egress NAT.
@@ -350,7 +373,8 @@ async def full_nat_status(_key: str = ViewerKey):
         data = await nat.nat_status()
         return NatStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/nat/box-egress", response_model=BoxEgressResponse)
@@ -374,7 +398,8 @@ async def box_egress_status(_key: str = ViewerKey):
             enabled=data["enabled"],
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/nat/box-egress", response_model=BoxEgressResponse)
@@ -405,7 +430,8 @@ async def box_egress_toggle(req: BoxEgressRequest, _key: str = ApiKey):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -430,7 +456,8 @@ async def conntrack_status(_key: str = ViewerKey):
         data = await diagnostics.get_conntrack()
         return ConntrackResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/conntrack", response_model=ConntrackResponse)
@@ -456,7 +483,8 @@ async def conntrack_tune(
         data = await diagnostics.set_conntrack(req.max_value)
         return ConntrackResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -485,4 +513,5 @@ async def snmp_status(_key: str = ViewerKey):
             detail=data.get("detail", ""),
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

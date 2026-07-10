@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 
 from ..auth import ApiKey, ViewerKey
+from ..constants import RE_SAFE_MATCH, RE_SAFE_NAME
 from ..models.schemas import (
     DropByMacRequest,
     DropByMacResponse,
@@ -29,7 +30,9 @@ router = APIRouter(prefix="/api/v1/sessions/control", tags=["session-control"])
 
 
 @router.get("/by-sid/{sid}", response_model=SessionByIdResponse)
-async def get_session_by_sid(sid: str, _key: str = ViewerKey):
+async def get_session_by_sid(
+    sid: str = Path(pattern=RE_SAFE_MATCH), _key: str = ViewerKey
+):
     """Look up a PPPoE session by accel-ppp session ID.
 
     Searches active sessions for the given SID and returns the
@@ -51,11 +54,14 @@ async def get_session_by_sid(sid: str, _key: str = ViewerKey):
             session=session,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/by-ip/{ip}", response_model=SessionByIdResponse)
-async def get_session_by_ip(ip: str, _key: str = ViewerKey):
+async def get_session_by_ip(
+    ip: str = Path(pattern=RE_SAFE_MATCH), _key: str = ViewerKey
+):
     """Look up a PPPoE session by assigned IP address.
 
     Searches active sessions for the given IP and returns the
@@ -77,11 +83,14 @@ async def get_session_by_ip(ip: str, _key: str = ViewerKey):
             session=session,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/snapshot/{username}", response_model=SessionSnapshotResponse)
-async def session_snapshot(username: str, _key: str = ViewerKey):
+async def session_snapshot(
+    username: str = Path(pattern=RE_SAFE_NAME), _key: str = ViewerKey
+):
     """Get a detailed session snapshot with traffic counters.
 
     Returns comprehensive session information including interface
@@ -101,7 +110,8 @@ async def session_snapshot(username: str, _key: str = ViewerKey):
         snap = await session_control.session_snapshot(username)
         return SessionSnapshotResponse(**snap)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/restart", response_model=RestartSessionResponse)
@@ -124,7 +134,8 @@ async def restart_session(req: RestartSessionRequest, _key: str = ApiKey):
         result = await session_control.restart_session(req.username)
         return RestartSessionResponse(**result)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/drop-by-mac", response_model=DropByMacResponse)
@@ -148,4 +159,5 @@ async def drop_by_mac(req: DropByMacRequest, _key: str = ApiKey):
         result = await session_control.drop_by_mac(req.mac)
         return DropByMacResponse(**result)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ async def get_logs(
         RuntimeError: If the journalctl command fails.
     """
     out, rc = await _run(
-        f"journalctl -u {unit} --no-pager -n {lines}",
+        f"journalctl -u {shlex.quote(unit)} --no-pager -n {lines}",
     )
     if rc != 0:
         raise RuntimeError(f"Failed to read logs: {out}")
@@ -102,7 +103,7 @@ async def log_stream_events(
     Yields:
         SSE-formatted strings containing JSON log line data.
     """
-    cmd = f"journalctl -u {unit} --no-pager -f -n 0"
+    cmd = f"journalctl -u {shlex.quote(unit)} --no-pager -f -n 0"
     log.debug("exec (stream): %s", cmd)
 
     proc = await asyncio.create_subprocess_shell(

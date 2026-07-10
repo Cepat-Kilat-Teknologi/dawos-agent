@@ -18,7 +18,7 @@ curl -H "X-API-Key: your-key" http://bng-node:8470/api/v1/system/info
 curl http://bng-node:8470/api/v1/system/info
 ```
 
-The WebSocket endpoint at `/ws/events` accepts the API key as a `key` query parameter since WebSocket clients cannot set custom headers in all environments.
+The WebSocket endpoint at `/ws/events` accepts the API key via the `X-API-Key` header (preferred) or as a `key` query parameter (fallback). Header-based authentication is preferred because query parameters may appear in server access logs and browser history.
 
 ### Generating a Strong API Key
 
@@ -179,6 +179,21 @@ This defense is applied in the following service modules:
 
 All API request bodies are validated by Pydantic v2 models before reaching any business logic. Invalid requests receive HTTP 422 with structured error details.
 
+---
+
+## Error Response Hardening
+
+All HTTP 500 error responses return a generic `"Internal server error"` message
+instead of exposing raw exception text. This prevents information disclosure of
+internal paths, stack traces, and system details to API clients.
+
+Client-facing 4xx errors (400, 404, 409, 422) retain descriptive messages since
+those contain controlled, non-sensitive text that helps callers diagnose request
+issues.
+
+Internal error details are logged server-side at ERROR level with the full
+exception message for debugging purposes.
+
 Validation includes:
 
 - **Type constraints** -- integers, strings, booleans, enums
@@ -213,9 +228,10 @@ def verify_webhook(payload: bytes, signature: str, secret: str) -> bool:
 
 ### Delivery
 
-- Webhook delivery is fire-and-forget (non-blocking).
+- Webhook delivery sends an actual HTTP POST to the configured URL via `httpx.AsyncClient` with a 10-second timeout.
 - Failures do not affect the API response.
-- The webhook payload includes: method, path, client IP, request ID, timestamp, and status code.
+- The webhook payload includes: event type, hook name, and optional context payload as JSON.
+- The response status code is captured and `success` is set based on whether the status is below 400.
 
 ---
 
@@ -248,7 +264,11 @@ Every HTTP request receives a UUID v4 trace ID:
 - Injected into all log records for that request
 - Included in webhook payloads and audit log entries
 
-If the client sends an `X-Request-ID` header, the agent preserves that value instead of generating a new one. This enables distributed tracing across services.
+If the client sends an `X-Request-ID` header, the agent validates it against
+the pattern `[\x20-\x7E]{1,128}` (printable ASCII, max 128 characters). Valid
+values are preserved for distributed tracing; invalid or missing values are
+replaced with a generated UUID v4. This prevents header injection and log
+pollution from malformed trace IDs.
 
 ---
 

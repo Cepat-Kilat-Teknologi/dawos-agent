@@ -34,6 +34,10 @@ with os.fdopen(_keys_fd, "w") as f:
 os.environ["DAWOS_API_KEY"] = _TEST_PRIMARY_KEY
 os.environ["DAWOS_API_KEYS_FILE"] = _keys_path
 os.environ["DAWOS_ACCEL_CMD"] = "/usr/bin/accel-cmd"
+# Disable per-IP rate limiting for the shared app: the suite fires far more
+# than the default 120/min from a single TestClient IP. Enforcement is
+# covered independently in tests/test_rate_limit.py.
+os.environ["DAWOS_RATE_LIMIT"] = ""
 
 from dawos_agent.app import app  # noqa: E402
 

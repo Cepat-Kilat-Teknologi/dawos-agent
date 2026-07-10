@@ -42,7 +42,8 @@ async def dns_fwd_status(_key: str = ViewerKey):
         data = await dns_forwarding.status()
         return DnsForwardingStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/config", response_model=DnsForwardingConfigResponse)
@@ -62,7 +63,8 @@ async def dns_fwd_config(_key: str = ViewerKey):
         data = await dns_forwarding.get_config()
         return DnsForwardingConfigResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.put("/config", response_model=DnsForwardingConfigResponse)
@@ -89,7 +91,8 @@ async def set_dns_fwd(req: DnsForwardingSetRequest, _key: str = ApiKey):
         code = 503 if "not installed" in msg else 500
         raise HTTPException(status_code=code, detail=msg) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/flush", response_model=DnsForwardingFlushResponse)
@@ -113,4 +116,5 @@ async def flush_dns_cache(_key: str = ApiKey):
         code = 503 if "not installed" in msg else 500
         raise HTTPException(status_code=code, detail=msg) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

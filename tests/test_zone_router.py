@@ -155,6 +155,31 @@ async def test_delete_zone_error(client, headers):
 
 
 @pytest.mark.asyncio
+async def test_create_zone_reports_service_failure(client, headers):
+    """A service ``success: False`` must surface as 409, not a false 201."""
+    with patch(
+        "dawos_agent.routers.zone_router.zone_firewall.create_zone",
+        new_callable=AsyncMock,
+        return_value={"success": False, "message": "table exists"},
+    ):
+        resp = await client.post("/api/v1/zones", headers=headers, json={"name": "dmz"})
+    assert resp.status_code == 409
+    assert "exists" in resp.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_delete_zone_reports_service_failure(client, headers):
+    """A service ``success: False`` must surface as 404, not a false 204."""
+    with patch(
+        "dawos_agent.routers.zone_router.zone_firewall.delete_zone",
+        new_callable=AsyncMock,
+        return_value={"success": False, "message": "no such table"},
+    ):
+        resp = await client.delete("/api/v1/zones/nope", headers=headers)
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_create_zone_rejects_unsafe_interface(client, headers):
     """Pydantic validator rejects shell metacharacters in interface list."""
     resp = await client.post(

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ async def _ensure_egress_table() -> None:
     when the object already exists, so this is safe to call on every
     write operation.
     """
-    cmds = [
+    base_cmds = [
         f"nft add table ip {TABLE_NAME}",
         (
             f"nft add map ip {TABLE_NAME} cust_egress "
@@ -97,17 +98,24 @@ async def _ensure_egress_table() -> None:
             f"nft add chain ip {TABLE_NAME} postrouting "
             "{ type nat hook postrouting priority 100 \\; }"
         ),
-        (
-            f"nft add rule ip {TABLE_NAME} postrouting "
-            "snat to ip saddr map @cust_egress"
-        ),
     ]
-    for cmd in cmds:
+    for cmd in base_cmds:
         _, rc = await _run(cmd, sudo=True)
         if rc != 0:
             raise RuntimeError(
                 f"Cannot ensure nftables table '{TABLE_NAME}' — " f"failed at: {cmd}"
             )
+    # ``nft add rule`` always appends — add the SNAT rule only when it is
+    # not already present, otherwise the postrouting chain accumulates a
+    # duplicate rule on every egress operation and grows unbounded (DA-H04).
+    snat_rule = "snat to ip saddr map @cust_egress"
+    existing, _ = await _run(f"nft list chain ip {TABLE_NAME} postrouting", sudo=True)
+    if snat_rule not in existing:
+        _, rc = await _run(
+            f"nft add rule ip {TABLE_NAME} postrouting {snat_rule}", sudo=True
+        )
+        if rc != 0:
+            raise RuntimeError(f"Cannot ensure nftables SNAT rule for '{TABLE_NAME}'")
 
 
 # ---------------------------------------------------------------------------
@@ -185,7 +193,8 @@ async def clear_egress(customer_ip: str) -> str:
     """
     await _ensure_egress_table()
     await _run_ok(
-        f"nft delete element ip {TABLE_NAME} cust_egress " f"{{ {customer_ip} }}",
+        f"nft delete element ip {TABLE_NAME} cust_egress "
+        f"{{ {shlex.quote(customer_ip)} }}",
         sudo=True,
     )
     await _persist()
@@ -213,7 +222,7 @@ async def add_public_ip(
     if not interface:
         interface = await _detect_uplink()
     await _run_ok(
-        f"ip addr add {public_ip}/32 dev {interface}",
+        f"ip addr add {shlex.quote(public_ip)}/32 dev {shlex.quote(interface)}",
         sudo=True,
     )
     return f"Added {public_ip} to {interface}"
@@ -235,7 +244,7 @@ async def remove_public_ip(
     if not interface:
         interface = await _detect_uplink()
     await _run_ok(
-        f"ip addr del {public_ip}/32 dev {interface}",
+        f"ip addr del {shlex.quote(public_ip)}/32 dev {shlex.quote(interface)}",
         sudo=True,
     )
     return f"Removed {public_ip} from {interface}"

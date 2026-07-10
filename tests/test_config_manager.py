@@ -3,7 +3,7 @@
 import contextlib
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -35,6 +35,37 @@ def test_read_config_not_found():
         pytest.raises(FileNotFoundError),
     ):
         config_manager.read_config()
+
+
+def test_read_backup_valid_and_rejects_traversal(tmp_config):
+    """read_backup serves flat backups but rejects traversal names (DA-H01)."""
+    _, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    good = backup_dir / "accel-ppp.conf.20260101.bak"
+    good.write_text("[ppp]\nverbose=1\n")
+    with patch.object(config_manager, "BACKUP_DIR", backup_dir):
+        content, size, _ = config_manager.read_backup(good.name)
+        assert "[ppp]" in content
+        assert size > 0
+        for bad in ("../accel-ppp.conf", "../../etc/passwd", "..", "sub/x.bak"):
+            with pytest.raises(FileNotFoundError):
+                config_manager.read_backup(bad)
+
+
+def test_diff_and_rollback_reject_traversal(tmp_config):
+    """diff/compare/rollback must reject path-traversal names (DA-H01)."""
+    conf, backup_dir = tmp_config
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    with (
+        patch.object(config_manager, "ACCEL_CONFIG", conf),
+        patch.object(config_manager, "BACKUP_DIR", backup_dir),
+    ):
+        with pytest.raises(FileNotFoundError):
+            config_manager.diff_with_backup("../../etc/passwd")
+        with pytest.raises(FileNotFoundError):
+            config_manager.diff_two_revisions("..", "x")
+        with pytest.raises(FileNotFoundError):
+            config_manager.rollback_to("../../etc/passwd")
 
 
 def test_write_config_with_backup(tmp_config):
@@ -253,6 +284,7 @@ async def test_auto_rollback(tmp_config):
     with (
         patch.object(config_manager, "ACCEL_CONFIG", conf),
         patch.object(config_manager, "BACKUP_DIR", backup_dir),
+        patch.object(config_manager.accel, "reload_config", new_callable=AsyncMock),
     ):
         config_manager.create_checkpoint()
         # Overwrite config

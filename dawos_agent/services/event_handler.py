@@ -10,15 +10,24 @@ execute — either as HTTP webhook POSTs or local shell commands.
 from __future__ import annotations
 
 import asyncio
+import collections
+import json
 import logging
 from datetime import datetime, timezone
 
+import httpx
+
 log = logging.getLogger(__name__)
+
+#: Upper bound on retained event-history entries.  Prevents unbounded
+#: in-memory growth on a long-running agent (DA-M11); mirrors the audit
+#: ring buffer in :mod:`dawos_agent.middleware`.
+_EVENT_LOG_MAXLEN = 1000
 
 # In-memory hook store -------------------------------------------------------
 
 _hooks: dict[str, dict] = {}
-_event_log: list[dict] = []
+_event_log: collections.deque[dict] = collections.deque(maxlen=_EVENT_LOG_MAXLEN)
 
 _VALID_EVENTS = frozenset(
     {
@@ -130,10 +139,30 @@ async def fire_event(event: str, payload: dict | None = None) -> dict:
 
         try:
             if action.startswith(("http://", "https://")):
-                # Webhook — simulate POST (actual HTTP in production)
+                # Webhook — fire actual HTTP POST (DA-M10).
                 result["type"] = "webhook"
-                result["success"] = True
-                log.info("Webhook fired: %s → %s", hook["name"], action)
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    body = json.dumps(
+                        {
+                            "event": event,
+                            "hook": hook["name"],
+                            "payload": payload or {},
+                        },
+                        default=str,
+                    )
+                    resp = await client.post(
+                        action,
+                        content=body,
+                        headers={"Content-Type": "application/json"},
+                    )
+                    result["success"] = resp.status_code < 400
+                    result["status_code"] = resp.status_code
+                log.info(
+                    "Webhook fired: %s → %s (status=%d)",
+                    hook["name"],
+                    action,
+                    resp.status_code,
+                )
             else:
                 # Shell command
                 proc = await asyncio.create_subprocess_shell(
@@ -173,7 +202,7 @@ def event_history(limit: int = 50) -> list[dict]:
     Returns:
         A list of event log dicts, newest first.
     """
-    return list(reversed(_event_log[-limit:]))
+    return list(reversed(list(_event_log)[-limit:]))
 
 
 def clear_history() -> int:

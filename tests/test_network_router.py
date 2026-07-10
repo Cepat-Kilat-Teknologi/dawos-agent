@@ -237,15 +237,28 @@ async def test_delete_vlan(client, headers):
 
 
 @pytest.mark.asyncio
-async def test_delete_vlan_error(client, headers):
+async def test_delete_vlan_not_found(client, headers):
     with patch(
         "dawos_agent.routers.network.network.delete_vlan",
         new_callable=AsyncMock,
-        side_effect=RuntimeError("not found"),
+        side_effect=RuntimeError('Cannot find device "eth0.999"'),
     ):
         resp = await client.delete("/api/v1/network/vlans/eth0.999", headers=headers)
 
-    assert resp.status_code == 400
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_vlan_server_error(client, headers):
+    with patch(
+        "dawos_agent.routers.network.network.delete_vlan",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("unexpected boom"),
+    ):
+        resp = await client.delete("/api/v1/network/vlans/eth0.100", headers=headers)
+
+    assert resp.status_code == 500
+    assert resp.json()["detail"] == "Internal server error"
 
 
 # ---------------------------------------------------------------------------

@@ -19,7 +19,7 @@ Use FastAPI with Uvicorn as the ASGI server, Pydantic v2 for request/response va
 
 ### Consequences
 
-- Automatic OpenAPI/Swagger documentation for all 138 endpoints.
+- Automatic OpenAPI/Swagger documentation for all 149 endpoints.
 - Native async support for subprocess-based service calls without blocking the event loop.
 - Pydantic v2 provides strict type validation and serialization with minimal boilerplate.
 - Python 3.9+ requirement excludes older distributions (Ubuntu 18.04 and below).
@@ -338,3 +338,41 @@ Implement a checkpoint system that:
 - Checkpoint storage is local to the BNG node — no external dependencies.
 - The `dawos` user needs write access to `/etc/accel-ppp.d/` (documented in installation guide).
 - No automatic rollback on failure — the operator must explicitly trigger rollback if the health check fails after applying changes. The deploy wizard in dawos-cli automates this workflow.
+
+---
+
+## ADR-015: Security Hardening — Error Responses and Input Validation
+
+**Status:** Accepted  
+**Date:** 2026-07-10
+
+### Context
+
+A comprehensive security review of the codebase identified several areas where the API exposed more information than necessary or handled edge cases incorrectly:
+
+1. HTTP 500 error handlers forwarded raw `str(exc)` to clients, potentially leaking internal paths, library names, and system details.
+2. Caller-supplied `X-Request-ID` headers were accepted verbatim without validation, allowing header injection and log pollution.
+3. The WebSocket endpoint only accepted API keys via query parameters, which appear in server access logs.
+4. The SNMP health check used an unreliable UDP socket probe that produced false positives.
+5. Event handler webhooks simulated success without making actual HTTP requests.
+6. The in-memory event log had no size bound, creating a potential memory leak.
+
+### Decision
+
+Apply targeted fixes across the codebase:
+
+1. **Generic error responses**: All 27 router modules now log the full exception server-side at ERROR level and return `"Internal server error"` to clients. Client-facing 4xx errors retain descriptive messages.
+2. **Request ID validation**: Validate against `[\x20-\x7E]{1,128}` (printable ASCII, max 128 chars). Invalid values are replaced with a generated UUID v4.
+3. **WebSocket header auth**: Check `X-API-Key` header first, fall back to query parameter only when absent.
+4. **SNMP check**: Replace `socket.sendto()` with `ss -lun sport = :161` for reliable port listening detection.
+5. **Webhook execution**: Use `httpx.AsyncClient` with a 10-second timeout for actual HTTP POST delivery.
+6. **Event log bound**: Wrap in `collections.deque(maxlen=1000)`.
+
+### Consequences
+
+- API clients can no longer extract internal system information from error responses. Operators must check server logs for debugging.
+- Distributed tracing still works — valid `X-Request-ID` values are preserved; only malformed values are rejected.
+- WebSocket clients that can set headers should prefer `X-API-Key` header over query parameter. The query parameter remains for environments where headers are not available.
+- The SNMP check now has an additional subprocess call (`ss`) per invocation, adding negligible latency.
+- Webhook hooks now create real network connections, which means they can fail on unreachable URLs (failures are caught and logged).
+- Event history is automatically bounded; operators monitoring high-frequency events see only the most recent 1000 entries.

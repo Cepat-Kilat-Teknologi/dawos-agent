@@ -43,7 +43,8 @@ async def monitoring_status(_key: str = ViewerKey):
         data = await monitoring.monitoring_status()
         return MonitoringStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/metrics/{service}", response_model=ExporterMetricsResponse)
@@ -66,7 +67,8 @@ async def exporter_metrics(service: str, _key: str = ViewerKey):
         data = await monitoring.exporter_metrics(service)
         return ExporterMetricsResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/configure", response_model=ExporterActionResponse)
@@ -89,7 +91,8 @@ async def configure_exporter(req: ConfigureExporterRequest, _key: str = ApiKey):
         data = await monitoring.configure_exporter(req.service, enable=req.enable)
         return ExporterActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/restart/{service}", response_model=ExporterRestartResponse)
@@ -112,4 +115,5 @@ async def exporter_restart(service: str, _key: str = ApiKey):
         data = await monitoring.exporter_restart(service)
         return ExporterRestartResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

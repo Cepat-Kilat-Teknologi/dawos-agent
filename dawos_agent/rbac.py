@@ -26,6 +26,7 @@ from __future__ import annotations
 import enum
 import json
 import logging
+import secrets
 from pathlib import Path
 
 log = logging.getLogger(__name__)
@@ -152,12 +153,17 @@ class KeyResolver:
             The resolved :class:`Role`, or ``None`` if the key is not
             recognised by any source.
         """
-        # Check extra keys first (keys file)
-        if api_key in self.extra_keys:
-            return self.extra_keys[api_key]
+        # Constant-time comparison against every known key to avoid
+        # leaking key material through byte-wise timing differences.
+        candidate = api_key.encode("utf-8")
 
-        # Fall back to primary key (always admin)
-        if api_key == self._primary_key:
+        # Check extra keys first (keys file).
+        for known_key, role in self.extra_keys.items():
+            if secrets.compare_digest(candidate, known_key.encode("utf-8")):
+                return role
+
+        # Fall back to primary key (always admin).
+        if secrets.compare_digest(candidate, self._primary_key.encode("utf-8")):
             return Role.ADMIN
 
         return None

@@ -160,6 +160,30 @@ async def test_loop_disabled_exits():
     await scheduler._loop("dis-test")
 
 
+@pytest.mark.asyncio
+async def test_loop_survives_execute_error():
+    """A transient _execute error must be logged, not kill the loop (DA-M12)."""
+    scheduler._jobs["err-loop"] = {
+        "name": "err-loop",
+        "command": "echo x",
+        "interval_seconds": 0,
+        "enabled": True,
+        "last_run": None,
+        "last_result": None,
+        "run_count": 0,
+    }
+
+    def boom(_name):
+        # Disable the job so the loop exits after this failed iteration.
+        scheduler._jobs["err-loop"]["enabled"] = False
+        raise RuntimeError("boom")
+
+    with patch.object(scheduler, "_execute", new=AsyncMock(side_effect=boom)) as mock:
+        await scheduler._loop("err-loop")  # must not raise
+
+    assert mock.call_count == 1
+
+
 # ---------------------------------------------------------------------------
 # _start_loop / _stop_loop
 # ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -178,6 +178,10 @@ async def test_guarded_apply(client, headers):
         ),
         patch(
             "dawos_agent.routers.checkpoint.config_manager.start_guarded_timer",
+        ),
+        patch(
+            "dawos_agent.routers.checkpoint.accel.reload_config",
+            new_callable=AsyncMock,
         ),
     ):
         resp = await client.post(

@@ -42,7 +42,8 @@ async def dhcp_status(_key: str = ViewerKey):
         data = await dhcp.dhcp_status()
         return DhcpStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/leases", response_model=DhcpLeasesResponse)
@@ -62,7 +63,8 @@ async def dhcp_leases(_key: str = ViewerKey):
         data = await dhcp.dhcp_leases()
         return DhcpLeasesResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/relay/status", response_model=DhcpRelayStatusResponse)
@@ -82,7 +84,8 @@ async def relay_status(_key: str = ViewerKey):
         data = await dhcp.relay_status()
         return DhcpRelayStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/restart", response_model=DhcpActionResponse)
@@ -102,7 +105,8 @@ async def dhcp_restart(_key: str = ApiKey):
         data = await dhcp.dhcp_restart()
         return DhcpActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("/relay/restart", response_model=DhcpActionResponse)
@@ -122,4 +126,5 @@ async def relay_restart(_key: str = ApiKey):
         data = await dhcp.relay_restart()
         return DhcpActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

@@ -152,5 +152,5 @@ async def test_terminate_session_error(client, headers):
             "/api/v1/sessions/terminate", headers=headers, json={"username": "x"}
         )
 
-    assert resp.status_code == 200
-    assert resp.json()["success"] is False
+    assert resp.status_code == 500
+    assert resp.json()["detail"] == "Internal server error"

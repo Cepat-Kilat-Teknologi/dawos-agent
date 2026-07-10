@@ -43,7 +43,8 @@ async def list_zones(_key: str = ViewerKey):
         data = await zone_firewall.list_zones()
         return ZoneListResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/{zone}", response_model=ZoneDetailResponse)
@@ -66,7 +67,8 @@ async def zone_detail(zone: str, _key: str = ViewerKey):
         data = await zone_firewall.zone_detail(zone)
         return ZoneDetailResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.post("", status_code=201, response_model=ZoneActionResponse)
@@ -87,9 +89,14 @@ async def create_zone(req: CreateZoneRequest, _key: str = ApiKey):
     """
     try:
         data = await zone_firewall.create_zone(req.name, interfaces=req.interfaces)
-        return ZoneActionResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+    if not data.get("success"):
+        raise HTTPException(
+            status_code=409, detail=data.get("message", "Zone creation failed")
+        )
+    return ZoneActionResponse(**data)
 
 
 @router.delete("/{zone}", status_code=204)
@@ -105,6 +112,11 @@ async def delete_zone(zone: str, _key: str = ApiKey):
         HTTPException(500): If the zone cannot be deleted.
     """
     try:
-        await zone_firewall.delete_zone(zone)
+        data = await zone_firewall.delete_zone(zone)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+    if not data.get("success"):
+        raise HTTPException(
+            status_code=404, detail=data.get("message", f"Zone '{zone}' not found")
+        )

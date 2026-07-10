@@ -89,7 +89,18 @@ def test_remove_hook_not_found():
 @pytest.mark.asyncio
 async def test_fire_event_webhook():
     event_handler.add_hook("wh1", "session-up", "https://example.com/hook")
-    result = await event_handler.fire_event("session-up", {"user": "test"})
+
+    mock_resp = AsyncMock()
+    mock_resp.status_code = 200
+    mock_client = AsyncMock()
+    mock_client.post = AsyncMock(return_value=mock_resp)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+
+    with patch(
+        "dawos_agent.services.event_handler.httpx.AsyncClient", return_value=mock_client
+    ):
+        result = await event_handler.fire_event("session-up", {"user": "test"})
 
     assert result["event"] == "session-up"
     assert result["hooks_fired"] == 1
@@ -222,6 +233,16 @@ async def test_event_history_limit():
 
     history = event_handler.event_history(limit=2)
     assert len(history) == 2
+
+
+def test_event_log_is_bounded():
+    """Event history must not grow without bound (DA-M11)."""
+    event_handler._event_log.clear()
+    for i in range(event_handler._EVENT_LOG_MAXLEN + 25):
+        event_handler._event_log.append({"event": f"e{i}"})
+    assert len(event_handler._event_log) == event_handler._EVENT_LOG_MAXLEN
+    # Newest entries are retained; oldest are evicted.
+    assert event_handler._event_log[-1]["event"] == "e1024"
 
 
 def test_clear_history():

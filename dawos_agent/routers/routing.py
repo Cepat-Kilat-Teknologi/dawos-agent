@@ -50,7 +50,8 @@ async def bgp_status(_key: str = ViewerKey):
         data = await routing.bgp_summary()
         return BgpStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/bgp/routes", response_model=BgpRoutesResponse)
@@ -69,7 +70,8 @@ async def bgp_routes(_key: str = ViewerKey):
         data = await routing.bgp_routes()
         return BgpRoutesResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +96,8 @@ async def ospf_status(_key: str = ViewerKey):
         data = await routing.ospf_status()
         return OspfStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/ospf/neighbors", response_model=OspfStatusResponse)
@@ -114,7 +117,8 @@ async def ospf_neighbors(_key: str = ViewerKey):
         data = await routing.ospf_neighbors()
         return OspfStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/ospf/routes", response_model=OspfRoutesResponse)
@@ -134,7 +138,8 @@ async def ospf_routes(_key: str = ViewerKey):
         data = await routing.ospf_routes()
         return OspfRoutesResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -159,7 +164,8 @@ async def rip_status(_key: str = ViewerKey):
         data = await routing.rip_status()
         return RipStatusResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/rip/routes", response_model=RipRoutesResponse)
@@ -179,7 +185,8 @@ async def rip_routes(_key: str = ViewerKey):
         data = await routing.rip_routes()
         return RipRoutesResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -204,7 +211,8 @@ async def bfd_peers(_key: str = ViewerKey):
         data = await routing.bfd_peers()
         return BfdPeersResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 @router.get("/bfd/summary", response_model=BfdSummaryResponse)
@@ -224,4 +232,5 @@ async def bfd_summary(_key: str = ViewerKey):
         data = await routing.bfd_summary()
         return BfdSummaryResponse(**data)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

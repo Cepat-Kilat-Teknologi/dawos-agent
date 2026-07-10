@@ -111,6 +111,21 @@ async def test_create_group_error(client, headers):
     assert resp.status_code == 500
 
 
+@pytest.mark.asyncio
+async def test_create_group_duplicate(client, headers):
+    with patch(
+        "dawos_agent.routers.fw_groups_router.firewall_groups.create_group",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("Error: Could not process rule: File exists"),
+    ):
+        resp = await client.post(
+            "/api/v1/firewall/groups",
+            headers=headers,
+            json={"name": "dup", "group_type": "address"},
+        )
+    assert resp.status_code == 409
+
+
 # ---------------------------------------------------------------------------
 # DELETE /firewall/groups/{name}
 # ---------------------------------------------------------------------------
@@ -136,6 +151,17 @@ async def test_delete_group_error(client, headers):
     ):
         resp = await client.delete("/api/v1/firewall/groups/bad", headers=headers)
     assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_delete_group_not_found(client, headers):
+    with patch(
+        "dawos_agent.routers.fw_groups_router.firewall_groups.delete_group",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("Error: No such file or directory"),
+    ):
+        resp = await client.delete("/api/v1/firewall/groups/missing", headers=headers)
+    assert resp.status_code == 404
 
 
 # ---------------------------------------------------------------------------
