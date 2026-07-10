@@ -16,7 +16,7 @@
 
 ## Overview
 
-**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **149 authenticated HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **151 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
 
 The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access, making it suitable for automation, orchestration platforms, and multi-node ISP deployments.
 
@@ -174,14 +174,14 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 
 ## API Reference
 
-149 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
+151 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
 
 | Group | Endpoints | Description |
 |---|:---:|---|
 | health | 2 | Liveness and readiness probes (public) |
 | metrics | 1 | Prometheus metrics (public) |
 | system | 2 | OS info, CPU, memory, disk |
-| service | 3 | Start/stop/restart accel-ppp, accel-cmd passthrough |
+| service | 5 | Status, start/stop/restart, graceful shutdown, accel-cmd passthrough |
 | sessions | 4 | List, stats, find, terminate |
 | session-control | 5 | Lookup by SID/IP, snapshot, restart |
 | config | 3 | Read/update accel-ppp.conf |
