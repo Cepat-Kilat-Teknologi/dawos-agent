@@ -66,11 +66,11 @@ Dist Router (10.0.0.3)
 | Passed | 138 (100%) |
 | N/A | 0 |
 | Failed | 0 |
-| Defects found | 7 (all fixed) |
+| Defects found | 9 (all fixed) |
 | Infrastructure issues | 5 (3 fixed, 2 environmental) |
 | Observations | 3 (non-blocking, deferred) |
 
-**Verdict:** PASS. All 138 endpoints behave correctly under normal operating conditions. Testing was conducted in four phases: initial dawos-cli walkthrough, direct curl verification, a full regression retest after installing all optional system packages (dnsmasq, keepalived, FRR/vtysh), and a final dawos-cli retest that discovered and fixed 2 additional CLI bugs (BUG-6, BUG-7). Zero regressions detected.
+**Verdict:** PASS. All 138 endpoints behave correctly under normal operating conditions. Testing was conducted in five phases: initial dawos-cli walkthrough, direct curl verification, a full regression retest after installing all optional system packages (dnsmasq, keepalived, FRR/vtysh), a dawos-cli retest that discovered and fixed 2 additional CLI bugs (BUG-6, BUG-7), and a fresh-install regression test that uncovered 2 agent bugs (BUG-8: missing httpx dependency, BUG-9: health/ready accel-cmd flag). All 9 defects fixed. Zero regressions detected.
 
 ---
 
