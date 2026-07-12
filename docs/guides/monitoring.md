@@ -338,7 +338,7 @@ Response:
 {
   "status": "ok",
   "node_name": "bng-prod-01",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "uptime_seconds": 86412.3
 }
 ```

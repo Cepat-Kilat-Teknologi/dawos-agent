@@ -46,7 +46,7 @@ curl -H "X-API-Key: your-secret" http://localhost:8470/api/v1/sessions/list
 
 - Python 3.9+
 - Linux (Debian 11+ / Ubuntu 22.04+)
-- accel-ppp installed and running
+- accel-ppp (the installer builds it from source automatically if not present)
 
 ## Install
 

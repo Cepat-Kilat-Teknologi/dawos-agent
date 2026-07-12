@@ -60,7 +60,7 @@ The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongs
 
 - **Python 3.9** or later
 - **Linux** (Debian 11+ / Ubuntu 22.04+), x86_64 architecture
-- **accel-ppp** installed and running
+- **accel-ppp** (the installer builds it from source automatically if not present)
 
 ### Quick Install (Recommended)
 

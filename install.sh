@@ -16,7 +16,7 @@ set -euo pipefail
 
 # ── version ──────────────────────────────────────────────────────────────────
 INSTALLER_VERSION="2.0.0"
-AGENT_VERSION="0.1.0"
+AGENT_VERSION="0.3.3"
 
 # ── defaults ─────────────────────────────────────────────────────────────────
 APP_NAME="dawos-agent"
