@@ -51,6 +51,7 @@ nav:
       - Upgrade: guides/upgrade.md
       - Monitoring Integration: guides/monitoring.md
       - Production Hardening: guides/production-hardening.md
+      - Kernel Tuning: guides/kernel-tuning.md
   - API:
       - Reference: api/reference.md
       - Input Validation: api/validation-rules.md
