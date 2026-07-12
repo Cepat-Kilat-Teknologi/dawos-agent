@@ -164,6 +164,16 @@ The default value (60) is too aggressive for a network appliance where latency m
 
 ---
 
+## Kernel Tuning
+
+A BNG requires extensive kernel parameter tuning for IP forwarding, socket buffers, ARP table sizing, connection tracking, network security hardening, and anti-bufferbloat packet scheduling.
+
+This is a large topic with its own dedicated guide:
+
+**:material-arrow-right: [Kernel Tuning for BNG](kernel-tuning.md)** — complete parameter-by-parameter reference with explanations, scaling tables, and production-ready config files.
+
+---
+
 ## Process Supervision
 
 ### The Risk
