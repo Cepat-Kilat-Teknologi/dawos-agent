@@ -60,20 +60,14 @@ The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongs
 
 - **Python 3.9** or later
 - **Linux** (Debian 11+ / Ubuntu 22.04+), x86_64 architecture
-- **accel-ppp** (the installer builds it from source automatically if not present)
+- **accel-ppp** — the installer script builds it from source automatically; if installing via pip you must install accel-ppp yourself first
 
-### Quick Install (Recommended)
+### Recommended Install (installer script)
 
-```bash
-pip install dawos-agent
-```
-
-### Production Install (with installer script)
-
-The installer script sets up accel-ppp, systemd service, sudoers, and the agent:
+The installer handles everything end-to-end: builds accel-ppp from source if not present, creates a `dawos` system user, installs the agent in a virtualenv, sets up systemd, sudoers, conntrack, and file ownership.
 
 ```bash
-# One-line install
+# One-line install (recommended)
 curl -sL https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh | sudo bash
 
 # Or clone and run manually
@@ -90,7 +84,66 @@ sudo bash install.sh --yes      # Non-interactive (accept defaults)
 sudo bash install.sh --uninstall # Remove everything
 ```
 
-The installer builds accel-ppp from source if not already installed, creates a `dawos` system user, sets up a venv at `/opt/dawos-agent/venv`, installs the systemd unit, configures least-privilege sudoers, and sets correct file ownership for accel-ppp config management.
+### Install via pip
+
+> **Note:** This installs only the Python package. You must have accel-ppp already installed and running on the system. Systemd service, sudoers, and conntrack must be configured manually.
+
+#### 1. Install accel-ppp from source
+
+```bash
+# Install build dependencies
+sudo apt-get update
+sudo apt-get install -y cmake gcc g++ make git \
+    libssl-dev libpcre3-dev liblua5.1-0-dev
+
+# Clone and build
+git clone --depth 1 https://github.com/accel-ppp/accel-ppp.git /tmp/accel-ppp-build
+mkdir /tmp/accel-ppp-build/build && cd /tmp/accel-ppp-build/build
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DKDIR=/lib/modules/$(uname -r)/build \
+      -DLUA=TRUE \
+      -DRADIUS=TRUE \
+      ..
+make -j$(nproc)
+sudo make install
+
+# Verify
+accel-pppd --version
+```
+
+#### 2. Install dawos-agent
+
+```bash
+pip install dawos-agent
+```
+
+#### 3. Configure system (manual steps)
+
+```bash
+# Create system user
+sudo useradd -r -s /usr/sbin/nologin dawos
+
+# Install conntrack
+sudo apt-get install -y conntrack
+
+# Set up sudoers (least-privilege)
+sudo tee /etc/sudoers.d/dawos-agent > /dev/null << 'SUDOERS'
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/ip
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
+dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
+dawos ALL=(ALL) NOPASSWD: /usr/bin/tee
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack
+SUDOERS
+sudo chmod 0440 /etc/sudoers.d/dawos-agent
+
+# Set config ownership
+sudo chown -R dawos:dawos /etc/accel-ppp.d/ 2>/dev/null || true
+sudo chown dawos:dawos /etc/accel-ppp.conf
+```
+
+See [Installation docs](https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/installation/) for systemd unit setup and full configuration.
 
 ### Install from Source (Development)
 

@@ -177,9 +177,37 @@ The installer creates a starter `/etc/accel-ppp.conf` with:
 
 ## Manual Install
 
-If you want full control, do it step by step.
+If you prefer `pip install` or want full control, follow these steps. The installer script above handles all of this automatically.
 
-### 1. Create system user
+### 1. Install accel-ppp from source
+
+> Skip this step if accel-ppp is already installed (`accel-pppd --version`).
+
+```bash
+# Install build dependencies
+sudo apt-get update
+sudo apt-get install -y cmake gcc g++ make git \
+    libssl-dev libpcre3-dev liblua5.1-0-dev
+
+# Clone and build
+git clone --depth 1 https://github.com/accel-ppp/accel-ppp.git /tmp/accel-ppp-build
+mkdir /tmp/accel-ppp-build/build && cd /tmp/accel-ppp-build/build
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DKDIR=/lib/modules/$(uname -r)/build \
+      -DLUA=TRUE \
+      -DRADIUS=TRUE \
+      ..
+make -j$(nproc)
+sudo make install
+
+# Verify
+accel-pppd --version
+
+# Clean up build files
+rm -rf /tmp/accel-ppp-build
+```
+
+### 2. Create system user
 
 ```bash
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
@@ -187,14 +215,14 @@ sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
 sudo usermod -aG systemd-journal dawos
 ```
 
-### 2. Create directories
+### 3. Create directories
 
 ```bash
 sudo mkdir -p /opt/dawos-agent /etc/dawos-agent
 sudo chown dawos:dawos /opt/dawos-agent
 ```
 
-### 3. Install the package
+### 4. Install the package
 
 ```bash
 sudo python3 -m venv /opt/dawos-agent/venv
@@ -205,13 +233,13 @@ sudo /opt/dawos-agent/venv/bin/pip install .
 sudo chown -R dawos:dawos /opt/dawos-agent
 ```
 
-### 4. Generate an API key
+### 5. Generate an API key
 
 ```bash
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-### 5. Create config file
+### 6. Create config file
 
 ```bash
 sudo tee /etc/dawos-agent/agent.env > /dev/null << 'EOF'
@@ -230,7 +258,7 @@ sudo chmod 0640 /etc/dawos-agent/agent.env
 sudo chown root:dawos /etc/dawos-agent/agent.env
 ```
 
-### 6. Install sudoers
+### 7. Install sudoers
 
 ```bash
 sudo tee /etc/sudoers.d/dawos-agent > /dev/null << 'EOF'
@@ -248,7 +276,18 @@ sudo chmod 0440 /etc/sudoers.d/dawos-agent
 sudo visudo -cf /etc/sudoers.d/dawos-agent
 ```
 
-### 7. Install systemd unit
+### 8. Install conntrack and set permissions
+
+```bash
+# Install conntrack tools (required for conntrack flush endpoint)
+sudo apt-get install -y conntrack
+
+# Set accel-ppp config ownership (required for config checkpoint/rollback)
+sudo chown -R dawos:dawos /etc/accel-ppp.d/ 2>/dev/null || true
+sudo chown dawos:dawos /etc/accel-ppp.conf
+```
+
+### 9. Install systemd unit
 
 ```bash
 sudo cp systemd/dawos-agent.service /etc/systemd/system/

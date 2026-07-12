@@ -46,15 +46,25 @@ curl -H "X-API-Key: your-secret" http://localhost:8470/api/v1/sessions/list
 
 - Python 3.9+
 - Linux (Debian 11+ / Ubuntu 22.04+)
-- accel-ppp (the installer builds it from source automatically if not present)
+- accel-ppp — the installer script builds it from source automatically; if installing via pip you must install accel-ppp yourself first
 
 ## Install
+
+### Recommended: installer script
+
+```bash
+curl -sL https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh | sudo bash
+```
+
+Handles everything: builds accel-ppp, creates system user, sets up systemd, sudoers, conntrack, and file ownership.
+
+### Via pip (accel-ppp must be installed first)
 
 ```bash
 pip install dawos-agent
 ```
 
-See [Installation](getting-started/installation.md) for production deployment with the installer script.
+See [Installation](getting-started/installation.md) for accel-ppp build instructions and manual system setup.
 
 ## Companion CLI
 
