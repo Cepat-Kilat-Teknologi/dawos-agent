@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-07-12
+
 ### Added
 
 - **`GET /api/v1/network/throughput`** -- read-only endpoint (ViewerKey) that
@@ -27,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Documents that `BulkRateLimitRequest` uses per-item objects
   (`{"items": [{"username": "...", "rate": "..."}]}`) rather than a flat
   usernames+rate shape.
+- **Test suite expanded** -- 1144 tests (up from 1133), 100% coverage
+  maintained. New tests cover throughput, conntrack flush, session restart
+  failure path, and IP pool CIDR validation error codes.
 
 ### Fixed
 
@@ -36,25 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `"cpu_percent": 3.0`) rather than numeric-strings (`"cpu_percent": "3"`).
   Pydantic v2 coercion handles the conversion transparently from the existing
   string-returning parsers.
-
-### Security
-
-- **Internal error details no longer leaked to API clients** -- All 27 router
-  modules now return a generic `"Internal server error"` message for HTTP 500
-  responses instead of forwarding raw exception text (`str(exc)`). Client-facing
-  4xx errors (400, 404, 409) retain descriptive messages since those contain
-  controlled, non-sensitive text. 106 error handlers updated across the codebase.
-- **X-Request-ID header validated** -- Caller-supplied `X-Request-ID` values are
-  now validated against `[\x20-\x7E]{1,128}` (printable ASCII, max 128 chars).
-  Invalid or missing values are replaced with a generated UUID v4. Prevents
-  header injection and log pollution from malformed trace IDs.
-- **WebSocket authentication prefers header over query parameter** -- The
-  `/ws/events` endpoint now checks the `X-API-Key` header first and falls back
-  to the `key` query parameter only when the header is absent. This reduces the
-  risk of API key exposure in server access logs and browser history.
-
-### Fixed
-
 - **SNMP health check reliability** -- Replaced unreliable UDP socket probe
   (`socket.sendto` to port 161) with `ss -lun sport = :161` to verify SNMP
   daemon is actually listening. The socket probe returned false positives when
@@ -82,11 +68,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Misleading variable name** -- Renamed internal `cache_size` variable to
   accurately reflect its purpose, improving code readability.
 
-### Changed
+### Security
 
-- **Test suite expanded** -- 1133 tests (up from 1117), 100% coverage
-  maintained. New tests cover session restart failure path and IP pool CIDR
-  validation error codes.
+- **Internal error details no longer leaked to API clients** -- All 27 router
+  modules now return a generic `"Internal server error"` message for HTTP 500
+  responses instead of forwarding raw exception text (`str(exc)`). Client-facing
+  4xx errors (400, 404, 409) retain descriptive messages since those contain
+  controlled, non-sensitive text. 106 error handlers updated across the codebase.
+- **X-Request-ID header validated** -- Caller-supplied `X-Request-ID` values are
+  now validated against `[\x20-\x7E]{1,128}` (printable ASCII, max 128 chars).
+  Invalid or missing values are replaced with a generated UUID v4. Prevents
+  header injection and log pollution from malformed trace IDs.
+- **WebSocket authentication prefers header over query parameter** -- The
+  `/ws/events` endpoint now checks the `X-API-Key` header first and falls back
+  to the `key` query parameter only when the header is absent. This reduces the
+  risk of API key exposure in server access logs and browser history.
 
 ## [0.3.2] - 2026-07-09
 
@@ -221,7 +217,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.2.0...v0.3.0
