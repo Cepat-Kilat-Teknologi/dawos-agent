@@ -20,7 +20,9 @@ from ..models.schemas import (
     DnsConfig,
     InterfaceAddress,
     InterfaceDetail,
+    InterfaceThroughput,
     RouteEntry,
+    ThroughputResponse,
     VlanInfo,
 )
 
@@ -463,6 +465,77 @@ async def delete_route(destination: str, gateway: str | None = None) -> str:
 
     await _run_ok(cmd, sudo=True)
     return f"Route deleted: {destination}"
+
+
+PROC_NET_DEV = Path("/proc/net/dev")
+
+
+# ---------------------------------------------------------------------------
+# Throughput (read-only, no sudo)
+# ---------------------------------------------------------------------------
+
+
+async def get_throughput(
+    proc_path: Path | None = None,
+) -> ThroughputResponse:
+    """Read cumulative byte counters from ``/proc/net/dev``.
+
+    Returns aggregate and per-interface ``rx_bytes``/``tx_bytes`` for
+    all non-loopback interfaces.  The ``rx_bps``/``tx_bps`` fields are
+    always ``0`` because a single snapshot cannot derive a rate — callers
+    should compute the rate from two successive responses and the elapsed
+    time between them.
+
+    Args:
+        proc_path: Override the ``/proc/net/dev`` path (for testing).
+
+    Returns:
+        A :class:`ThroughputResponse` with counters and interface breakdown.
+
+    Raises:
+        RuntimeError: If ``/proc/net/dev`` cannot be read.
+    """
+    path = proc_path or PROC_NET_DEV
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RuntimeError(f"Cannot read {path}: {exc}") from exc
+
+    interfaces: list[InterfaceThroughput] = []
+    total_rx = 0
+    total_tx = 0
+
+    for line in text.splitlines():
+        # Lines look like "  eth0: 12345 ... 67890 ..."
+        if ":" not in line:
+            continue
+        name, rest = line.split(":", 1)
+        name = name.strip()
+        if name == "lo":
+            continue
+
+        parts = rest.split()
+        if len(parts) < 9:
+            continue
+
+        rx_bytes = int(parts[0])
+        tx_bytes = int(parts[8])
+        total_rx += rx_bytes
+        total_tx += tx_bytes
+
+        interfaces.append(
+            InterfaceThroughput(
+                name=name,
+                rx_bytes=rx_bytes,
+                tx_bytes=tx_bytes,
+            )
+        )
+
+    return ThroughputResponse(
+        rx_bytes=total_rx,
+        tx_bytes=total_tx,
+        interfaces=interfaces,
+    )
 
 
 # ---------------------------------------------------------------------------

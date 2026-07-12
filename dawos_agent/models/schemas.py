@@ -631,9 +631,45 @@ class InterfaceConfigResponse(BaseModel):
     interface: str
 
 
-# ---------------------------------------------------------------------------
-# VLANs
-# ---------------------------------------------------------------------------
+class InterfaceThroughput(BaseModel):
+    """Byte and rate counters for a single network interface.
+
+    Attributes:
+        name: Interface name (e.g. ``eth0``).
+        rx_bytes: Cumulative bytes received since boot.
+        tx_bytes: Cumulative bytes transmitted since boot.
+        rx_bps: Receive rate in bits per second (0 for single-sample reads).
+        tx_bps: Transmit rate in bits per second (0 for single-sample reads).
+    """
+
+    name: str
+    rx_bytes: int = 0
+    tx_bytes: int = 0
+    rx_bps: float = 0.0
+    tx_bps: float = 0.0
+
+
+class ThroughputResponse(BaseModel):
+    """Aggregate and per-interface throughput counters.
+
+    A single ``GET`` returns cumulative byte counters from
+    ``/proc/net/dev``.  The ``rx_bps`` and ``tx_bps`` fields are ``0``
+    on a single read — compute the rate by differencing two successive
+    responses and dividing by the elapsed time.
+
+    Attributes:
+        rx_bytes: Total received bytes across all non-loopback interfaces.
+        tx_bytes: Total transmitted bytes across all non-loopback interfaces.
+        rx_bps: Aggregate receive rate in bits per second (0 for a single read).
+        tx_bps: Aggregate transmit rate in bits per second (0 for a single read).
+        interfaces: Per-interface breakdown.
+    """
+
+    rx_bytes: int = 0
+    tx_bytes: int = 0
+    rx_bps: float = 0.0
+    tx_bps: float = 0.0
+    interfaces: list[InterfaceThroughput] = Field(default_factory=list)
 
 
 class VlanCreateRequest(BaseModel):

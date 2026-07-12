@@ -26,6 +26,7 @@ from ..models.schemas import (
     RouteDeleteRequest,
     RouteListResponse,
     RouteResponse,
+    ThroughputResponse,
     VlanCreateRequest,
     VlanDeleteResponse,
     VlanListResponse,
@@ -123,6 +124,36 @@ async def configure_interface(
         raise HTTPException(
             status_code=400, detail="Interface configuration failed"
         ) from exc
+
+
+# ---------------------------------------------------------------------------
+# Throughput
+# ---------------------------------------------------------------------------
+
+
+@router.get("/throughput", response_model=ThroughputResponse)
+async def get_throughput(_key: str = ViewerKey):
+    """Return cumulative byte counters for all non-loopback interfaces.
+
+    Reads ``/proc/net/dev`` and returns aggregate and per-interface
+    ``rx_bytes`` / ``tx_bytes``.  The ``rx_bps`` and ``tx_bps`` fields
+    are always ``0`` on a single read — to compute a rate, issue two
+    requests separated by a known interval and divide the byte delta by
+    the elapsed seconds, then multiply by 8 for bits-per-second.
+
+    No ``sudo`` required — ``/proc/net/dev`` is world-readable.
+
+    Returns:
+        ThroughputResponse: Aggregate and per-interface byte counters.
+
+    Raises:
+        HTTPException(500): If ``/proc/net/dev`` cannot be read.
+    """
+    try:
+        return await network.get_throughput()
+    except Exception as exc:
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 
 # ---------------------------------------------------------------------------

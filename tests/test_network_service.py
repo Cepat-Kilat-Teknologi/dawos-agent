@@ -822,3 +822,78 @@ async def test_set_vlan_state_error():
         pytest.raises(RuntimeError, match="Command failed"),
     ):
         await network.set_vlan_state("eth0.999", "up")
+
+
+# ---------------------------------------------------------------------------
+# Throughput
+# ---------------------------------------------------------------------------
+
+PROC_NET_DEV = (
+    "Inter-|   Receive  |  Transmit\n"
+    " face |bytes packets errs drop fifo frame comp multi"
+    "|bytes packets errs drop fifo colls carr comp\n"
+    "    lo: 1000 10 0 0 0 0 0 0 2000 20 0 0 0 0 0 0\n"
+    "  eth0: 123456789 100000 0 0 0 0 0 0 987654321"
+    " 80000 0 0 0 0 0 0\n"
+    "  ppp0: 5000000 4000 0 0 0 0 0 0 3000000"
+    " 3000 0 0 0 0 0 0\n"
+)
+
+
+@pytest.mark.asyncio
+async def test_get_throughput(tmp_path):
+    proc_file = tmp_path / "dev"
+    proc_file.write_text(PROC_NET_DEV)
+
+    result = await network.get_throughput(proc_path=proc_file)
+
+    # Aggregate should exclude loopback
+    assert result.rx_bytes == 123456789 + 5000000
+    assert result.tx_bytes == 987654321 + 3000000
+    assert result.rx_bps == 0.0
+    assert result.tx_bps == 0.0
+    assert len(result.interfaces) == 2
+    assert result.interfaces[0].name == "eth0"
+    assert result.interfaces[0].rx_bytes == 123456789
+    assert result.interfaces[1].name == "ppp0"
+    assert result.interfaces[1].tx_bytes == 3000000
+
+
+@pytest.mark.asyncio
+async def test_get_throughput_empty(tmp_path):
+    proc_file = tmp_path / "dev"
+    proc_file.write_text("Inter-|   Receive\n face |bytes\n")
+
+    result = await network.get_throughput(proc_path=proc_file)
+
+    assert result.rx_bytes == 0
+    assert result.tx_bytes == 0
+    assert result.interfaces == []
+
+
+@pytest.mark.asyncio
+async def test_get_throughput_malformed_line(tmp_path):
+    """Lines with fewer than 9 columns after the colon are skipped."""
+    content = (
+        "Inter-|   Receive  |  Transmit\n"
+        " face |bytes packets\n"
+        "  eth0: 100 200 0 0 0 0 0 0 300 400 0 0 0 0 0 0\n"
+        "  bad0: 50 60\n"
+    )
+    proc_file = tmp_path / "dev"
+    proc_file.write_text(content)
+
+    result = await network.get_throughput(proc_path=proc_file)
+
+    assert len(result.interfaces) == 1
+    assert result.interfaces[0].name == "eth0"
+    assert result.rx_bytes == 100
+    assert result.tx_bytes == 300
+
+
+@pytest.mark.asyncio
+async def test_get_throughput_missing_file(tmp_path):
+    proc_file = tmp_path / "nonexistent"
+
+    with pytest.raises(RuntimeError, match="Cannot read"):
+        await network.get_throughput(proc_path=proc_file)

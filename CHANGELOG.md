@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`GET /api/v1/network/throughput`** -- read-only endpoint (ViewerKey) that
+  reads `/proc/net/dev` and returns aggregate plus per-interface cumulative
+  `rx_bytes` / `tx_bytes` counters.  `rx_bps` / `tx_bps` are always `0` on a
+  single snapshot; callers compute rate from two successive reads.  No sudo
+  required.
+
 ### Fixed
 
 - **sessions/stats returns numeric fields as numbers** -- `SessionStatsResponse`

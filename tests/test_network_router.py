@@ -11,6 +11,7 @@ from dawos_agent.models.schemas import (
     InterfaceAddress,
     InterfaceDetail,
     RouteEntry,
+    ThroughputResponse,
     VlanInfo,
 )
 
@@ -575,6 +576,46 @@ async def test_set_dns_rejects_unsafe_search_domain(client, headers):
         json={"nameservers": ["8.8.8.8"], "search_domains": ["; evil"]},
     )
     assert resp.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Throughput
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_throughput(client, headers):
+    mock_response = ThroughputResponse(
+        rx_bytes=128456789,
+        tx_bytes=987654321,
+        interfaces=[],
+    )
+    with patch(
+        "dawos_agent.routers.network.network.get_throughput",
+        new_callable=AsyncMock,
+        return_value=mock_response,
+    ):
+        resp = await client.get("/api/v1/network/throughput", headers=headers)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["rx_bytes"] == 128456789
+    assert data["tx_bytes"] == 987654321
+    assert data["rx_bps"] == 0.0
+    assert data["tx_bps"] == 0.0
+    assert isinstance(data["interfaces"], list)
+
+
+@pytest.mark.asyncio
+async def test_get_throughput_error(client, headers):
+    with patch(
+        "dawos_agent.routers.network.network.get_throughput",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("Cannot read /proc/net/dev"),
+    ):
+        resp = await client.get("/api/v1/network/throughput", headers=headers)
+
+    assert resp.status_code == 500
 
 
 # ---------------------------------------------------------------------------
