@@ -62,7 +62,12 @@ async def test_session_stats(client, headers):
     assert resp.status_code == 200
     data = resp.json()
     assert data["active"] == 10
-    assert data["pool_used"] == "10"
+    assert isinstance(data["cpu_percent"], float)
+    assert data["cpu_percent"] == 3.0
+    assert isinstance(data["pool_used"], int)
+    assert data["pool_used"] == 10
+    assert isinstance(data["pool_total"], int)
+    assert data["pool_total"] == 100
 
 
 @pytest.mark.asyncio

@@ -389,7 +389,7 @@ class SessionStatsResponse(BaseModel):
         active: Number of sessions in the ``active`` state.
         starting: Number of sessions currently negotiating.
         finishing: Number of sessions in the teardown phase.
-        cpu_percent: CPU usage of the accel-ppp process.
+        cpu_percent: CPU usage of the accel-ppp process as a percentage.
         pool_used: Number of IP addresses currently leased from the pool.
         pool_total: Total IP addresses available in the pool.
         uptime: accel-ppp daemon uptime string.
@@ -398,9 +398,9 @@ class SessionStatsResponse(BaseModel):
     active: int = 0
     starting: int = 0
     finishing: int = 0
-    cpu_percent: str = "0"
-    pool_used: str = "0"
-    pool_total: str = "0"
+    cpu_percent: float = 0.0
+    pool_used: int = 0
+    pool_total: int = 0
     uptime: str = ""
 
 

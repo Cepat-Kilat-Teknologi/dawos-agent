@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **sessions/stats returns numeric fields as numbers** -- `SessionStatsResponse`
+  now types `cpu_percent` as `float` and `pool_used`/`pool_total` as `int`
+  instead of `str`.  JSON consumers receive proper numeric values (e.g.
+  `"cpu_percent": 3.0`) rather than numeric-strings (`"cpu_percent": "3"`).
+  Pydantic v2 coercion handles the conversion transparently from the existing
+  string-returning parsers.
+
 ### Security
 
 - **Internal error details no longer leaked to API clients** -- All 27 router
