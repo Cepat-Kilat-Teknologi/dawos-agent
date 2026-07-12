@@ -6,6 +6,27 @@ underlying operation for each item, returning per-item results.
 All bulk endpoints require ``operator`` role or higher because they
 perform write operations.  The maximum batch size is enforced at the
 request model layer (100 items per call).
+
+Request body shapes
+-------------------
+
+``POST /terminate``::
+
+    {"usernames": ["user1", "user2"]}
+
+``POST /ratelimit``::
+
+    {"items": [{"username": "user1", "rate": "10M/50M"},
+               {"username": "user2", "rate": "5M/20M"}]}
+
+    NOTE: each item carries its own ``rate`` so different subscribers
+    can receive different bandwidth in a single call.  This differs from
+    a flat ``{"usernames": [...], "rate": "..."}`` shape — callers must
+    send per-item objects.
+
+``POST /shaper-restore``::
+
+    {"usernames": ["user1", "user2"]}
 """
 
 from __future__ import annotations
@@ -36,6 +57,10 @@ async def bulk_terminate(
     independently.  Individual failures do not cancel the remaining
     items.
 
+    Request body::
+
+        {"usernames": ["user1", "user2", ...]}
+
     Args:
         req: Request body with list of usernames to terminate.
 
@@ -63,6 +88,18 @@ async def bulk_ratelimit(
 
     Accepts a list of username-rate pairs and applies each shaper
     change independently.
+
+    Request body::
+
+        {"items": [{"username": "user1", "rate": "10M/50M"},
+                   {"username": "user2", "rate": "5M/20M"}]}
+
+    .. note::
+
+       Each item carries its own ``rate`` field, allowing different
+       bandwidth values per subscriber in one call.  This is **not** a
+       flat ``{"usernames": [...], "rate": "..."}`` shape — callers
+       must send an array of per-item objects under the ``items`` key.
 
     Args:
         req: Request body with list of rate-limit items.
@@ -92,6 +129,10 @@ async def bulk_shaper_restore(
 
     Accepts a list of usernames and restores each session's original
     shaper independently.
+
+    Request body::
+
+        {"usernames": ["user1", "user2", ...]}
 
     Args:
         req: Request body with list of usernames to restore.

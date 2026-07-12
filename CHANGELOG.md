@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `conntrack -F` via sudo to clear all nf_conntrack entries.  Returns
   pre-flush entry count.  Sudoers entry added for `/usr/sbin/conntrack`.
 
+### Changed
+
+- **bulk endpoint docstrings now include request body JSON examples** --
+  module docstring and per-endpoint docstrings for `/api/v1/bulk/terminate`,
+  `/ratelimit`, and `/shaper-restore` now show the exact wire format.
+  Documents that `BulkRateLimitRequest` uses per-item objects
+  (`{"items": [{"username": "...", "rate": "..."}]}`) rather than a flat
+  usernames+rate shape.
+
 ### Fixed
 
 - **sessions/stats returns numeric fields as numbers** -- `SessionStatsResponse`
