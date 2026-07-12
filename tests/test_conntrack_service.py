@@ -234,3 +234,45 @@ def test_safe_int():
     assert conntrack._safe_int("42") == 42
     assert conntrack._safe_int("abc") == 0
     assert conntrack._safe_int("") == 0
+
+
+# ---------------------------------------------------------------------------
+# flush_table
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_flush_table():
+    calls = iter(["1500", ""])
+
+    async def fake_shell(cmd, **kw):
+        val = next(calls)
+        return _mock_proc(val)
+
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        side_effect=fake_shell,
+    ):
+        result = await conntrack.flush_table()
+
+    assert result["success"] is True
+    assert result["message"] == "Conntrack table flushed"
+    assert result["entries_before"] == 1500
+
+
+@pytest.mark.asyncio
+async def test_flush_table_failure():
+    calls = iter(["500", ""])
+
+    async def fake_shell(cmd, **kw):
+        val = next(calls)
+        if "conntrack -F" in cmd:
+            return _mock_proc(val, returncode=1)
+        return _mock_proc(val)
+
+    with patch(
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        side_effect=fake_shell,
+    ):
+        with pytest.raises(RuntimeError, match="Failed to flush"):
+            await conntrack.flush_table()

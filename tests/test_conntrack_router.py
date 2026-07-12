@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -238,4 +238,46 @@ async def test_apply_profile_error(client, headers):
 @pytest.mark.asyncio
 async def test_conntrack_requires_auth(client, bad_headers):
     resp = await client.get("/api/v1/conntrack/config", headers=bad_headers)
+    assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Flush
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_flush_table(client, headers):
+    with patch(
+        "dawos_agent.routers.conntrack_router.conntrack.flush_table",
+        new_callable=AsyncMock,
+        return_value={
+            "success": True,
+            "message": "Conntrack table flushed",
+            "entries_before": 2500,
+        },
+    ):
+        resp = await client.post("/api/v1/conntrack/flush", headers=headers)
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["entries_before"] == 2500
+
+
+@pytest.mark.asyncio
+async def test_flush_table_error(client, headers):
+    with patch(
+        "dawos_agent.routers.conntrack_router.conntrack.flush_table",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("Failed to flush"),
+    ):
+        resp = await client.post("/api/v1/conntrack/flush", headers=headers)
+
+    assert resp.status_code == 500
+
+
+@pytest.mark.asyncio
+async def test_flush_table_requires_auth(client, bad_headers):
+    resp = await client.post("/api/v1/conntrack/flush", headers=bad_headers)
     assert resp.status_code == 401

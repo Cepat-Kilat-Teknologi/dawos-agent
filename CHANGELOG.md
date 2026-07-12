@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   single snapshot; callers compute rate from two successive reads.  No sudo
   required.
 
+- **`POST /api/v1/conntrack/flush`** -- operator endpoint (ApiKey) that runs
+  `conntrack -F` via sudo to clear all nf_conntrack entries.  Returns
+  pre-flush entry count.  Sudoers entry added for `/usr/sbin/conntrack`.
+
 ### Fixed
 
 - **sessions/stats returns numeric fields as numbers** -- `SessionStatsResponse`

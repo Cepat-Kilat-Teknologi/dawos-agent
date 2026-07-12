@@ -24,3 +24,6 @@ dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
 
 # --- write config files (firewall.py, nat.py, diagnostics.py) ---
 dawos ALL=(ALL) NOPASSWD: /usr/bin/tee
+
+# --- conntrack flush (conntrack.py) ---
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack

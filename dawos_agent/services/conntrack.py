@@ -245,6 +245,39 @@ async def apply_profile(name: str) -> dict:
     return await get_timeouts()
 
 
+# ---------------------------------------------------------------------------
+# Flush
+# ---------------------------------------------------------------------------
+
+
+async def flush_table() -> dict:
+    """Flush all entries from the nf_conntrack table.
+
+    Runs ``conntrack -F`` with sudo to clear every tracked connection.
+    Returns the entry count observed *before* the flush for informational
+    purposes.
+
+    Returns:
+        A dictionary with ``success``, ``message``, and
+        ``entries_before``.
+
+    Raises:
+        RuntimeError: If the ``conntrack -F`` command fails.
+    """
+    count_out, _ = await _run("sysctl -n net.netfilter.nf_conntrack_count")
+    entries_before = _safe_int(count_out)
+
+    _, rc = await _run("conntrack -F", sudo=True)
+    if rc != 0:
+        raise RuntimeError("Failed to flush conntrack table")
+
+    return {
+        "success": True,
+        "message": "Conntrack table flushed",
+        "entries_before": entries_before,
+    }
+
+
 def _safe_int(value: str, default: int = 0) -> int:
     try:
         return int(value)

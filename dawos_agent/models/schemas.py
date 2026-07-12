@@ -1902,6 +1902,20 @@ class ConntrackProfileRequest(BaseModel):
     )
 
 
+class ConntrackFlushResponse(BaseModel):
+    """Response after flushing the conntrack table.
+
+    Attributes:
+        success: Whether the flush completed successfully.
+        message: Human-readable confirmation message.
+        entries_before: Number of tracked entries before the flush.
+    """
+
+    success: bool
+    message: str
+    entries_before: int = 0
+
+
 # ---------------------------------------------------------------------------
 # BFD
 # ---------------------------------------------------------------------------

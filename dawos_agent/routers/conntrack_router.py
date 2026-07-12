@@ -15,6 +15,7 @@ from fastapi import APIRouter, HTTPException
 from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     ConntrackConfigResponse,
+    ConntrackFlushResponse,
     ConntrackHelperResponse,
     ConntrackHelpersListResponse,
     ConntrackProfileRequest,
@@ -184,6 +185,31 @@ async def apply_profile(req: ConntrackProfileRequest, _key: str = ApiKey):
         return ConntrackTimeoutsResponse(timeouts=data)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
+@router.post("/flush", response_model=ConntrackFlushResponse)
+async def flush_table(_key: str = ApiKey):
+    """Flush all entries from the conntrack table.
+
+    Clears every tracked connection from the kernel ``nf_conntrack``
+    table by running ``conntrack -F`` with sudo.  This is a destructive
+    operation — all stateful firewall tracking is lost and existing
+    connections must be re-established.
+
+    Requires ``/usr/sbin/conntrack`` in the sudoers allow-list.
+
+    Returns:
+        ConntrackFlushResponse: Success status and pre-flush entry count.
+
+    Raises:
+        HTTPException(500): If the flush command fails.
+    """
+    try:
+        data = await conntrack.flush_table()
+        return ConntrackFlushResponse(**data)
     except Exception as exc:
         log.error("Operation failed: %s", exc)
         raise HTTPException(status_code=500, detail="Internal server error") from exc
