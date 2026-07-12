@@ -383,7 +383,7 @@ _preflight() {
     fi
 
     # Network tools
-    for tool in nft ip ss systemctl; do
+    for tool in nft ip ss systemctl conntrack; do
         if command -v "$tool" &>/dev/null; then
             _ok "${tool}: available"
         else
@@ -1173,6 +1173,14 @@ _install_service() {
 
     local repo_dir="$SOURCE_DIR"
 
+    # ── conntrack tool ──
+    if ! command -v conntrack &>/dev/null; then
+        _info "Installing conntrack tools..."
+        apt-get install -y -qq conntrack >/dev/null 2>&1 && \
+            _ok "conntrack installed" || \
+            _warn "conntrack install failed — conntrack flush endpoint will not work"
+    fi
+
     # ── sudoers ──
     local sudoers_src="${repo_dir}/deploy/dawos-agent.sudoers"
     if [[ -f "$sudoers_src" ]]; then
@@ -1194,6 +1202,7 @@ dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
 dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh
 dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
 dawos ALL=(ALL) NOPASSWD: /usr/bin/tee
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack
 SUDOERS
         chmod 0440 "$SUDOERS_FILE"
         _ok "Sudoers installed (inline rules)"

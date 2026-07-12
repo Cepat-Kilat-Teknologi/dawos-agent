@@ -87,8 +87,9 @@ The agent uses `sudo` to call these tools for router management:
 | `vtysh` | frr | FRR routing daemon (BGP, OSPF, RIP) |
 | `sysctl` | procps | Kernel parameter tuning |
 | `tee` | coreutils | Config file writes |
+| `conntrack` | conntrack | Conntrack table flush |
 
-These are optional — the agent installs and runs without them, but related endpoints will return errors.
+These are optional — the agent installs and runs without them, but related endpoints will return errors. The installer automatically installs `conntrack` if not present.
 
 ---
 
