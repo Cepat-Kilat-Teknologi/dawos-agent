@@ -1318,6 +1318,49 @@ Update DNS configuration in `/etc/resolv.conf`.
 | `200`  | Updated |
 | `500`  | Write failed |
 
+### GET /api/v1/network/throughput
+
+Read per-interface throughput counters from `/proc/net/dev`. Returns byte counters and calculated bits-per-second rates for all non-loopback interfaces.
+
+**Auth:** Required (Viewer)
+
+**Response:**
+
+```json
+{
+  "interfaces": [
+    {
+      "name": "ens18",
+      "rx_bytes": 123456789,
+      "tx_bytes": 987654321,
+      "rx_bps": 1048576.0,
+      "tx_bps": 524288.0
+    },
+    {
+      "name": "ens19",
+      "rx_bytes": 456789012,
+      "tx_bytes": 654321098,
+      "rx_bps": 2097152.0,
+      "tx_bps": 1048576.0
+    }
+  ]
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `interfaces` | array | List of interface throughput objects |
+| `interfaces[].name` | string | Interface name (e.g. `ens18`) |
+| `interfaces[].rx_bytes` | integer | Total received bytes |
+| `interfaces[].tx_bytes` | integer | Total transmitted bytes |
+| `interfaces[].rx_bps` | float | Receive rate in bits per second |
+| `interfaces[].tx_bps` | float | Transmit rate in bits per second |
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Failed to read `/proc/net/dev` |
+
 ---
 
 ## 10. Firewall
@@ -2638,6 +2681,35 @@ Apply a named conntrack tuning profile.
 |--------|---------|
 | `200`  | Applied |
 | `400`  | Unknown profile |
+
+### POST /api/v1/conntrack/flush
+
+Flush the entire conntrack table, dropping all tracked connections. This is a destructive operation — all stateful NAT and firewall entries are removed, which may briefly interrupt active connections.
+
+**Auth:** Required (Operator)
+
+**Request body:** None.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Conntrack table flushed",
+  "entries_before": 1523
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Whether the flush completed successfully |
+| `message` | string | Human-readable result message |
+| `entries_before` | integer | Number of conntrack entries before flushing |
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Flushed |
+| `500`  | Flush command failed |
 
 ---
 

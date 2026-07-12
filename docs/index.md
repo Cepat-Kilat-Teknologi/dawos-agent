@@ -9,7 +9,7 @@
 
 ## What is DawOS Agent?
 
-DawOS Agent is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **151 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+DawOS Agent is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **153 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
 
 The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access.
 
@@ -72,7 +72,7 @@ dawos top    # live dashboard
 
 | Metric | Value |
 |--------|-------|
-| Tests | 1133 passing |
+| Tests | 1144 passing |
 | Coverage | minimum 90% |
 | Pylint | 10.00/10 |
 | Black | Formatted |

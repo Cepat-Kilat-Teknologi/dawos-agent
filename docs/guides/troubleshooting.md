@@ -294,7 +294,7 @@ sudo systemctl restart dawos-agent
 
 ### Symptom
 
-Operations involving `nft`, `ip`, `tc`, `vtysh`, `sysctl`, or `tee` fail with a "permission denied" or "not allowed" error in the logs.
+Operations involving `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`, or `conntrack` fail with a "permission denied" or "not allowed" error in the logs.
 
 ### Diagnosis
 
@@ -311,14 +311,14 @@ sudo -u dawos sudo -n /usr/sbin/nft list ruleset
 The sudoers file must allow the `dawos` user to run specific commands without a password. Expected content:
 
 ```
-dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft, /usr/sbin/ip, /usr/sbin/tc, /usr/sbin/vtysh, /usr/sbin/sysctl, /usr/bin/tee
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft, /usr/sbin/ip, /usr/sbin/tc, /usr/sbin/vtysh, /usr/sbin/sysctl, /usr/bin/tee, /usr/sbin/conntrack
 ```
 
 If missing or incorrect:
 
 ```bash
 # Recreate the sudoers file
-echo 'dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft, /usr/sbin/ip, /usr/sbin/tc, /usr/sbin/vtysh, /usr/sbin/sysctl, /usr/bin/tee' | \
+echo 'dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft, /usr/sbin/ip, /usr/sbin/tc, /usr/sbin/vtysh, /usr/sbin/sysctl, /usr/bin/tee, /usr/sbin/conntrack' | \
   sudo tee /etc/sudoers.d/dawos-agent
 
 # Set correct permissions

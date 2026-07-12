@@ -240,6 +240,7 @@ dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
 dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh
 dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
 dawos ALL=(ALL) NOPASSWD: /usr/bin/tee
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack
 EOF
 
 sudo chmod 0440 /etc/sudoers.d/dawos-agent
@@ -402,7 +403,7 @@ sudo apt update && sudo apt install python3 python3-venv
 
 ### Sudoers
 
-Only 6 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See [deploy/dawos-agent.sudoers](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/deploy/dawos-agent.sudoers).
+Only 7 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See [deploy/dawos-agent.sudoers](https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/deploy/dawos-agent.sudoers).
 
 ### accel-ppp Config Ownership
 

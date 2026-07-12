@@ -16,7 +16,7 @@
 
 ## Overview
 
-**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **151 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **153 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
 
 The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access, making it suitable for automation, orchestration platforms, and multi-node ISP deployments.
 
@@ -174,7 +174,7 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 
 ## API Reference
 
-151 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
+153 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
 
 | Group | Endpoints | Description |
 |---|:---:|---|
@@ -186,14 +186,14 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 | session-control | 5 | Lookup by SID/IP, snapshot, restart |
 | config | 3 | Read/update accel-ppp.conf |
 | checkpoint | 8 | Revisions, diff, rollback, guarded apply, confirm |
-| network | 12 | Interfaces, VLANs, routes, DNS |
+| network | 13 | Interfaces, VLANs, routes, DNS, throughput |
 | firewall | 19 | nftables, NAT, sysctl, conntrack, SNMP |
 | firewall-groups | 4 | Named groups with member management |
 | pppoe | 6 | Listener interfaces, MAC filter |
 | pado-delay | 2 | PADO delay for PPPoE |
 | traffic | 5 | SSE streams, TC queues, rate limits |
 | routing | 9 | BGP, OSPF, RIP, BFD |
-| conntrack | 7 | Table size, timeouts, profiles |
+| conntrack | 8 | Table size, timeouts, profiles, flush |
 | connection-limits | 3 | Global/per-interface limits |
 | ip-pool | 4 | Address pool management |
 | scheduler | 4 | Job scheduling with run-on-demand |
@@ -373,10 +373,10 @@ dawos-agent/
 │   ├── retry.py             # Exponential backoff retry for accel-cmd
 │   ├── webhooks.py          # Fire-and-forget webhook delivery
 │   ├── models/
-│   │   └── schemas.py       # 188 Pydantic v2 request/response models
+│   │   └── schemas.py       # 191 Pydantic v2 request/response models
 │   ├── routers/             # 34 API router modules (HTTP layer only)
 │   └── services/            # 29 service modules (business logic + shell calls)
-├── tests/                   # 1133 tests
+├── tests/                   # 1144 tests
 ├── docs/                    # MkDocs Material documentation
 ├── .github/
 │   └── workflows/
@@ -402,7 +402,7 @@ dawos-agent/
 | **Router -> Service -> Shell** | Routers handle HTTP, services contain business logic, shell commands via `_run()`. |
 | **Auth on every endpoint** | `ApiKey` dependency returns 401 on missing/invalid key. `/health`, `/health/ready`, `/metrics` are the only public endpoints. |
 | **Pydantic v2 models** | All request/response types defined in `models/schemas.py` with strict validation. |
-| **Least-privilege sudo** | Only 6 commands allowed: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`. |
+| **Least-privilege sudo** | Only 7 commands allowed: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`, `conntrack`. |
 | **No shell injection** | All subprocess calls use list-form arguments, never string interpolation. Defense-in-depth `shlex.quote()` on user-supplied values. |
 | **Systemd sandboxing** | `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `WatchdogSec=30`. |
 
@@ -489,7 +489,7 @@ coverage run -m pytest tests/ && coverage report -m
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 1133 passing | `pytest tests/ -x -q` |
+| Tests | 1144 passing | `pytest tests/ -x -q` |
 | Coverage | minimum 90% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |
@@ -521,7 +521,7 @@ We welcome contributions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 - **API-key auth with RBAC** -- three-tier role hierarchy (viewer, operator, admin) on all endpoints except public probes
 - **Rate limiting** -- per-IP throttling with configurable limits, HTTP 429 responses
 - **Systemd sandboxing** -- `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp=true`, `WatchdogSec=30`
-- **Least-privilege sudo** -- limited to 6 commands: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`
+- **Least-privilege sudo** -- limited to 7 commands: `nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`, `conntrack`
 - **No shell injection** -- all subprocess calls use list-form arguments with `shlex.quote()` defense-in-depth
 - **No `eval()` or `exec()`** anywhere in the codebase
 - **Webhook signing** -- optional HMAC-SHA256 payload verification

@@ -8,14 +8,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## Unreleased
 
-### Security
+### Added
 
-- Internal error details no longer leaked to API clients (27 router modules, 106 handlers)
-- `X-Request-ID` header validated against printable ASCII regex before acceptance
-- WebSocket `/ws/events` now prefers `X-API-Key` header over query parameter
+- `GET /api/v1/network/throughput` — read-only endpoint (ViewerKey) that reads `/proc/net/dev` and returns aggregate plus per-interface cumulative `rx_bytes` / `tx_bytes` counters. No sudo required.
+- `POST /api/v1/conntrack/flush` — operator endpoint (ApiKey) that runs `conntrack -F` via sudo to clear all nf_conntrack entries. Returns pre-flush entry count. Sudoers entry added for `/usr/sbin/conntrack`.
+
+### Changed
+
+- Bulk endpoint docstrings now include request body JSON examples — documents that `BulkRateLimitRequest` uses per-item objects (`{"items": [{"username": "...", "rate": "..."}]}`) rather than a flat usernames+rate shape.
+- Test suite: 1144 tests, 100% coverage maintained
 
 ### Fixed
 
+- `sessions/stats` returns numeric fields as numbers — `SessionStatsResponse` now types `cpu_percent` as `float` and `pool_used`/`pool_total` as `int` instead of `str`
 - SNMP health check: replaced UDP socket probe with `ss -lun` for reliability
 - IP pool CIDR validation returns HTTP 422 instead of 409
 - `restart_session()` catches `RuntimeError` and reports `success: false`
@@ -24,9 +29,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - `parse_stat()` handles malformed accel-cmd output gracefully
 - Renamed misleading `cache_size` variable
 
-### Changed
+### Security
 
-- Test suite: 1133 tests, 100% coverage maintained
+- Internal error details no longer leaked to API clients (27 router modules, 106 handlers)
+- `X-Request-ID` header validated against printable ASCII regex before acceptance
+- WebSocket `/ws/events` now prefers `X-API-Key` header over query parameter
 
 ---
 

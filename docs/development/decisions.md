@@ -19,7 +19,7 @@ Use FastAPI with Uvicorn as the ASGI server, Pydantic v2 for request/response va
 
 ### Consequences
 
-- Automatic OpenAPI/Swagger documentation for all 149 endpoints.
+- Automatic OpenAPI/Swagger documentation for all 153 endpoints.
 - Native async support for subprocess-based service calls without blocking the event loop.
 - Pydantic v2 provides strict type validation and serialization with minimal boilerplate.
 - Python 3.9+ requirement excludes older distributions (Ubuntu 18.04 and below).
@@ -273,15 +273,15 @@ All DELETE endpoints return HTTP 204 with no response body. No `response_model` 
 
 ### Context
 
-DawOS Agent runs as an unprivileged `dawos` user but needs to execute certain system commands (`nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`) that require root privileges.
+DawOS Agent runs as an unprivileged `dawos` user but needs to execute certain system commands (`nft`, `ip`, `tc`, `vtysh`, `sysctl`, `tee`, `conntrack`) that require root privileges.
 
 ### Decision
 
-Grant passwordless sudo access to exactly six commands via `/etc/sudoers.d/dawos-agent`. The agent process runs as `dawos:dawos` with no other elevated privileges. The systemd unit uses `ReadWritePaths` to restrict filesystem access.
+Grant passwordless sudo access to exactly seven commands via `/etc/sudoers.d/dawos-agent`. The agent process runs as `dawos:dawos` with no other elevated privileges. The systemd unit uses `ReadWritePaths` to restrict filesystem access.
 
 ### Consequences
 
-- The attack surface is limited to six well-defined system commands.
+- The attack surface is limited to seven well-defined system commands.
 - Compromising the agent process does not grant unrestricted root access.
 - Adding new privileged operations requires updating the sudoers file, systemd unit, and documentation — a deliberate friction that forces security review.
 

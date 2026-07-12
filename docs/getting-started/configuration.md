@@ -195,7 +195,7 @@ By default, DawOS Agent uses a single API key (`DAWOS_API_KEY`) which grants **a
 
 ```json
 {
-  "M5ydfeMbEFU0wala6I0yictAi_vGmDT8DVESQr2qIGQ": "admin",
+  "your-admin-api-key-here": "admin",
   "viewer-key-for-grafana-dashboards": "viewer",
   "operator-key-for-noc-team": "operator"
 }
@@ -329,6 +329,17 @@ Writes configuration files to paths owned by root:
 - nftables rule files
 - sysctl configuration snippets
 - NAT egress configuration
+
+### Conntrack — `/usr/sbin/conntrack`
+
+```
+dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack
+```
+
+**Used by:** `conntrack.py`
+
+Manages the kernel connection tracking table:
+- Flushing all conntrack entries (`conntrack -F`)
 
 ---
 

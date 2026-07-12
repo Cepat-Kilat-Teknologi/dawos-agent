@@ -123,7 +123,7 @@ All other filesystem locations are read-only to the service process.
 
 ## Least-Privilege Sudo
 
-The `dawos` service user has passwordless sudo access for exactly 6 commands. No shell access, no wildcards, no unrestricted commands.
+The `dawos` service user has passwordless sudo access for exactly 7 commands. No shell access, no wildcards, no unrestricted commands.
 
 | Command | Full Path | Used By |
 |---------|-----------|---------|
@@ -133,6 +133,7 @@ The `dawos` service user has passwordless sudo access for exactly 6 commands. No
 | `vtysh` | `/usr/bin/vtysh` | FRR routing daemon (BGP, OSPF, RIP, BFD) |
 | `sysctl` | `/usr/sbin/sysctl` | Kernel parameter tuning |
 | `tee` | `/usr/bin/tee` | Writing to system configuration files |
+| `conntrack` | `/usr/sbin/conntrack` | Conntrack table flush |
 
 The sudoers file is installed at `/etc/sudoers.d/dawos-agent` with mode `0440` owned by `root:root`.
 
@@ -279,7 +280,7 @@ pollution from malformed trace IDs.
 | File | Mode | Owner | Contains |
 |------|------|-------|----------|
 | `/etc/dawos-agent/agent.env` | `0640` | `root:dawos` | API key and all DAWOS_* settings |
-| `/etc/sudoers.d/dawos-agent` | `0440` | `root:root` | Sudo rules (6 commands) |
+| `/etc/sudoers.d/dawos-agent` | `0440` | `root:root` | Sudo rules (7 commands) |
 
 ### accel-ppp Configuration
 
