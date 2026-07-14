@@ -16,7 +16,7 @@ set -euo pipefail
 
 # ── version ──────────────────────────────────────────────────────────────────
 INSTALLER_VERSION="2.0.0"
-AGENT_VERSION="0.3.3"
+AGENT_VERSION="0.4.0"
 
 # ── defaults ─────────────────────────────────────────────────────────────────
 APP_NAME="dawos-agent"
@@ -516,8 +516,9 @@ _setup_system() {
     fi
 
     # ── directories ──
-    mkdir -p "$INSTALL_DIR" "$CONFIG_DIR"
+    mkdir -p "$INSTALL_DIR" "$CONFIG_DIR" /var/lib/dawos-agent
     chown "${APP_USER}:${APP_GROUP}" "$INSTALL_DIR"
+    chown "${APP_USER}:${APP_GROUP}" /var/lib/dawos-agent
     _ok "Directories created"
 }
 
@@ -1235,7 +1236,7 @@ WatchdogSec=30
 NoNewPrivileges=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf -/etc/systemd/resolved.conf.d -/etc/dnsmasq.d -/etc/dnsmasq.conf
+ReadWritePaths=-/etc/accel-ppp.conf -/etc/accel-ppp.d -/etc/accel-nat-egress.nft -/etc/sysctl.d -/etc/nftables.conf -/etc/resolv.conf -/etc/systemd/resolved.conf.d -/etc/dnsmasq.d -/etc/dnsmasq.conf -/var/lib/dawos-agent
 PrivateTmp=true
 
 StandardOutput=journal

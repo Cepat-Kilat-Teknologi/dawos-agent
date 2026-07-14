@@ -238,6 +238,61 @@ Usage:
 
 ---
 
+## Upgrading to v0.4.0
+
+v0.4.0 introduces session history with a SQLite database stored at `/var/lib/dawos-agent/history.db`. This requires two additional setup steps that the `manage.sh` upgrade script handles automatically.
+
+### If Using `manage.sh` (Recommended)
+
+The upgrade script automatically:
+
+1. Creates `/var/lib/dawos-agent/` with correct ownership
+2. Adds `-/var/lib/dawos-agent` to the systemd `ReadWritePaths` directive
+3. Reloads the systemd daemon
+
+```bash
+sudo bash scripts/manage.sh upgrade
+```
+
+No manual steps needed.
+
+### If Upgrading Manually
+
+After `pip install --upgrade dawos-agent`, perform these additional steps **before** restarting:
+
+```bash
+# 1. Create history database directory
+sudo mkdir -p /var/lib/dawos-agent
+sudo chown dawos:dawos /var/lib/dawos-agent
+
+# 2. Add /var/lib/dawos-agent to systemd ReadWritePaths
+#    (required because ProtectSystem=strict blocks writes to unlisted paths)
+sudo sed -i 's|^ReadWritePaths=.*|& -/var/lib/dawos-agent|' \
+    /etc/systemd/system/dawos-agent.service
+sudo systemctl daemon-reload
+
+# 3. Restart
+sudo systemctl restart dawos-agent
+```
+
+### Verify History Feature
+
+```bash
+# Check history endpoints work
+curl -sf -H 'X-API-Key: KEY' http://localhost:8470/api/v1/sessions/history
+curl -sf -H 'X-API-Key: KEY' http://localhost:8470/api/v1/sessions/history/stats
+```
+
+### New Configuration Variable
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DAWOS_HISTORY_DB` | `/var/lib/dawos-agent/history.db` | SQLite session history database path |
+
+Add to `/etc/dawos-agent/agent.env` only if you need a non-default path.
+
+---
+
 ## Post-Upgrade Checklist
 
 After every upgrade, verify these items:
@@ -251,6 +306,7 @@ After every upgrade, verify these items:
 | accel-ppp connected | `curl -sf http://localhost:8470/health/ready` | `"ready": true` |
 | Metrics available | `curl -sf http://localhost:8470/metrics \| head -5` | Prometheus text output |
 | No startup errors | `sudo journalctl -u dawos-agent --since '5 min ago' -p err` | Empty or no relevant errors |
+| History works (v0.4.0+) | `curl -sf -H 'X-API-Key: KEY' http://localhost:8470/api/v1/sessions/history` | HTTP 200 with JSON array |
 
 ---
 

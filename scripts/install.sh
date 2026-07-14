@@ -50,7 +50,9 @@ fi
 
 # ── 2. install directory + venv ────────────────────────────────────
 mkdir -p "${INSTALL_DIR}"
+mkdir -p /var/lib/dawos-agent
 chown "${APP_USER}:${APP_GROUP}" "${INSTALL_DIR}"
+chown "${APP_USER}:${APP_GROUP}" /var/lib/dawos-agent
 
 if [[ ! -d "${VENV_DIR}" ]]; then
     python3 -m venv "${VENV_DIR}"

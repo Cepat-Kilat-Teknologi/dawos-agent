@@ -152,7 +152,7 @@ The installer (`install.sh` v2.0) performs these steps in order:
 |------|-------------|
 | **1. Preflight** | Checks OS, Python, disk space, required tools |
 | **2. Configure** | Prompts for API key, listen address, node name (or uses defaults with `--yes`) |
-| **3. System setup** | Creates `dawos` system user, adds to `systemd-journal` group, creates directories |
+| **3. System setup** | Creates `dawos` system user, adds to `systemd-journal` group, creates directories (`/opt/dawos-agent`, `/etc/dawos-agent`, `/var/lib/dawos-agent`) |
 | **4. accel-ppp** | Detects or builds accel-ppp from source, writes `/etc/accel-ppp.conf`, creates systemd unit |
 | **5. Download** | Downloads dawos-agent source from GitHub (skipped if running from cloned repo) |
 | **6. Install** | Creates Python venv, installs package with pip |
@@ -218,8 +218,9 @@ sudo usermod -aG systemd-journal dawos
 ### 3. Create directories
 
 ```bash
-sudo mkdir -p /opt/dawos-agent /etc/dawos-agent
+sudo mkdir -p /opt/dawos-agent /etc/dawos-agent /var/lib/dawos-agent
 sudo chown dawos:dawos /opt/dawos-agent
+sudo chown dawos:dawos /var/lib/dawos-agent
 ```
 
 ### 4. Install the package

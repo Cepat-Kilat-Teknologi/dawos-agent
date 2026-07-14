@@ -148,6 +148,12 @@ fix_ownership() {
     step "Fixing file ownership..."
     chown -R "${APP_USER}:${APP_GROUP}" "${INSTALL_DIR}"
 
+    # Ensure history database directory exists (added in v0.4.0)
+    if [[ ! -d /var/lib/dawos-agent ]]; then
+        mkdir -p /var/lib/dawos-agent
+    fi
+    chown "${APP_USER}:${APP_GROUP}" /var/lib/dawos-agent
+
     # Fix accel-ppp config ownership (required for config backup operations)
     if [[ -d /etc/accel-ppp.d ]]; then
         chown -R "${APP_USER}:${APP_GROUP}" /etc/accel-ppp.d/
@@ -188,6 +194,21 @@ except Exception:
                 rm -f "${SUDOERS_FILE}"
             fi
         fi
+    fi
+}
+
+update_systemd_unit() {
+    # Migrate systemd unit ReadWritePaths for v0.4.0+ (session history DB)
+    local unit="/etc/systemd/system/${APP_NAME}.service"
+    if [[ ! -f "${unit}" ]]; then
+        return
+    fi
+
+    if ! grep -q "/var/lib/dawos-agent" "${unit}" 2>/dev/null; then
+        step "Adding /var/lib/dawos-agent to systemd ReadWritePaths..."
+        sed -i 's|^ReadWritePaths=.*|& -/var/lib/dawos-agent|' "${unit}"
+        systemctl daemon-reload
+        info "Systemd unit updated (ReadWritePaths)"
     fi
 }
 
@@ -423,6 +444,10 @@ cmd_upgrade() {
     # 4. Fix ownership
     fix_ownership
 
+    # 4b. Migrate sudoers and systemd unit if needed (v0.4.0+ history DB)
+    update_sudoers
+    update_systemd_unit
+
     # 5. Start service
     step "Starting ${APP_NAME} service..."
     systemctl start "${APP_NAME}"
@@ -491,6 +516,9 @@ cmd_downgrade() {
 
     # 4. Fix ownership
     fix_ownership
+
+    # 4b. Migrate systemd unit if needed
+    update_systemd_unit
 
     # 5. Start service
     step "Starting ${APP_NAME} service..."
