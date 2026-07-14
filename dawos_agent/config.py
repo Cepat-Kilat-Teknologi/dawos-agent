@@ -130,6 +130,9 @@ class Settings(BaseSettings):
     # --- audit ----------------------------------------------------------------
     audit_buffer_size: int = 1000
 
+    # --- session history ------------------------------------------------------
+    history_db: str = "/var/lib/dawos-agent/history.db"
+
     # --- webhooks -------------------------------------------------------------
     webhook_url: str = ""
     webhook_secret: str = ""
@@ -174,6 +177,7 @@ _SILENT_DEFAULTS: frozenset[str] = frozenset(
         "audit_buffer_size",
         "webhook_url",
         "webhook_secret",
+        "history_db",
     }
 )
 

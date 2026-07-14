@@ -329,6 +329,112 @@ sudo nft add rule inet filter input tcp dport 8470 drop
 
 ---
 
+## CSV Export Hardening
+
+The CSV export endpoints (`GET /api/v1/export/sessions` and `GET /api/v1/export/history`) produce RFC 4180-compliant CSV files with additional security hardening against spreadsheet formula injection.
+
+### Formula Injection Prevention
+
+Spreadsheet applications (Microsoft Excel, LibreOffice Calc, Google Sheets) interpret cell values beginning with certain characters as formulas or commands. An attacker who can influence session usernames or other fields could inject payloads like `=HYPERLINK("http://evil.com")` or `=cmd|'/C calc'!A0`.
+
+DawOS Agent sanitises all CSV cell values before output:
+
+| Character | Risk | Mitigation |
+|-----------|------|------------|
+| `=` | Formula execution | Prefixed with single-quote |
+| `+` | Formula execution | Prefixed with single-quote |
+| `-` | Formula execution (negative number ambiguity) | Prefixed with single-quote |
+| `@` | External data reference | Prefixed with single-quote |
+| `\t` (tab) | Field separator injection | Prefixed with single-quote |
+| `\r` (carriage return) | Row injection | Prefixed with single-quote |
+
+The sanitisation function checks only the first character of each value. A leading single-quote (`'`) neutralises the formula trigger in all major spreadsheet applications without altering the data for non-spreadsheet consumers (databases, scripts, log aggregators).
+
+Additionally, all cell values are wrapped in double quotes via `csv.QUOTE_ALL`, which provides a secondary defense layer against delimiter injection.
+
+### Export Size Limits
+
+The history export endpoint clamps the `limit` parameter to the range `[1, 50000]` to prevent denial-of-service via excessively large database dumps. The default limit is 10,000 records.
+
+---
+
+## Session History Database Security
+
+The session history feature stores snapshots of active PPPoE sessions in a local SQLite database. Several layers protect this data store.
+
+### SQL Injection Prevention
+
+All database queries use parameterised SQL with `?` placeholders. No user input is ever interpolated into SQL strings via f-strings, string concatenation, or `.format()`.
+
+```python
+# How queries are constructed (safe)
+conn.execute(
+    "DELETE FROM session_history WHERE snapshot_at < ?;",
+    (before,),
+)
+
+# What is NOT done (unsafe)
+conn.execute(f"DELETE FROM session_history WHERE snapshot_at < '{before}';")
+```
+
+This pattern applies to all five SQL operations: insert (snapshot), select (query), count (pagination), delete (purge), and aggregate (stats).
+
+### Database Configuration
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `DAWOS_HISTORY_DB` | `/var/lib/dawos-agent/history.db` | Filesystem path to the SQLite database file |
+
+The database file is created automatically on first use. The parent directory is created if it does not exist. WAL (Write-Ahead Logging) mode is enabled for concurrent read performance.
+
+### Access Control
+
+| Endpoint | Auth Level | Rationale |
+|----------|-----------|-----------|
+| `GET /api/v1/sessions/history` | ViewerKey | Read-only query |
+| `POST /api/v1/sessions/history/snapshot` | ViewerKey | Non-destructive capture |
+| `DELETE /api/v1/sessions/history` | ApiKey | Destructive bulk delete |
+| `GET /api/v1/sessions/history/stats` | ViewerKey | Read-only aggregate |
+
+The purge endpoint requires ApiKey (operator/admin) authentication because it permanently deletes data.
+
+---
+
+## Config Validator Safety
+
+The config validation endpoint (`POST /api/v1/config/validate`) accepts raw accel-ppp configuration text and returns a list of structural issues.
+
+The validator is **inherently safe by design**:
+
+- Pure Python implementation -- no shell commands, no subprocess calls
+- No file system access -- does not read from or write to disk
+- No network calls -- operates entirely in-memory
+- No `eval()` or `exec()` -- uses only regex matching and string operations
+- Input is treated as plain text data, never as executable code
+
+The validator checks:
+
+- Section header syntax (`[section-name]`)
+- Key-value pair format
+- IP address and CIDR notation validity
+- Port number ranges (1-65535)
+- Bare-key sections (`[modules]` and `[ip-pool]`)
+- Duplicate section detection
+
+Invalid input produces informational warnings rather than errors, making the endpoint safe for exploratory use.
+
+---
+
+## RADIUS Secret Protection
+
+The RADIUS diagnostics endpoints (`GET /api/v1/radius/config`, `/status`, `/check`) provide visibility into RADIUS server configuration and connectivity without exposing sensitive credentials.
+
+**Shared secrets are never returned to API callers.** The config parser regex intentionally captures only the server address and port fields from `server=`, `auth-server=`, and `acct-server=` directives. The shared secret (typically the second comma-separated field) is discarded during parsing.
+
+This is enforced at the service layer (`services/radius.py`), not at the router layer, so there is no code path that could accidentally leak a secret through response serialisation.
+
+---
+
 ## Dependency Security
 
 All Python dependencies are audited for known vulnerabilities:

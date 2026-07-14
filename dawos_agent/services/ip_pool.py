@@ -7,6 +7,7 @@ data via ``accel-cmd show ippool``.
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import re
 from pathlib import Path
@@ -187,4 +188,112 @@ async def pool_usage() -> dict:
         "used": info.get("used", "0"),
         "total": info.get("total", "0"),
         "available": info.get("available", "0"),
+    }
+
+
+def _cidr_host_count(cidr: str) -> int:
+    """Return the number of usable host addresses in a CIDR range.
+
+    For /31 and /32 networks, returns ``num_addresses`` directly
+    (point-to-point or single host).  For larger networks, subtracts
+    the network and broadcast addresses.
+
+    Args:
+        cidr: CIDR notation string (e.g. ``"10.0.0.0/24"``).
+
+    Returns:
+        Number of usable host addresses, or 0 if *cidr* is invalid.
+    """
+    try:
+        net = ipaddress.ip_network(cidr, strict=False)
+    except ValueError:
+        return 0
+
+    if net.prefixlen >= 31:
+        return net.num_addresses
+    return max(net.num_addresses - 2, 0)
+
+
+async def get_pool_detail(  # pylint: disable=too-many-locals
+    config_path: Path | None = None,
+) -> dict:
+    """Get per-pool utilisation with IP-to-user mappings.
+
+    Cross-references configured pools from ``[ip-pool]`` with active
+    sessions from ``accel-cmd show sessions`` to produce a detailed
+    breakdown of which IPs are in use and by whom within each pool.
+
+    Args:
+        config_path: Override the default configuration file path.
+
+    Returns:
+        A dictionary suitable for constructing
+        :class:`~dawos_agent.models.schemas.IpPoolDetailResponse`.
+
+    Raises:
+        FileNotFoundError: If the configuration file does not exist.
+    """
+    pools = list_pools(config_path=config_path)
+    sessions = await accel.show_sessions(columns="ip,username")
+
+    # Build network objects for each pool
+    pool_nets: list[tuple[dict, ipaddress.IPv4Network | None]] = []
+    for pool in pools:
+        try:
+            net = ipaddress.ip_network(pool["range"], strict=False)
+        except ValueError:
+            net = None
+        pool_nets.append((pool, net))
+
+    # Match each session IP to a pool
+    pool_assignments: dict[str, list[dict]] = {p["name"]: [] for p in pools}
+
+    for sess in sessions:
+        sess_ip = sess.get("ip", "").strip()
+        if not sess_ip:
+            continue
+
+        try:
+            addr = ipaddress.ip_address(sess_ip)
+        except ValueError:
+            continue
+
+        for pool, net in pool_nets:
+            if net and addr in net:
+                pool_assignments[pool["name"]].append(
+                    {"ip": sess_ip, "username": sess.get("username", "")}
+                )
+                break  # IP belongs to at most one pool
+
+    # Build detail entries
+    detail_pools: list[dict] = []
+    total_used = 0
+    total_capacity = 0
+
+    for pool in pools:
+        total_ips = _cidr_host_count(pool["range"])
+        assignments = pool_assignments[pool["name"]]
+        used = len(assignments)
+        available = max(total_ips - used, 0)
+        pct = round((used / total_ips) * 100, 1) if total_ips > 0 else 0.0
+
+        detail_pools.append(
+            {
+                "name": pool["name"],
+                "range": pool["range"],
+                "total_ips": total_ips,
+                "used": used,
+                "available": available,
+                "utilization_pct": pct,
+                "assignments": assignments,
+            }
+        )
+        total_used += used
+        total_capacity += total_ips
+
+    return {
+        "pools": detail_pools,
+        "total_pools": len(pools),
+        "total_used": total_used,
+        "total_capacity": total_capacity,
     }

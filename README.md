@@ -16,7 +16,7 @@
 
 ## Overview
 
-**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **153 HTTP endpoints** across **34 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
+**DawOS Agent** is an open-source broadband network gateway management daemon built on FastAPI. It wraps `accel-cmd`, `nft`, `ip`, `tc`, `vtysh`, and other Linux system utilities as **170 HTTP endpoints** across **38 router modules**, giving you full control of your [accel-ppp](https://accel-ppp.org/) PPPoE infrastructure through a single REST API.
 
 The agent runs as a lightweight single-process daemon (64 MB RSS at idle) alongside accel-ppp on the same node. It provides complete remote management without direct SSH access, making it suitable for automation, orchestration platforms, and multi-node ISP deployments.
 
@@ -227,7 +227,7 @@ See [Configuration docs](https://cepat-kilat-teknologi.github.io/dawos-agent/get
 
 ## API Reference
 
-153 endpoints across 34 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
+170 endpoints across 38 groups. All require `X-API-Key` header except `/health`, `/health/ready`, and `/metrics`.
 
 | Group | Endpoints | Description |
 |---|:---:|---|
@@ -426,10 +426,10 @@ dawos-agent/
 │   ├── retry.py             # Exponential backoff retry for accel-cmd
 │   ├── webhooks.py          # Fire-and-forget webhook delivery
 │   ├── models/
-│   │   └── schemas.py       # 191 Pydantic v2 request/response models
-│   ├── routers/             # 34 API router modules (HTTP layer only)
-│   └── services/            # 29 service modules (business logic + shell calls)
-├── tests/                   # 1144 tests
+│   │   └── schemas.py       # 214 Pydantic v2 request/response models
+│   ├── routers/             # 38 API router modules (HTTP layer only)
+│   └── services/            # 34 service modules (business logic + shell calls)
+├── tests/                   # 1410 tests
 ├── docs/                    # MkDocs Material documentation
 ├── .github/
 │   └── workflows/
@@ -542,7 +542,7 @@ coverage run -m pytest tests/ && coverage report -m
 
 | Gate | Target | Command |
 |------|--------|---------|
-| Tests | 1144 passing | `pytest tests/ -x -q` |
+| Tests | 1410 passing | `pytest tests/ -x -q` |
 | Coverage | minimum 90% | `coverage report -m` |
 | Pylint | 10.00/10 | `pylint dawos_agent/` |
 | Black | All formatted | `black --check dawos_agent/ tests/` |

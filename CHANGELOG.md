@@ -7,6 +7,122 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-14
+
+### Added
+
+- **Session search by MAC, IP, and SID** -- Three new endpoints for locating
+  sessions without iterating the full session table:
+  - `GET /api/v1/sessions/search/mac/{mac}` -- find sessions by calling-station
+    MAC address (case-insensitive, colon-separated).
+  - `GET /api/v1/sessions/search/ip/{ip}` -- find sessions by assigned IP
+    address.
+  - `GET /api/v1/sessions/search/sid/{sid}` -- find sessions by accel-ppp
+    session ID.
+
+  All three return `SessionListResponse` and require ViewerKey authentication.
+
+- **Extended system statistics** -- `GET /api/v1/system/stats` returns
+  structured statistics from `accel-cmd show stat` broken into four sections:
+  `core` (starting/active/finishing session counters), `pppoe` (PADI/PADO/PADR
+  counters, filtered/delayed/lost metrics), `radius` (auth/acct request counts,
+  timeouts, lost, queue, per-server breakdowns with avg response time), and
+  `memory` (allocated/available). Response model: `ExtendedStatsResponse`.
+
+- **RADIUS diagnostics** -- Three read-only endpoints for RADIUS server
+  visibility without SSH access to the BNG node:
+  - `GET /api/v1/radius/config` -- parse `[radius]` section from
+    `accel-ppp.conf` and return server addresses, ports, and timeout settings.
+    Shared secrets are **never** returned (security by design).
+  - `GET /api/v1/radius/status` -- return live RADIUS request/response counters
+    from `accel-cmd show stat`.
+  - `GET /api/v1/radius/check` -- TCP connect probe to each configured RADIUS
+    server's auth port. Returns per-server reachability with latency.
+
+- **PPPoE runtime configuration** -- Two endpoints for managing PPPoE protocol
+  settings (`[pppoe]` section) without editing the config file directly:
+  - `GET /api/v1/pppoe/config` -- read current `service-name`, `ac-name`, and
+    `verbose` values.
+  - `PUT /api/v1/pppoe/config` -- update one or more PPPoE runtime settings.
+    Creates a config backup before modifying the file.
+
+- **IP pool detail** -- `GET /api/v1/ip-pool/detail` returns assignment-level
+  detail for all configured IP pools, including per-pool total, used, and
+  available counts. Response model: `IpPoolDetailResponse`.
+
+- **Session history (SQLite)** -- Four endpoints backed by a local SQLite
+  database for historical session analysis:
+  - `POST /api/v1/sessions/history/snapshot` -- capture a point-in-time
+    snapshot of all active sessions into the history database.
+  - `GET /api/v1/sessions/history` -- query historical records with optional
+    filters (username, IP, time range) and pagination.
+  - `DELETE /api/v1/sessions/history` -- purge records older than a given
+    ISO-8601 timestamp. Requires ApiKey (operator/admin) authentication.
+  - `GET /api/v1/sessions/history/stats` -- aggregate statistics: total
+    records, unique users, oldest/newest snapshot, database file size.
+
+  The database uses WAL mode for concurrent read performance, parameterised
+  queries for SQL injection prevention, and indexes on username, snapshot_at,
+  and IP columns. Database path is configurable via `DAWOS_HISTORY_DB`
+  (default `/var/lib/dawos-agent/history.db`).
+
+- **Config validation** -- `POST /api/v1/config/validate` accepts raw
+  accel-ppp configuration text and returns a list of validation issues
+  (errors, warnings, informational) without modifying any files. The
+  validator is a pure Python parser that checks section structure, key-value
+  syntax, IP/CIDR formats, port ranges, and bare-key sections (`[modules]`,
+  `[ip-pool]`). No shell execution, no file I/O -- inherently safe.
+  Requires ViewerKey authentication.
+
+- **CSV export** -- Two endpoints for downloading session data as RFC
+  4180-compliant CSV files:
+  - `GET /api/v1/export/sessions` -- export all active PPPoE sessions.
+  - `GET /api/v1/export/history` -- export session history records with
+    optional filters (username, IP, time range, limit 1-50000).
+
+  Both endpoints return `text/csv` with a `Content-Disposition` header for
+  browser file download. Cell values are sanitised to prevent spreadsheet
+  formula injection (leading `=`, `+`, `-`, `@`, `\t`, `\r` characters
+  are prefixed with a single-quote).
+
+- **23 new Pydantic models** -- `CoreStats`, `SessionSectionStats`,
+  `PppoeStats`, `RadiusServerStats`, `MemoryStats`, `ExtendedStatsResponse`,
+  `RadiusConfigServer`, `RadiusConfigResponse`, `RadiusStatusResponse`,
+  `RadiusCheckItem`, `RadiusCheckResponse`, `PppoeRuntimeConfigResponse`,
+  `PppoeRuntimeConfigUpdateRequest`, `IpPoolAssignment`, `IpPoolDetailEntry`,
+  `IpPoolDetailResponse`, `SessionHistoryRecord`, `SessionHistoryResponse`,
+  `SessionSnapshotResult`, `SessionHistoryStatsResponse`,
+  `ConfigValidationIssue`, `ConfigValidationRequest`,
+  `ConfigValidationResponse`.
+
+- **5 new service modules** -- `config_validator`, `csv_export`,
+  `pppoe_config`, `radius`, `session_history`.
+
+- **4 new router modules** -- `csv_export_router`, `pppoe_config_router`,
+  `radius`, `session_history_router`.
+
+- **Test suite expanded** -- 1410 tests (up from 1144), 100% coverage
+  maintained across 6385 statements. 10 new test files added plus
+  modifications to 5 existing test files.
+
+### Security
+
+- **CSV formula injection prevention** -- All CSV export values are sanitised
+  before output. Characters that trigger formula execution in spreadsheet
+  applications (`=`, `+`, `-`, `@`, `\t`, `\r`) are prefixed with a
+  single-quote when they appear as the first character of a cell value.
+  Combined with `csv.QUOTE_ALL` quoting, this follows the OWASP CSV Injection
+  Prevention guidelines.
+
+- **RADIUS shared secrets never exposed** -- The RADIUS diagnostics endpoints
+  parse server configuration lines but intentionally strip the shared secret
+  field. Only addresses and port numbers are returned to callers.
+
+- **Parameterised SQL in session history** -- All SQLite queries use `?`
+  placeholder parameters. No string interpolation or f-string formatting is
+  used in any SQL statement. This eliminates SQL injection as an attack
+  vector for the session history feature.
+
 ## [0.3.3] - 2026-07-12
 
 ### Added
@@ -217,7 +333,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.0...v0.3.1

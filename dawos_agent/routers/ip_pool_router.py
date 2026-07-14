@@ -16,6 +16,7 @@ from fastapi import APIRouter, HTTPException
 from ..auth import ApiKey, ViewerKey
 from ..models.schemas import (
     AddPoolRequest,
+    IpPoolDetailResponse,
     IpPoolListResponse,
     PoolUsageResponse,
     RemovePoolResponse,
@@ -139,4 +140,29 @@ async def pool_usage(_key: str = ViewerKey):
         return PoolUsageResponse(**data)
     except Exception as exc:
         log.error("Operation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
+@router.get("/detail", response_model=IpPoolDetailResponse)
+async def pool_detail(_key: str = ViewerKey):
+    """Get per-pool utilisation with IP-to-user mappings.
+
+    Cross-references the configured IP pools from ``[ip-pool]`` with
+    active PPPoE sessions to show which addresses are assigned to which
+    subscribers within each pool.
+
+    Returns:
+        IpPoolDetailResponse: Per-pool detail with assignments.
+
+    Raises:
+        HTTPException(404): If the configuration file is not found.
+        HTTPException(500): If the detail data cannot be retrieved.
+    """
+    try:
+        data = await ip_pool.get_pool_detail()
+        return IpPoolDetailResponse(**data)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        log.error("Failed to get pool detail: %s", exc)
         raise HTTPException(status_code=500, detail="Internal server error") from exc

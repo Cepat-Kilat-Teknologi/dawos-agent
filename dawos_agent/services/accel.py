@@ -15,6 +15,7 @@ import shlex
 from typing import Any
 
 from ..config import settings
+from ..constants import ACCEL_SESSION_COLUMNS, COLUMNS_DEFAULT
 from ..retry import with_retry
 
 log = logging.getLogger(__name__)
@@ -73,18 +74,114 @@ async def _run_cmd_once(args: str) -> str:
     return output
 
 
+def validate_columns(columns: str) -> str:
+    """Validate and sanitise a comma-separated column list.
+
+    Each token is checked against :data:`ACCEL_SESSION_COLUMNS`.
+    Unknown column names are silently dropped so that the resulting
+    string is always safe for shell interpolation.
+
+    Args:
+        columns: Comma-separated column names from the caller.
+
+    Returns:
+        A sanitised comma-separated string containing only valid columns.
+
+    Raises:
+        ValueError: If *columns* is empty or contains no valid names.
+    """
+    valid = [
+        c
+        for c in (tok.strip() for tok in columns.split(","))
+        if c in ACCEL_SESSION_COLUMNS
+    ]
+    if not valid:
+        raise ValueError(f"No valid columns in: {columns}")
+    return ",".join(valid)
+
+
 async def show_sessions(
-    columns: str = "ifname,username,ip,calling-sid,rate-limit,type,state,uptime,rx-bytes,tx-bytes",
+    columns: str = COLUMNS_DEFAULT,
 ) -> list[dict[str, str]]:
     """Retrieve all active PPPoE sessions as a list of dictionaries.
 
     Args:
         columns: Comma-separated column names to include in the output.
+            Defaults to the legacy 10-column set for backward
+            compatibility.  Pass :data:`COLUMNS_EXTENDED` for the full
+            telemetry set.
 
     Returns:
         A list of dicts, one per session, keyed by column name.
     """
-    output = await run_cmd(f"show sessions {columns}")
+    safe_cols = validate_columns(columns)
+    output = await run_cmd(f"show sessions {safe_cols}")
+    return parse_table(output)
+
+
+# -- Search match fields whitelist -------------------------------------------
+SEARCH_MATCH_FIELDS: frozenset[str] = frozenset(
+    {
+        "ifname",
+        "username",
+        "ip",
+        "calling-sid",
+        "called-sid",
+        "sid",
+        "type",
+        "state",
+        "inbound-if",
+        "service-name",
+    }
+)
+"""Fields accepted by ``accel-cmd show sessions match <field>``."""
+
+
+def validate_match_field(field: str) -> str:
+    """Validate that *field* is an allowed ``show sessions match`` field.
+
+    Args:
+        field: The match field name.
+
+    Returns:
+        The validated field name.
+
+    Raises:
+        ValueError: If *field* is not in :data:`SEARCH_MATCH_FIELDS`.
+    """
+    if field not in SEARCH_MATCH_FIELDS:
+        raise ValueError(f"Invalid match field: {field}")
+    return field
+
+
+async def search_sessions(
+    field: str,
+    value: str,
+    columns: str = COLUMNS_DEFAULT,
+) -> list[dict[str, str]]:
+    """Search active sessions by matching a field value.
+
+    Uses ``accel-cmd show sessions match <field> <value> <columns>``
+    to find sessions where the given field matches the value.
+
+    Args:
+        field: The session field to match against (must be in
+            :data:`SEARCH_MATCH_FIELDS`).
+        value: The value or pattern to match.
+        columns: Comma-separated column names to include in results.
+
+    Returns:
+        A list of session dicts matching the search criteria.
+
+    Raises:
+        ValueError: If *field* is invalid or *columns* contains no
+            valid column names.
+    """
+    safe_field = validate_match_field(field)
+    safe_cols = validate_columns(columns)
+    output = await run_cmd(
+        f"show sessions match {safe_field} {shlex.quote(value)} {safe_cols}"
+    )
     return parse_table(output)
 
 
@@ -253,6 +350,237 @@ def parse_ippool(text: str) -> dict[str, str]:
                 result[key] = s.split(":", 1)[1].strip()
 
     return result
+
+
+async def show_stat_extended() -> dict[str, Any]:
+    """Retrieve and parse complete accel-ppp runtime statistics.
+
+    Unlike :func:`show_stat` which only extracts sessions/cpu/uptime,
+    this function parses **every** section of ``show stat`` output
+    including core, pppoe, radius, and memory.
+
+    Returns:
+        A dictionary suitable for constructing an
+        :class:`~dawos_agent.models.schemas.ExtendedStatsResponse`.
+    """
+    output = await run_cmd("show stat")
+    return parse_stat_extended(output)
+
+
+def parse_stat_extended(  # pylint: disable=too-many-branches
+    text: str,
+) -> dict[str, Any]:
+    """Parse the full ``show stat`` output into a structured dictionary.
+
+    Handles all sections: uptime, cpu, mem, core, sessions, pppoe, and
+    one or more ``radius(...)`` blocks.  The RADIUS header line uses a
+    special format ``radius(<id>, <addr>):`` which is parsed to extract
+    the server identifier and address.
+
+    Args:
+        text: Raw multi-line output from ``accel-cmd show stat``.
+
+    Returns:
+        A nested dictionary matching the
+        :class:`~dawos_agent.models.schemas.ExtendedStatsResponse` shape.
+    """
+    result: dict[str, Any] = {
+        "uptime": "",
+        "cpu": "0",
+        "memory": {"rss_kb": 0, "virt_kb": 0},
+        "core": {},
+        "sessions": {"starting": 0, "active": 0, "finishing": 0},
+        "pppoe": {},
+        "radius": [],
+    }
+    section: str | None = None
+    current_radius: dict[str, Any] | None = None
+
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        if not stripped:
+            continue
+
+        # Top-level keys (no leading whitespace)
+        if raw and not raw[0:1].isspace():
+            # Flush any pending RADIUS block
+            if current_radius is not None:
+                result["radius"].append(current_radius)
+                current_radius = None
+
+            if stripped.startswith("uptime:"):
+                result["uptime"] = stripped.split(":", 1)[1].strip()
+                section = None
+                continue
+            if stripped.startswith("cpu:"):
+                result["cpu"] = stripped.split(":", 1)[1].strip().rstrip("%")
+                section = None
+                continue
+            if stripped.startswith("mem(rss/virt):"):
+                _parse_mem_line(stripped, result)
+                section = None
+                continue
+
+            # radius(3, 10.100.0.253):
+            if stripped.startswith("radius("):
+                current_radius = _parse_radius_header(stripped)
+                section = "radius"
+                continue
+
+            # Simple section header: "core:", "sessions:", "pppoe:"
+            if stripped.endswith(":") and " " not in stripped:
+                section = stripped.rstrip(":")
+            else:
+                section = None
+            continue
+
+        # Indented line → belongs to current section
+        if ":" not in stripped:
+            continue
+
+        key, val = stripped.split(":", 1)
+        key = key.strip()
+        val = val.strip()
+
+        if section == "core":
+            with contextlib.suppress(ValueError):
+                result["core"][key] = int(val)
+        elif section == "sessions":
+            if key in ("starting", "active", "finishing"):
+                with contextlib.suppress(ValueError):
+                    result["sessions"][key] = int(val)
+        elif section == "pppoe":
+            _parse_pppoe_line(key, val, result)
+        elif section == "radius" and current_radius is not None:
+            _parse_radius_line(key, val, current_radius)
+
+    # Flush final RADIUS block if output ended without a new section
+    if current_radius is not None:
+        result["radius"].append(current_radius)
+
+    return result
+
+
+def _parse_mem_line(line: str, result: dict[str, Any]) -> None:
+    """Extract RSS and virtual memory from ``mem(rss/virt): X/Y kB``."""
+    after_colon = line.split(":", 1)[1].strip()
+    mem_part = after_colon.split()[0] if after_colon else ""
+    parts = mem_part.split("/")
+    if len(parts) == 2:
+        with contextlib.suppress(ValueError):
+            result["memory"]["rss_kb"] = int(parts[0])
+        with contextlib.suppress(ValueError):
+            result["memory"]["virt_kb"] = int(parts[1])
+
+
+def _parse_radius_header(line: str) -> dict[str, Any]:
+    """Parse ``radius(<id>, <addr>):`` into initial RADIUS dict."""
+    rad: dict[str, Any] = {"server_id": "", "server_address": ""}
+    # Extract content between parentheses
+    start = line.index("(") + 1
+    end = line.index(")")
+    inner = line[start:end]
+    parts = [p.strip() for p in inner.split(",")]
+    if len(parts) >= 1:
+        rad["server_id"] = parts[0]
+    if len(parts) >= 2:
+        rad["server_address"] = parts[1]
+    return rad
+
+
+def _parse_pppoe_line(key: str, val: str, result: dict[str, Any]) -> None:
+    """Parse a single PPPoE stats line into the result dict."""
+    pppoe = result.setdefault("pppoe", {})
+    simple_keys = {
+        "starting": "starting",
+        "active": "active",
+        "delayed PADO": "delayed_pado",
+        "recv PADI": "recv_padi",
+        "drop PADI": "drop_padi",
+        "sent PADO": "sent_pado",
+        "sent PADS": "sent_pads",
+        "filtered": "filtered",
+    }
+    if key in simple_keys:
+        with contextlib.suppress(ValueError):
+            pppoe[simple_keys[key]] = int(val)
+        return
+
+    # recv PADR(dup): 20041(0)
+    if key.startswith("recv PADR"):
+        _parse_padr(val, pppoe)
+
+
+def _parse_padr(val: str, pppoe: dict[str, Any]) -> None:
+    """Parse ``recv PADR(dup): 20041(0)`` value."""
+    # val = "20041(0)"
+    if "(" in val:
+        main_part = val.split("(")[0]
+        dup_part = val.split("(")[1].rstrip(")")
+        with contextlib.suppress(ValueError):
+            pppoe["recv_padr"] = int(main_part)
+        with contextlib.suppress(ValueError):
+            pppoe["recv_padr_dup"] = int(dup_part)
+    else:
+        with contextlib.suppress(ValueError):
+            pppoe["recv_padr"] = int(val)
+
+
+def _parse_radius_line(key: str, val: str, rad: dict[str, Any]) -> None:
+    """Parse a single RADIUS stats line into the RADIUS dict."""
+    simple = {
+        "state": "state",
+        "fail count": "fail_count",
+        "request count": "request_count",
+        "queue length": "queue_length",
+        "auth sent": "auth_sent",
+        "acct sent": "acct_sent",
+        "interim sent": "interim_sent",
+    }
+    if key in simple:
+        field = simple[key]
+        if field == "state":
+            rad[field] = val
+        else:
+            with contextlib.suppress(ValueError):
+                rad[field] = int(val)
+        return
+
+    # auth lost(total/5m/1m): 414/0/0
+    _parse_radius_lost(key, val, rad)
+    # auth avg query time(5m/1m): 0/0 ms
+    _parse_radius_avg(key, val, rad)
+
+
+def _parse_radius_lost(key: str, val: str, rad: dict[str, Any]) -> None:
+    """Parse ``<type> lost(total/5m/1m): X/Y/Z`` into RADIUS dict."""
+    for prefix in ("auth", "acct", "interim"):
+        label = f"{prefix} lost(total/5m/1m)"
+        if key == label:
+            parts = val.split("/")
+            if len(parts) == 3:
+                with contextlib.suppress(ValueError):
+                    rad[f"{prefix}_lost_total"] = int(parts[0])
+                with contextlib.suppress(ValueError):
+                    rad[f"{prefix}_lost_5m"] = int(parts[1])
+                with contextlib.suppress(ValueError):
+                    rad[f"{prefix}_lost_1m"] = int(parts[2])
+            return
+
+
+def _parse_radius_avg(key: str, val: str, rad: dict[str, Any]) -> None:
+    """Parse ``<type> avg query time(5m/1m): X/Y ms`` into RADIUS dict."""
+    for prefix in ("auth", "acct", "interim"):
+        label = f"{prefix} avg query time(5m/1m)"
+        if key == label:
+            clean = val.replace("ms", "").strip()
+            parts = clean.split("/")
+            if len(parts) == 2:
+                with contextlib.suppress(ValueError):
+                    rad[f"{prefix}_avg_query_time_5m"] = int(parts[0])
+                with contextlib.suppress(ValueError):
+                    rad[f"{prefix}_avg_query_time_1m"] = int(parts[1])
+            return
 
 
 # ---------------------------------------------------------------------------

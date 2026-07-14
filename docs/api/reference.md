@@ -4026,3 +4026,375 @@ Stream live log lines via Server-Sent Events.
 ```
 data: Jul 07 00:00:01 bng accel-pppd[1234]: pppoe: session started
 ```
+
+---
+
+## 32. Session History
+
+SQLite-backed session snapshots for historical analysis. The database is stored at the path configured by `DAWOS_HISTORY_DB` (default `/var/lib/dawos-agent/history.db`).
+
+### POST /api/v1/sessions/history/snapshot
+
+Capture a point-in-time snapshot of all active PPPoE sessions into the history database. Each active session is stored as a separate row with the current timestamp.
+
+**Auth:** Required (ViewerKey)
+
+**Request body:** None
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "captured": 42,
+  "snapshot_at": "2026-07-14T10:30:00.000000+00:00"
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Snapshot captured |
+| `500`  | Database write failed |
+
+### GET /api/v1/sessions/history
+
+Query historical session records with optional filters and pagination.
+
+**Auth:** Required (ViewerKey)
+
+| Parameter | In | Type | Default | Description |
+|-----------|----|------|---------|-------------|
+| `username` | query | string | *(none)* | Exact username match |
+| `ip` | query | string | *(none)* | Exact IP address match |
+| `start` | query | string | *(none)* | ISO-8601 lower bound for `snapshot_at` |
+| `end` | query | string | *(none)* | ISO-8601 upper bound for `snapshot_at` |
+| `limit` | query | int | `100` | Maximum records to return (1-1000) |
+| `offset` | query | int | `0` | Pagination offset |
+
+**Response:**
+
+```json
+{
+  "records": [
+    {
+      "id": 1,
+      "snapshot_at": "2026-07-14T10:30:00",
+      "username": "user001",
+      "ip": "10.0.0.1",
+      "sid": "abc123",
+      "ifname": "ppp0",
+      "calling_sid": "AA:BB:CC:DD:EE:FF",
+      "state": "active",
+      "uptime": "01:30:00",
+      "rx_bytes": "104857600",
+      "tx_bytes": "52428800"
+    }
+  ],
+  "total": 1,
+  "limit": 100,
+  "offset": 0
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Database query failed |
+
+### DELETE /api/v1/sessions/history
+
+Purge history records older than a given timestamp.
+
+**Auth:** Required (ApiKey -- operator or admin role)
+
+| Parameter | In | Type | Required | Description |
+|-----------|----|------|----------|-------------|
+| `before` | query | string | Yes | ISO-8601 timestamp cutoff. Records with `snapshot_at < before` are deleted. |
+
+**Response:**
+
+```json
+{
+  "deleted": 1500
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Purge completed |
+| `422`  | Missing `before` parameter |
+| `500`  | Database delete failed |
+
+### GET /api/v1/sessions/history/stats
+
+Return aggregate statistics for the session history database.
+
+**Auth:** Required (ViewerKey)
+
+**Response:**
+
+```json
+{
+  "total_records": 15000,
+  "unique_users": 342,
+  "oldest_snapshot": "2026-06-01T00:00:00",
+  "newest_snapshot": "2026-07-14T10:30:00",
+  "db_size_bytes": 2097152
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Database read failed |
+
+---
+
+## 33. Config Validation
+
+Validate accel-ppp configuration text without modifying any files on disk.
+
+### POST /api/v1/config/validate
+
+Accept raw accel-ppp configuration content and return a list of structural issues. The validator checks section syntax, key-value format, IP/CIDR validity, port ranges, and bare-key sections. This is a read-only operation -- no files are written.
+
+**Auth:** Required (ViewerKey)
+
+**Request body:**
+
+```json
+{
+  "content": "[modules]\nauth_pap\nauth_chap_md5\n\n[core]\nthread-count=4\n\n[pppoe]\ninterface=ens19\n"
+}
+```
+
+**Response:**
+
+```json
+{
+  "valid": true,
+  "issues": [],
+  "section_count": 3,
+  "line_count": 8
+}
+```
+
+When issues are found:
+
+```json
+{
+  "valid": false,
+  "issues": [
+    {
+      "line": 5,
+      "severity": "error",
+      "message": "Invalid IP address format: 999.999.999.999"
+    },
+    {
+      "line": 8,
+      "severity": "warning",
+      "message": "Port number out of range (1-65535): 70000"
+    }
+  ],
+  "section_count": 2,
+  "line_count": 10
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Validation completed (check `valid` field for result) |
+| `422`  | Missing or empty `content` field |
+| `500`  | Validator internal error |
+
+---
+
+## 34. CSV Export
+
+Download session data as RFC 4180-compliant CSV files. Cell values are sanitised to prevent spreadsheet formula injection.
+
+### GET /api/v1/export/sessions
+
+Export all active PPPoE sessions as a CSV file download.
+
+**Auth:** Required (ViewerKey)
+
+**Response:** `text/csv` with `Content-Disposition: attachment; filename="sessions.csv"` header.
+
+CSV columns: `ifname`, `username`, `ip`, `calling-sid`, `rate-limit`, `type`, `state`, `uptime`, `rx-bytes`, `tx-bytes`.
+
+```csv
+"ifname","username","ip","calling-sid","rate-limit","type","state","uptime","rx-bytes","tx-bytes"
+"ppp0","user001","10.0.0.1","AA:BB:CC:DD:EE:FF","10M/50M","pppoe","active","01:30:00","104857600","52428800"
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | CSV file returned |
+| `500`  | Session data unavailable |
+
+### GET /api/v1/export/history
+
+Export session history records as a CSV file download with optional filters.
+
+**Auth:** Required (ViewerKey)
+
+| Parameter | In | Type | Default | Description |
+|-----------|----|------|---------|-------------|
+| `username` | query | string | *(none)* | Exact username match |
+| `ip` | query | string | *(none)* | Exact IP address match |
+| `start` | query | string | *(none)* | ISO-8601 lower bound for `snapshot_at` |
+| `end` | query | string | *(none)* | ISO-8601 upper bound for `snapshot_at` |
+| `limit` | query | int | `10000` | Maximum records (1-50000) |
+
+**Response:** `text/csv` with `Content-Disposition: attachment; filename="history.csv"` header.
+
+CSV columns: `id`, `snapshot_at`, `username`, `ip`, `sid`, `ifname`, `calling_sid`, `state`, `uptime`, `rx_bytes`, `tx_bytes`.
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | CSV file returned |
+| `500`  | History data unavailable |
+
+---
+
+## 35. RADIUS Diagnostics
+
+Read-only views of RADIUS server configuration, runtime statistics, and reachability. Shared secrets are never exposed.
+
+### GET /api/v1/radius/config
+
+Parse the `[radius]` section from `accel-ppp.conf` and return server addresses, ports, and timeout settings. Shared secrets are stripped during parsing.
+
+**Auth:** Required (ViewerKey)
+
+**Response:**
+
+```json
+{
+  "servers": [
+    {
+      "address": "10.0.0.100",
+      "auth_port": 1812,
+      "acct_port": 1813
+    }
+  ],
+  "timeout": 3,
+  "max_try": 3
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Config parse failed |
+
+### GET /api/v1/radius/status
+
+Return live RADIUS request/response counters from `accel-cmd show stat`.
+
+**Auth:** Required (ViewerKey)
+
+**Response:**
+
+```json
+{
+  "auth_sent": 15000,
+  "auth_received": 14995,
+  "auth_timeout": 5,
+  "acct_sent": 30000,
+  "acct_received": 29998,
+  "acct_timeout": 2
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Stats unavailable |
+
+### GET /api/v1/radius/check
+
+Perform a TCP connect probe to each configured RADIUS server's authentication port and report reachability with latency.
+
+**Auth:** Required (ViewerKey)
+
+**Response:**
+
+```json
+{
+  "results": [
+    {
+      "address": "10.0.0.100",
+      "port": 1812,
+      "reachable": true,
+      "latency_ms": 2.5
+    }
+  ]
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Check completed (inspect per-server `reachable` field) |
+| `500`  | Check failed |
+
+---
+
+## 36. PPPoE Runtime Configuration
+
+Manage PPPoE protocol settings in the `[pppoe]` section of `accel-ppp.conf`. Interface bindings and PADO delay are managed by separate endpoint groups.
+
+### GET /api/v1/pppoe/config
+
+Read current `service-name`, `ac-name`, and `verbose` settings.
+
+**Auth:** Required (ViewerKey)
+
+**Response:**
+
+```json
+{
+  "service_name": "internet",
+  "ac_name": "bng-jakarta-01",
+  "verbose": 0
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Success |
+| `500`  | Config parse failed |
+
+### PUT /api/v1/pppoe/config
+
+Update one or more PPPoE runtime settings. Creates a config backup before modifying the file.
+
+**Auth:** Required (ApiKey)
+
+**Request body:**
+
+```json
+{
+  "service_name": "isp-premium",
+  "ac_name": "bng-jakarta-02"
+}
+```
+
+All fields are optional. Only provided fields are updated.
+
+**Response:**
+
+```json
+{
+  "service_name": "isp-premium",
+  "ac_name": "bng-jakarta-02",
+  "verbose": 0
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| `200`  | Settings updated |
+| `422`  | Invalid field value |
+| `500`  | Config write failed |

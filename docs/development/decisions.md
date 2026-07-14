@@ -19,7 +19,7 @@ Use FastAPI with Uvicorn as the ASGI server, Pydantic v2 for request/response va
 
 ### Consequences
 
-- Automatic OpenAPI/Swagger documentation for all 153 endpoints.
+- Automatic OpenAPI/Swagger documentation for all 170 endpoints.
 - Native async support for subprocess-based service calls without blocking the event loop.
 - Pydantic v2 provides strict type validation and serialization with minimal boilerplate.
 - Python 3.9+ requirement excludes older distributions (Ubuntu 18.04 and below).

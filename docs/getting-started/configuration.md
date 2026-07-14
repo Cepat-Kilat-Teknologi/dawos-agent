@@ -129,6 +129,12 @@ sudo systemctl restart dawos-agent
 | `DAWOS_WEBHOOK_URL` | *(disabled)* | `string` | HTTP(S) endpoint to receive event notifications (session up/down, config changes, service restarts). When set, the agent fires asynchronous POST requests with JSON payloads on relevant events. |
 | `DAWOS_WEBHOOK_SECRET` | *(disabled)* | `string` | HMAC-SHA256 secret for webhook payload signing. When set, a `X-Webhook-Signature` header is included in each webhook request. Receivers should validate this signature to verify payload authenticity. |
 
+### Session History
+
+| Variable | Default | Type | Description |
+|----------|---------|------|-------------|
+| `DAWOS_HISTORY_DB` | `/var/lib/dawos-agent/history.db` | `string` | Filesystem path to the SQLite database used for session history snapshots. The database is created automatically on first snapshot. The parent directory is created if it does not exist. WAL mode is enabled for concurrent read performance. Set to a path on fast storage (SSD preferred) for production workloads with frequent snapshots. |
+
 ### Example Configuration File
 
 ```bash

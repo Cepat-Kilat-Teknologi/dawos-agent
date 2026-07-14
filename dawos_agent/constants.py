@@ -61,3 +61,53 @@ RE_SAFE_MATCH: str = r"^[A-Za-z0-9._:/%@-]+$"
 """accel-cmd match key (session SID / IP / username lookup); permits
 IPv4/IPv6/CIDR and identifier characters while blocking every shell
 metacharacter."""
+
+RE_SAFE_COLUMNS: str = r"^[a-zA-Z0-9_,-]+$"
+"""Comma-separated column list for ``accel-cmd show sessions``."""
+
+# -- accel-cmd session columns -----------------------------------------------
+# Whitelist of valid column names for ``show sessions``.  Used by the
+# ``?columns=`` query parameter to reject unknown or malicious values
+# before they reach the subprocess layer.
+
+ACCEL_SESSION_COLUMNS: frozenset[str] = frozenset(
+    {
+        "ifname",
+        "username",
+        "ip",
+        "ip6",
+        "ip6-dp",
+        "calling-sid",
+        "called-sid",
+        "sid",
+        "rate-limit",
+        "type",
+        "state",
+        "uptime",
+        "uptime-raw",
+        "rx-bytes",
+        "tx-bytes",
+        "rx-bytes-raw",
+        "tx-bytes-raw",
+        "rx-pkts",
+        "tx-pkts",
+        "inbound-if",
+        "service-name",
+        "comp",
+        "netns",
+    }
+)
+"""All valid column names accepted by ``accel-cmd show sessions``."""
+
+COLUMNS_DEFAULT: str = (
+    "ifname,username,ip,calling-sid,rate-limit," "type,state,uptime,rx-bytes,tx-bytes"
+)
+"""Default (legacy-compatible) column set for ``show sessions``."""
+
+COLUMNS_EXTENDED: str = (
+    "ifname,username,ip,calling-sid,called-sid,sid,rate-limit,"
+    "type,state,uptime,uptime-raw,rx-bytes,tx-bytes,"
+    "rx-bytes-raw,tx-bytes-raw,rx-pkts,tx-pkts,"
+    "inbound-if,service-name"
+)
+"""Extended column set exposing all session telemetry fields."""

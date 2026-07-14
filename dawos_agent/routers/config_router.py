@@ -18,8 +18,10 @@ from ..models.schemas import (
     ConfigResponse,
     ConfigUpdateRequest,
     ConfigUpdateResponse,
+    ConfigValidationRequest,
+    ConfigValidationResponse,
 )
-from ..services import config_manager
+from ..services import config_manager, config_validator
 
 log = logging.getLogger(__name__)
 
@@ -116,3 +118,31 @@ async def list_backups(_key: str = ViewerKey):
             creation timestamp.
     """
     return config_manager.list_backups()
+
+
+@router.post("/validate", response_model=ConfigValidationResponse)
+async def validate_config(req: ConfigValidationRequest, _key: str = ViewerKey):
+    """Validate accel-ppp configuration content without applying it.
+
+    Performs structural and semantic checks on the provided configuration
+    text: syntax validation, required section verification, IP/CIDR
+    checks, port range validation, and duplicate section detection.
+
+    This is a read-only operation — the configuration file on disk is
+    not modified.
+
+    Args:
+        req: Request body containing the configuration text to validate.
+
+    Returns:
+        ConfigValidationResponse: Validation results with issues list.
+
+    Raises:
+        HTTPException(500): If the validation logic itself fails.
+    """
+    try:
+        result = config_validator.validate_config(req.content)
+        return ConfigValidationResponse(**result)
+    except Exception as exc:
+        log.error("Config validation failed: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc

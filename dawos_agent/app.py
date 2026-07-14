@@ -40,6 +40,7 @@ from .routers import (
     checkpoint,
     config_router,
     conntrack_router,
+    csv_export_router,
     dhcp_router,
     diagnostics,
     dns_forwarding,
@@ -59,10 +60,13 @@ from .routers import (
     pado_router,
     playbooks_router,
     pppoe,
+    pppoe_config_router,
+    radius,
     routing,
     scheduler,
     service,
     session_control,
+    session_history_router,
     sessions,
     system,
     traffic,
@@ -153,6 +157,7 @@ app.include_router(config_router.router)
 app.include_router(network.router)
 app.include_router(firewall.router)
 app.include_router(pppoe.router)
+app.include_router(radius.router)
 app.include_router(traffic.router)
 app.include_router(routing.router)
 app.include_router(checkpoint.router)
@@ -163,7 +168,9 @@ app.include_router(ntp.router)
 app.include_router(session_control.router)
 app.include_router(limits_router.router)
 app.include_router(pado_router.router)
+app.include_router(pppoe_config_router.router)
 app.include_router(ip_pool_router.router)
+app.include_router(session_history_router.router)
 app.include_router(lldp_router.router)
 app.include_router(dhcp_router.router)
 app.include_router(flow_router.router)
@@ -175,6 +182,7 @@ app.include_router(monitoring_router.router)
 app.include_router(playbooks_router.router)
 app.include_router(diagnostics.router)
 app.include_router(logs.router)
+app.include_router(csv_export_router.router)
 
 # WebSocket (authenticated via query parameter) ----------------------------
 app.include_router(ws.router)

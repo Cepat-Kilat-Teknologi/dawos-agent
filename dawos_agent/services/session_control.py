@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import shlex
 
+from ..constants import COLUMNS_EXTENDED
 from . import accel
 
 log = logging.getLogger(__name__)
@@ -26,8 +27,9 @@ async def session_by_sid(sid: str) -> dict | None:
     Returns:
         A dictionary with session fields, or ``None`` if not found.
     """
-    cols = "sid,ifname,username,ip,calling-sid,rate-limit,type,state,uptime"
-    output = await accel.run_cmd(f"show sessions match sid ^{shlex.quote(sid)}$ {cols}")
+    output = await accel.run_cmd(
+        f"show sessions match sid ^{shlex.quote(sid)}$ {COLUMNS_EXTENDED}"
+    )
     rows = accel.parse_table(output)
     return rows[0] if rows else None
 
@@ -41,8 +43,9 @@ async def session_by_ip(ip: str) -> dict | None:
     Returns:
         A dictionary with session fields, or ``None`` if not found.
     """
-    cols = "sid,ifname,username,ip,calling-sid,type,state,uptime"
-    output = await accel.run_cmd(f"show sessions match ip ^{shlex.quote(ip)}$ {cols}")
+    output = await accel.run_cmd(
+        f"show sessions match ip ^{shlex.quote(ip)}$ {COLUMNS_EXTENDED}"
+    )
     rows = accel.parse_table(output)
     return rows[0] if rows else None
 
@@ -57,12 +60,8 @@ async def session_snapshot(username: str) -> dict:
         A dictionary with ``username``, ``found`` (bool), ``sessions``
         (list of dicts with traffic counters), and ``count``.
     """
-    cols = (
-        "sid,ifname,username,ip,calling-sid,rate-limit,"
-        "type,state,uptime,rx-bytes,tx-bytes,rx-pkts,tx-pkts"
-    )
     output = await accel.run_cmd(
-        f"show sessions match username ^{shlex.quote(username)}$ {cols}",
+        f"show sessions match username ^{shlex.quote(username)}$ {COLUMNS_EXTENDED}",
     )
     rows = accel.parse_table(output)
     return {

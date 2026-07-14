@@ -6,6 +6,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ---
 
+## v0.4.0 (2026-07-14)
+
+### Added
+
+- Session history database (SQLite WAL mode) with 4 endpoints: record, query with filtering, purge by timestamp, and statistics
+- Config validation endpoint (`POST /api/v1/config/validate`) for dry-run syntax checking without applying changes
+- CSV export endpoints for sessions and session history with RFC 4180 compliance and formula injection prevention
+- RADIUS diagnostics endpoints: auth test, CoA disconnect test, and NAS client listing
+- PPPoE runtime configuration endpoints: interface listing and module reload
+- Session search endpoints: search by username, IP address, and session ID with pattern matching
+- Extended system statistics endpoint with parsed numeric fields
+- IP pool detail endpoint for single pool inspection
+- 23 new Pydantic models, 5 new service modules, 4 new router modules
+- Test suite expanded to 1410 tests with 100% coverage
+
+### Security
+
+- CSV formula injection prevention (prefixes `=`, `+`, `-`, `@`, `\t`, `\r` with single-quote)
+- RADIUS shared secrets never exposed via API responses
+- Parameterized SQL queries throughout session history service
+
+---
+
 ## v0.3.3 (2026-07-12)
 
 ### Added
@@ -16,7 +39,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Changed
 
 - Bulk endpoint docstrings now include request body JSON examples — documents that `BulkRateLimitRequest` uses per-item objects (`{"items": [{"username": "...", "rate": "..."}]}`) rather than a flat usernames+rate shape.
-- Test suite: 1144 tests, 100% coverage maintained
+- Test suite: 1410 tests, 100% coverage maintained
 
 ### Fixed
 

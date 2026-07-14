@@ -242,6 +242,67 @@ async def test_pool_usage_error(client, headers):
 
 
 # ---------------------------------------------------------------------------
+# GET /ip-pool/detail
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_pool_detail(client, headers):
+    mock_data = {
+        "pools": [
+            {
+                "name": "customers",
+                "range": "10.0.0.0/24",
+                "total_ips": 254,
+                "used": 2,
+                "available": 252,
+                "utilization_pct": 0.8,
+                "assignments": [
+                    {"ip": "10.0.0.5", "username": "user1"},
+                    {"ip": "10.0.0.10", "username": "user2"},
+                ],
+            }
+        ],
+        "total_pools": 1,
+        "total_used": 2,
+        "total_capacity": 254,
+    }
+    with patch(
+        "dawos_agent.routers.ip_pool_router.ip_pool.get_pool_detail",
+        new_callable=AsyncMock,
+        return_value=mock_data,
+    ):
+        resp = await client.get("/api/v1/ip-pool/detail", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["total_pools"] == 1
+    assert body["total_used"] == 2
+    assert len(body["pools"][0]["assignments"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_pool_detail_not_found(client, headers):
+    with patch(
+        "dawos_agent.routers.ip_pool_router.ip_pool.get_pool_detail",
+        new_callable=AsyncMock,
+        side_effect=FileNotFoundError("missing"),
+    ):
+        resp = await client.get("/api/v1/ip-pool/detail", headers=headers)
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_pool_detail_error(client, headers):
+    with patch(
+        "dawos_agent.routers.ip_pool_router.ip_pool.get_pool_detail",
+        new_callable=AsyncMock,
+        side_effect=Exception("fail"),
+    ):
+        resp = await client.get("/api/v1/ip-pool/detail", headers=headers)
+    assert resp.status_code == 500
+
+
+# ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
 
@@ -250,3 +311,41 @@ async def test_pool_usage_error(client, headers):
 async def test_ip_pool_requires_auth(client, bad_headers):
     resp = await client.get("/api/v1/ip-pool", headers=bad_headers)
     assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_ip_pool_detail_requires_auth(client, bad_headers):
+    resp = await client.get("/api/v1/ip-pool/detail", headers=bad_headers)
+    assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Model smoke tests
+# ---------------------------------------------------------------------------
+
+
+def test_ip_pool_assignment_defaults():
+    from dawos_agent.models.schemas import IpPoolAssignment
+
+    obj = IpPoolAssignment(ip="10.0.0.1", username="u1")
+    assert obj.ip == "10.0.0.1"
+    assert obj.username == "u1"
+
+
+def test_ip_pool_detail_entry_defaults():
+    from dawos_agent.models.schemas import IpPoolDetailEntry
+
+    obj = IpPoolDetailEntry()
+    assert obj.name == ""
+    assert obj.total_ips == 0
+    assert obj.assignments == []
+
+
+def test_ip_pool_detail_response_defaults():
+    from dawos_agent.models.schemas import IpPoolDetailResponse
+
+    obj = IpPoolDetailResponse()
+    assert obj.pools == []
+    assert obj.total_pools == 0
+    assert obj.total_used == 0
+    assert obj.total_capacity == 0

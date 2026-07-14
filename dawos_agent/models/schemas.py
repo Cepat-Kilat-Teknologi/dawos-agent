@@ -341,31 +341,53 @@ class Session(BaseModel):
     accepts both the alias and the Python name thanks to
     ``populate_by_name``.
 
+    All fields default to empty string so the model gracefully handles
+    responses from ``accel-cmd`` regardless of which ``columns`` were
+    requested — only the columns present in the output will be populated.
+
     Attributes:
         ifname: Virtual interface name assigned to the session (e.g. ``ppp0``).
         username: Subscriber's RADIUS/PAP/CHAP authentication username.
         ip: IPv4 address assigned to the session.
         calling_sid: Calling-Station-Id (typically the subscriber's MAC address).
+        called_sid: Called-Station-Id (NAS port identifier).
+        sid: Unique accel-ppp session identifier.
         rate_limit: Applied bandwidth shaping rule (e.g. ``"5M/20M"``), empty
             if none.
         type: Session type (``pppoe``, ``pptp``, ``l2tp``, etc.).
         state: Session state as reported by accel-ppp (``active``, ``starting``,
             ``finishing``).
         uptime: Human-readable session duration string.
-        rx_bytes: Total bytes received by the subscriber since session start.
-        tx_bytes: Total bytes transmitted to the subscriber since session start.
+        uptime_raw: Session duration in seconds (numeric string).
+        rx_bytes: Human-readable received bytes since session start.
+        tx_bytes: Human-readable transmitted bytes since session start.
+        rx_bytes_raw: Raw received bytes counter (numeric string).
+        tx_bytes_raw: Raw transmitted bytes counter (numeric string).
+        rx_pkts: Received packet count (numeric string).
+        tx_pkts: Transmitted packet count (numeric string).
+        inbound_if: Physical inbound interface (e.g. ``ens19``).
+        service_name: PPPoE Service-Name tag value.
     """
 
     ifname: str = ""
     username: str = ""
     ip: str = ""
     calling_sid: str = Field("", alias="calling-sid")
+    called_sid: str = Field("", alias="called-sid")
+    sid: str = ""
     rate_limit: str = Field("", alias="rate-limit")
     type: str = ""
     state: str = ""
     uptime: str = ""
+    uptime_raw: str = Field("", alias="uptime-raw")
     rx_bytes: str = Field("", alias="rx-bytes")
     tx_bytes: str = Field("", alias="tx-bytes")
+    rx_bytes_raw: str = Field("", alias="rx-bytes-raw")
+    tx_bytes_raw: str = Field("", alias="tx-bytes-raw")
+    rx_pkts: str = Field("", alias="rx-pkts")
+    tx_pkts: str = Field("", alias="tx-pkts")
+    inbound_if: str = Field("", alias="inbound-if")
+    service_name: str = Field("", alias="service-name")
 
     model_config = {"populate_by_name": True}
 
@@ -402,6 +424,271 @@ class SessionStatsResponse(BaseModel):
     pool_used: int = 0
     pool_total: int = 0
     uptime: str = ""
+
+
+# ---------------------------------------------------------------------------
+# Extended accel-ppp stats (P0.2)
+# ---------------------------------------------------------------------------
+
+
+class CoreStats(BaseModel):
+    """accel-ppp core subsystem statistics.
+
+    Attributes:
+        mempool_allocated: Total mempool bytes allocated.
+        mempool_available: Mempool bytes currently free.
+        thread_count: Number of worker threads.
+        thread_active: Currently active threads.
+        context_count: Total context objects.
+        context_sleeping: Sleeping context objects.
+        context_pending: Pending context objects.
+        md_handler_count: Total MD handler count.
+        md_handler_pending: Pending MD handlers.
+        timer_count: Total timer count.
+        timer_pending: Pending timers.
+    """
+
+    mempool_allocated: int = 0
+    mempool_available: int = 0
+    thread_count: int = 0
+    thread_active: int = 0
+    context_count: int = 0
+    context_sleeping: int = 0
+    context_pending: int = 0
+    md_handler_count: int = 0
+    md_handler_pending: int = 0
+    timer_count: int = 0
+    timer_pending: int = 0
+
+
+class SessionSectionStats(BaseModel):
+    """Session counts from the ``sessions:`` section of ``show stat``.
+
+    Attributes:
+        starting: Sessions currently negotiating.
+        active: Fully established sessions.
+        finishing: Sessions in teardown phase.
+    """
+
+    starting: int = 0
+    active: int = 0
+    finishing: int = 0
+
+
+class PppoeStats(BaseModel):
+    """PPPoE protocol counters from ``show stat``.
+
+    Attributes:
+        starting: PPPoE sessions in discovery phase.
+        active: Active PPPoE sessions.
+        delayed_pado: PADO responses delayed by rate limiting.
+        recv_padi: Total PADI packets received.
+        drop_padi: PADI packets dropped (filtered or rate limited).
+        sent_pado: PADO responses sent.
+        recv_padr: PADR packets received.
+        recv_padr_dup: Duplicate PADR packets received.
+        sent_pads: PADS (session confirmation) packets sent.
+        filtered: Sessions rejected by MAC/service-name filter.
+    """
+
+    starting: int = 0
+    active: int = 0
+    delayed_pado: int = 0
+    recv_padi: int = 0
+    drop_padi: int = 0
+    sent_pado: int = 0
+    recv_padr: int = 0
+    recv_padr_dup: int = 0
+    sent_pads: int = 0
+    filtered: int = 0
+
+
+class RadiusServerStats(BaseModel):
+    """Per-RADIUS-server statistics from ``show stat``.
+
+    Attributes:
+        server_id: Numeric server identifier in parentheses.
+        server_address: RADIUS server IP address.
+        state: Server state (``active``, ``down``, etc.).
+        fail_count: Consecutive failure counter.
+        request_count: Current in-flight request count.
+        queue_length: Pending request queue depth.
+        auth_sent: Total authentication requests sent.
+        auth_lost_total: Auth requests lost (all time).
+        auth_lost_5m: Auth requests lost (last 5 minutes).
+        auth_lost_1m: Auth requests lost (last 1 minute).
+        auth_avg_query_time_5m: Average auth query time in ms (5m).
+        auth_avg_query_time_1m: Average auth query time in ms (1m).
+        acct_sent: Total accounting requests sent.
+        acct_lost_total: Acct requests lost (all time).
+        acct_lost_5m: Acct requests lost (last 5 minutes).
+        acct_lost_1m: Acct requests lost (last 1 minute).
+        acct_avg_query_time_5m: Average acct query time in ms (5m).
+        acct_avg_query_time_1m: Average acct query time in ms (1m).
+        interim_sent: Total interim-update requests sent.
+        interim_lost_total: Interim requests lost (all time).
+        interim_lost_5m: Interim requests lost (last 5 minutes).
+        interim_lost_1m: Interim requests lost (last 1 minute).
+        interim_avg_query_time_5m: Average interim query time in ms (5m).
+        interim_avg_query_time_1m: Average interim query time in ms (1m).
+    """
+
+    server_id: str = ""
+    server_address: str = ""
+    state: str = ""
+    fail_count: int = 0
+    request_count: int = 0
+    queue_length: int = 0
+    auth_sent: int = 0
+    auth_lost_total: int = 0
+    auth_lost_5m: int = 0
+    auth_lost_1m: int = 0
+    auth_avg_query_time_5m: int = 0
+    auth_avg_query_time_1m: int = 0
+    acct_sent: int = 0
+    acct_lost_total: int = 0
+    acct_lost_5m: int = 0
+    acct_lost_1m: int = 0
+    acct_avg_query_time_5m: int = 0
+    acct_avg_query_time_1m: int = 0
+    interim_sent: int = 0
+    interim_lost_total: int = 0
+    interim_lost_5m: int = 0
+    interim_lost_1m: int = 0
+    interim_avg_query_time_5m: int = 0
+    interim_avg_query_time_1m: int = 0
+
+
+class MemoryStats(BaseModel):
+    """Process memory usage from the ``mem(rss/virt)`` line.
+
+    Attributes:
+        rss_kb: Resident Set Size in kilobytes.
+        virt_kb: Virtual memory size in kilobytes.
+    """
+
+    rss_kb: int = 0
+    virt_kb: int = 0
+
+
+class ExtendedStatsResponse(BaseModel):
+    """Complete accel-ppp runtime statistics from ``show stat``.
+
+    Combines every section of the ``show stat`` output into a single
+    structured response.
+
+    Attributes:
+        uptime: Daemon uptime string (e.g. ``"2.12:58:33"``).
+        cpu: CPU usage percentage string.
+        memory: RSS and virtual memory usage.
+        core: Core subsystem statistics.
+        sessions: Session count summary.
+        pppoe: PPPoE protocol counters.
+        radius: List of per-server RADIUS statistics.
+    """
+
+    uptime: str = ""
+    cpu: str = "0"
+    memory: MemoryStats = MemoryStats()
+    core: CoreStats = CoreStats()
+    sessions: SessionSectionStats = SessionSectionStats()
+    pppoe: PppoeStats = PppoeStats()
+    radius: list[RadiusServerStats] = []
+
+
+# ---------------------------------------------------------------------------
+# RADIUS diagnostics (P0.4)
+# ---------------------------------------------------------------------------
+
+
+class RadiusConfigServer(BaseModel):
+    """One configured RADIUS server parsed from ``accel-ppp.conf``.
+
+    Secrets are **never** included — only addresses and port numbers.
+
+    Attributes:
+        address: RADIUS server IP address or hostname.
+        auth_port: Authentication port (default 1812).
+        acct_port: Accounting port (default 1813).
+    """
+
+    address: str
+    auth_port: int = 1812
+    acct_port: int = 1813
+
+
+class RadiusConfigResponse(BaseModel):
+    """RADIUS configuration extracted from ``accel-ppp.conf``.
+
+    All fields are read-only views of the ``[radius]`` INI section.
+    Shared secrets are **stripped** from every server entry.
+
+    Attributes:
+        nas_identifier: NAS-Identifier string sent in RADIUS packets.
+        nas_ip_address: NAS-IP-Address sent in RADIUS packets.
+        gw_ip_address: Gateway IP address for framed routes.
+        servers: Configured RADIUS server list (no secrets).
+        timeout: RADIUS request timeout in seconds.
+        max_try: Maximum retry attempts per request.
+        acct_timeout: Accounting request timeout in seconds.
+    """
+
+    nas_identifier: str = ""
+    nas_ip_address: str = ""
+    gw_ip_address: str = ""
+    servers: list[RadiusConfigServer] = []
+    timeout: int = 3
+    max_try: int = 3
+    acct_timeout: int = 0
+
+
+class RadiusStatusResponse(BaseModel):
+    """Live RADIUS server status from ``accel-cmd show stat``.
+
+    Attributes:
+        servers: Per-server runtime statistics.
+        total: Total number of RADIUS servers.
+        active: Number of servers in ``active`` state.
+        down: Number of servers in non-active state.
+    """
+
+    servers: list[RadiusServerStats] = []
+    total: int = 0
+    active: int = 0
+    down: int = 0
+
+
+class RadiusCheckItem(BaseModel):
+    """Diagnostic result for one RADIUS server.
+
+    Attributes:
+        address: Server IP address.
+        auth_port: Authentication port checked.
+        reachable: Whether a TCP connection to the auth port succeeded.
+        state: Runtime state from accel-ppp (``active``, ``down``, or
+            ``unknown`` when not found in runtime stats).
+        detail: Human-readable diagnostic summary.
+    """
+
+    address: str
+    auth_port: int = 1812
+    reachable: bool = False
+    state: str = "unknown"
+    detail: str = ""
+
+
+class RadiusCheckResponse(BaseModel):
+    """Aggregated RADIUS diagnostic check results.
+
+    Attributes:
+        checks: Per-server diagnostic results.
+        total: Number of servers checked.
+        healthy: ``True`` when every server is reachable **and** active.
+    """
+
+    checks: list[RadiusCheckItem] = []
+    total: int = 0
+    healthy: bool = False
 
 
 class TerminateRequest(BaseModel):
@@ -2269,6 +2556,65 @@ class SetPadoDelayRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# PPPoE Runtime Config
+# ---------------------------------------------------------------------------
+
+
+class PppoeRuntimeConfigResponse(BaseModel):
+    """PPPoE runtime configuration from the ``[pppoe]`` section.
+
+    These are scalar settings that control PPPoE protocol behaviour:
+
+    * **service-name** — advertised in PADO/PADS packets; clients can
+      filter by service name.
+    * **ac-name** — Access Concentrator name sent in PADO; identifies
+      this BNG to PPPoE clients.
+    * **verbose** — when ``1``, enables detailed PPPoE protocol logging
+      in accel-ppp.
+
+    Attributes:
+        service_name: PPPoE service name (empty string if not set).
+        ac_name: Access Concentrator name (empty string if not set).
+        verbose: Verbose logging flag (0 = off, 1 = on).
+    """
+
+    service_name: str = ""
+    ac_name: str = ""
+    verbose: int = Field(0, ge=0, le=1)
+
+
+class PppoeRuntimeConfigUpdateRequest(BaseModel):
+    """Request to update PPPoE runtime configuration.
+
+    Only fields that are explicitly provided (non-``None``) will be
+    updated in the configuration file.  Omitted fields retain their
+    current values.
+
+    Attributes:
+        service_name: New PPPoE service name.
+        ac_name: New Access Concentrator name.
+        verbose: Verbose logging flag (0 = off, 1 = on).
+    """
+
+    service_name: str | None = Field(
+        None,
+        description="PPPoE service name (e.g. 'internet')",
+        pattern=_RE_SAFE_NAME,
+    )
+    ac_name: str | None = Field(
+        None,
+        description="Access Concentrator name (e.g. 'bng-jakarta-1')",
+        pattern=_RE_SAFE_NAME,
+    )
+    verbose: int | None = Field(
+        None,
+        ge=0,
+        le=1,
+        description="Verbose PPPoE logging (0=off, 1=on)",
+    )
+
+
+# ---------------------------------------------------------------------------
 # IP Pool (Sprint 2)
 # ---------------------------------------------------------------------------
 
@@ -2339,6 +2685,142 @@ class PoolUsageResponse(BaseModel):
     used: str = "0"
     total: str = "0"
     available: str = "0"
+
+
+class IpPoolAssignment(BaseModel):
+    """A single IP address assignment within a pool.
+
+    Attributes:
+        ip: IPv4 address assigned to a session.
+        username: Subscriber username that holds the lease.
+    """
+
+    ip: str
+    username: str
+
+
+class IpPoolDetailEntry(BaseModel):
+    """Detailed utilisation of a single IP pool.
+
+    Combines the configured pool definition with live session data to
+    show which addresses are in use and by whom.
+
+    Attributes:
+        name: Pool label/name from the configuration.
+        range: CIDR range string.
+        total_ips: Total usable addresses in the CIDR range.
+        used: Number of addresses currently assigned to sessions.
+        available: Number of addresses still unassigned.
+        utilization_pct: Usage as a percentage (0.0–100.0).
+        assignments: List of active IP→username mappings.
+    """
+
+    name: str = ""
+    range: str = ""
+    total_ips: int = 0
+    used: int = 0
+    available: int = 0
+    utilization_pct: float = 0.0
+    assignments: list[IpPoolAssignment] = []
+
+
+class IpPoolDetailResponse(BaseModel):
+    """Aggregate per-pool utilisation with IP-to-user mappings.
+
+    Attributes:
+        pools: Per-pool detail entries.
+        total_pools: Number of configured pools.
+        total_used: Aggregate addresses in use across all pools.
+        total_capacity: Aggregate usable addresses across all pools.
+    """
+
+    pools: list[IpPoolDetailEntry] = []
+    total_pools: int = 0
+    total_used: int = 0
+    total_capacity: int = 0
+
+
+# ---------------------------------------------------------------------------
+# Session History (P1.7)
+# ---------------------------------------------------------------------------
+
+
+class SessionHistoryRecord(BaseModel):
+    """A single session history record captured during a snapshot.
+
+    Attributes:
+        id: Auto-incremented database row ID.
+        snapshot_at: ISO-8601 timestamp when the snapshot was taken.
+        username: PPPoE subscriber username.
+        ip: Assigned IP address.
+        sid: accel-ppp session identifier.
+        ifname: Interface name (e.g. ``ppp0``).
+        calling_sid: Calling station ID (subscriber MAC).
+        state: Session state at snapshot time (e.g. ``active``).
+        uptime: Session uptime string (e.g. ``01:23:45``).
+        rx_bytes: Received bytes counter.
+        tx_bytes: Transmitted bytes counter.
+    """
+
+    id: int = 0
+    snapshot_at: str = ""
+    username: str = ""
+    ip: str = ""
+    sid: str = ""
+    ifname: str = ""
+    calling_sid: str = ""
+    state: str = ""
+    uptime: str = ""
+    rx_bytes: str = ""
+    tx_bytes: str = ""
+
+
+class SessionHistoryResponse(BaseModel):
+    """Paginated session history query result.
+
+    Attributes:
+        records: List of history records matching the query.
+        total: Total number of matching records (before pagination).
+        limit: Maximum records returned per page.
+        offset: Number of records skipped.
+    """
+
+    records: list[SessionHistoryRecord] = []
+    total: int = 0
+    limit: int = 100
+    offset: int = 0
+
+
+class SessionSnapshotResult(BaseModel):
+    """Result of a session history snapshot operation.
+
+    Attributes:
+        success: Whether the snapshot completed successfully.
+        captured: Number of sessions captured in this snapshot.
+        snapshot_at: ISO-8601 timestamp of the snapshot.
+    """
+
+    success: bool = True
+    captured: int = 0
+    snapshot_at: str = ""
+
+
+class SessionHistoryStatsResponse(BaseModel):
+    """Aggregate statistics for the session history database.
+
+    Attributes:
+        total_records: Total number of records in the database.
+        unique_users: Number of distinct usernames seen.
+        oldest_snapshot: ISO-8601 timestamp of the oldest snapshot.
+        newest_snapshot: ISO-8601 timestamp of the newest snapshot.
+        db_size_bytes: SQLite database file size in bytes.
+    """
+
+    total_records: int = 0
+    unique_users: int = 0
+    oldest_snapshot: str = ""
+    newest_snapshot: str = ""
+    db_size_bytes: int = 0
 
 
 # ---------------------------------------------------------------------------
@@ -3268,3 +3750,55 @@ class BulkOperationResponse(BaseModel):
     succeeded: int = 0
     failed: int = 0
     results: list[BulkResultItem] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Config Validation
+# ---------------------------------------------------------------------------
+
+
+class ConfigValidationIssue(BaseModel):
+    """A single validation finding from config analysis.
+
+    Attributes:
+        severity: Issue severity — ``error``, ``warning``, or ``info``.
+        line: 1-based line number where the issue was detected (0 if global).
+        section: INI section name containing the issue (empty if global).
+        message: Human-readable description of the problem.
+    """
+
+    severity: str = "error"
+    line: int = 0
+    section: str = ""
+    message: str = ""
+
+
+class ConfigValidationRequest(BaseModel):
+    """Request body for configuration validation.
+
+    Attributes:
+        content: Raw accel-ppp configuration text to validate.
+    """
+
+    content: str = Field(
+        min_length=1,
+        description="accel-ppp configuration text to validate",
+    )
+
+
+class ConfigValidationResponse(BaseModel):
+    """Result of validating an accel-ppp configuration.
+
+    Attributes:
+        valid: ``True`` if no errors were found (warnings are allowed).
+        errors: Count of error-severity issues.
+        warnings: Count of warning-severity issues.
+        sections: List of section names found in the configuration.
+        issues: Detailed list of validation findings.
+    """
+
+    valid: bool = True
+    errors: int = 0
+    warnings: int = 0
+    sections: list[str] = Field(default_factory=list)
+    issues: list[ConfigValidationIssue] = Field(default_factory=list)
