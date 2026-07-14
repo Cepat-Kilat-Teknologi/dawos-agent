@@ -59,7 +59,7 @@ _PORT_KEYS = frozenset(
 # ---------------------------------------------------------------------------
 
 
-def validate_config(content: str) -> dict:
+def validate_config(content: str) -> dict:  # pylint: disable=too-many-locals
     """Validate an accel-ppp configuration string.
 
     Args:

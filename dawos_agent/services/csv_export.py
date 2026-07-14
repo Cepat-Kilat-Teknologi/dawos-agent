@@ -113,7 +113,7 @@ async def export_sessions_csv() -> str:
     return _rows_to_csv(_SESSION_FIELDS, sessions)
 
 
-async def export_history_csv(
+async def export_history_csv(  # pylint: disable=too-many-arguments
     *,
     username: str | None = None,
     ip: str | None = None,
