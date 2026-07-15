@@ -6,6 +6,8 @@ repo_name: Cepat-Kilat-Teknologi/dawos-agent
 
 theme:
   name: material
+  logo: assets/logo-icon.png
+  favicon: assets/favicon.png
   palette:
     - scheme: default
       primary: blue
@@ -26,6 +28,9 @@ theme:
     - content.code.copy
     - search.suggest
     - search.highlight
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
