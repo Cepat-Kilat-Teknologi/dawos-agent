@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-banner.png" alt="DawOS Agent" width="480">
+</p>
+
 # DawOS Agent
 
 **Broadband management, simplified.**
