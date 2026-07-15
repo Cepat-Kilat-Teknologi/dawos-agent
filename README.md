@@ -1,5 +1,8 @@
 <p align="center">
-  <strong>DawOS Agent</strong><br>
+  <img src="assets/logo1.png" alt="DawOS Agent" width="480">
+</p>
+
+<p align="center">
   <em>Broadband management, simplified.</em><br>
   <a href="https://pypi.org/project/dawos-agent/">PyPI</a> |
   <a href="https://cepat-kilat-teknologi.github.io/dawos-agent/">Documentation</a> |
