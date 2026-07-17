@@ -38,7 +38,7 @@ table inet filter {
 async def test_list_groups():
     proc = _mock_proc(NFT_SETS)
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.list_groups()
@@ -54,7 +54,7 @@ async def test_list_groups():
 async def test_list_groups_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.list_groups()
@@ -66,7 +66,7 @@ async def test_list_groups_error():
 async def test_list_groups_empty():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.list_groups()
@@ -83,7 +83,7 @@ async def test_list_groups_empty():
 async def test_create_group_address():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.create_group("blocked", "address")
@@ -96,7 +96,7 @@ async def test_create_group_address():
 async def test_create_group_network():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.create_group("nets", "network")
@@ -108,7 +108,7 @@ async def test_create_group_network():
 async def test_create_group_port():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.create_group("webports", "port")
@@ -120,7 +120,7 @@ async def test_create_group_port():
 async def test_create_group_with_elements():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.create_group(
@@ -141,7 +141,7 @@ async def test_create_group_failure():
     """Table ensure succeeds but set creation fails → RuntimeError."""
     call_count = 0
 
-    async def _side_effect(cmd, **kw):
+    async def _side_effect(*args, **kw):
         nonlocal call_count
         call_count += 1
         # First call = _ensure_table (succeed), second = nft add set (fail)
@@ -151,7 +151,7 @@ async def test_create_group_failure():
 
     with (
         patch(
-            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
             side_effect=_side_effect,
         ),
         pytest.raises(RuntimeError, match="Failed to create group"),
@@ -165,7 +165,7 @@ async def test_create_group_ensure_table_failure():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Cannot create nftables table"),
@@ -178,7 +178,7 @@ async def test_create_group_elements_failure():
     """Table + set creation succeed but adding elements fails."""
     call_count = 0
 
-    async def _side_effect(cmd, **kw):
+    async def _side_effect(*args, **kw):
         nonlocal call_count
         call_count += 1
         # Calls 1 (_ensure_table) and 2 (nft add set) succeed; 3 (add element) fails
@@ -188,7 +188,7 @@ async def test_create_group_elements_failure():
 
     with (
         patch(
-            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
             side_effect=_side_effect,
         ),
         pytest.raises(RuntimeError, match="failed to add elements"),
@@ -205,7 +205,7 @@ async def test_create_group_elements_failure():
 async def test_delete_group():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.delete_group("blocked")
@@ -218,7 +218,7 @@ async def test_delete_group_failure():
     proc = _mock_proc("not found", returncode=1)
     with (
         patch(
-            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to delete group"),
@@ -235,7 +235,7 @@ async def test_delete_group_failure():
 async def test_add_members():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await firewall_groups.add_members("blocked", ["10.0.0.3"])
@@ -248,7 +248,7 @@ async def test_add_members_failure():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+            "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to add members"),
@@ -265,9 +265,9 @@ async def test_add_members_failure():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_shell",
+        "dawos_agent.services.firewall_groups.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await firewall_groups._run("nft list sets", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

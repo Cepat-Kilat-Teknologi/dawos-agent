@@ -26,7 +26,7 @@ async def test_list_zones():
     out = "table inet filter\ntable inet nat\n"
     proc = _mock_proc(out)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.list_zones()
@@ -40,7 +40,7 @@ async def test_list_zones():
 async def test_list_zones_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.list_zones()
@@ -52,7 +52,7 @@ async def test_list_zones_error():
 async def test_list_zones_empty():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.list_zones()
@@ -82,7 +82,7 @@ table inet filter {
 async def test_zone_detail():
     proc = _mock_proc(NFT_TABLE)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.zone_detail("filter")
@@ -96,7 +96,7 @@ async def test_zone_detail():
 async def test_zone_detail_not_found():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.zone_detail("nonexistent")
@@ -113,7 +113,7 @@ async def test_zone_detail_not_found():
 async def test_create_zone():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.create_zone("dmz")
@@ -126,7 +126,7 @@ async def test_create_zone():
 async def test_create_zone_with_interfaces():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.create_zone("lan", interfaces=["eth0", "eth1"])
@@ -139,7 +139,7 @@ async def test_create_zone_with_interfaces():
 async def test_create_zone_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.create_zone("bad")
@@ -156,7 +156,7 @@ async def test_create_zone_failure():
 async def test_delete_zone():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.delete_zone("dmz")
@@ -168,7 +168,7 @@ async def test_delete_zone():
 async def test_delete_zone_failure():
     proc = _mock_proc("no such table", returncode=1)
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await zone_firewall.delete_zone("nope")
@@ -185,9 +185,9 @@ async def test_delete_zone_failure():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_shell",
+        "dawos_agent.services.zone_firewall.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await zone_firewall._run("nft list tables", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

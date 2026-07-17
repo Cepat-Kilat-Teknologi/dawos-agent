@@ -30,7 +30,9 @@ TABLE_NAME = "accelnat"
 # ---------------------------------------------------------------------------
 
 
-async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
+async def _run(
+    cmd: str, *, sudo: bool = False, stdin_data: str | None = None
+) -> tuple[str, int]:
     """Execute a shell command asynchronously.
 
     Args:
@@ -43,12 +45,15 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
+        stdin=asyncio.subprocess.PIPE if stdin_data else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await proc.communicate()
+    stdout, stderr = await proc.communicate(
+        input=stdin_data.encode() if stdin_data else None
+    )
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
@@ -172,7 +177,7 @@ async def set_egress(customer_ip: str, public_ip: str) -> str:
     await _ensure_egress_table()
     await _run_ok(
         f"nft add element ip {TABLE_NAME} cust_egress "
-        f"{{ {customer_ip} : {public_ip} }}",
+        f"{{ {shlex.quote(customer_ip)} : {shlex.quote(public_ip)} }}",
         sudo=True,
     )
     await _persist()
@@ -268,7 +273,7 @@ async def nat_status() -> dict:
     egress = await get_egress_map()
 
     post_out, _ = await _run(
-        f"nft list chain ip {TABLE_NAME} postrouting 2>/dev/null",
+        f"nft list chain ip {TABLE_NAME} postrouting",
         sudo=True,
     )
     bound_out, _ = await _run(
@@ -295,7 +300,7 @@ async def box_egress_status() -> dict:
         A dictionary with ``enabled`` (bool).
     """
     _, rc = await _run(
-        f"nft list table ip {TABLE_NAME} 2>/dev/null",
+        f"nft list table ip {TABLE_NAME}",
         sudo=True,
     )
     return {"enabled": rc == 0}
@@ -341,8 +346,9 @@ async def _persist() -> None:
     if rc == 0 and out:
         content = f"#!/usr/sbin/nft -f\n# dawos-agent managed\n{out}\n"
         await _run(
-            f"tee {PERSIST_FILE} > /dev/null " f"<<< '{content}'",
+            f"tee {PERSIST_FILE}",
             sudo=True,
+            stdin_data=content,
         )
 
 

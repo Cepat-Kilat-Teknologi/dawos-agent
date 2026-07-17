@@ -1,14 +1,20 @@
 """Task scheduler — asyncio-based periodic job management.
 
 Pure-Python asyncio scheduler with REST CRUD and execution history.
-Jobs run shell commands at configurable intervals and record their
-results in memory for inspection.
+Jobs run pre-validated commands at configurable intervals and record
+their results in memory for inspection.
+
+Security: commands are validated at the schema layer
+(``SchedulerJobRequest.validate_command_safety``) against an allowlist
+of safe prefixes and forbidden shell metacharacters (QA-160726 / DAWOS-01).
+Execution uses ``create_subprocess_exec`` (no shell) for defense-in-depth.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 from datetime import datetime, timezone
 
 log = logging.getLogger(__name__)
@@ -121,20 +127,25 @@ async def run_job(name: str) -> dict:
 
 
 async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
-    """Execute a shell command asynchronously.
+    """Execute a command asynchronously using exec (no shell).
+
+    The command string is split with :func:`shlex.split` and executed
+    via :func:`asyncio.create_subprocess_exec` — never through a shell
+    — to prevent injection even if validation is bypassed (QA-160726).
 
     Args:
-        cmd: The command string to execute.
-        sudo: If True, prefix the command with ``sudo``.
+        cmd: The command string to execute (split via shlex).
+        sudo: If True, prefix the argument list with ``sudo``.
 
     Returns:
         A tuple of (stdout_text, return_code).
     """
+    args = shlex.split(cmd)
     if sudo:
-        cmd = f"sudo {cmd}"
-    log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+        args = ["sudo"] + args
+    log.debug("exec: %s", args)
+    proc = await asyncio.create_subprocess_exec(
+        *args,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -142,7 +153,7 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
-        log.warning("job failed (rc=%d): %s — %s", proc.returncode, cmd, err)
+        log.warning("job failed (rc=%d): %s — %s", proc.returncode, args, err)
     return out, proc.returncode
 
 

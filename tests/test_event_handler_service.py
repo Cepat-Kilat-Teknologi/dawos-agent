@@ -121,7 +121,7 @@ async def test_fire_event_command():
     proc.returncode = 0
 
     with patch(
-        "dawos_agent.services.event_handler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.event_handler.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await event_handler.fire_event("session-down")
@@ -140,7 +140,7 @@ async def test_fire_event_command_failure():
     proc.returncode = 1
 
     with patch(
-        "dawos_agent.services.event_handler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.event_handler.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await event_handler.fire_event("shaper-change")
@@ -164,7 +164,7 @@ async def test_fire_event_exception_in_hook():
     event_handler.add_hook("err1", "config-reload", "some-cmd")
 
     with patch(
-        "dawos_agent.services.event_handler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.event_handler.asyncio.create_subprocess_exec",
         side_effect=OSError("exec failed"),
     ):
         result = await event_handler.fire_event("config-reload")

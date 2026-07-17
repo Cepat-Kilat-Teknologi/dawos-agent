@@ -11,11 +11,14 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
 
-async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
+async def _run(
+    cmd: str, *, sudo: bool = False, stdin_data: str | None = None
+) -> tuple[str, int]:
     """Execute a shell command asynchronously.
 
     Args:
@@ -28,12 +31,15 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
+        stdin=asyncio.subprocess.PIPE if stdin_data else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await proc.communicate()
+    stdout, stderr = await proc.communicate(
+        input=stdin_data.encode() if stdin_data else None
+    )
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
@@ -88,9 +94,9 @@ async def set_table_size(size: int) -> dict:
         raise RuntimeError(f"Failed to set nf_conntrack_max to {size}")
     # Persist
     _, rc = await _run(
-        f"tee /etc/sysctl.d/91-dawos-conntrack.conf "
-        f"<<< 'net.netfilter.nf_conntrack_max = {size}'",
+        "tee /etc/sysctl.d/91-dawos-conntrack.conf",
         sudo=True,
+        stdin_data=f"net.netfilter.nf_conntrack_max = {size}",
     )
     if rc != 0:
         raise RuntimeError("Failed to persist nf_conntrack_max to /etc/sysctl.d")

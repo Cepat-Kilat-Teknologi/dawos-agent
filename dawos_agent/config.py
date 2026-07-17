@@ -94,6 +94,17 @@ class Settings(BaseSettings):
             in the ``X-Dawos-Signature`` header so receivers can
             verify authenticity.  When empty, the signature header
             is omitted.  Override via ``DAWOS_WEBHOOK_SECRET``.
+        docs_enabled: When ``True`` (default), the ``/docs`` and
+            ``/redoc`` interactive API documentation endpoints are
+            available.  Set to ``False`` in production to prevent
+            information disclosure (DAWOS-13).  Override via
+            ``DAWOS_DOCS_ENABLED``.
+        metrics_auth: When ``True``, the ``/metrics`` Prometheus
+            endpoint requires a valid ``X-API-Key`` header (viewer
+            role or above).  Defaults to ``False`` for backward
+            compatibility with Prometheus scrapers that do not
+            support custom authentication headers (DAWOS-14).
+            Override via ``DAWOS_METRICS_AUTH``.
     """
 
     # --- agent identity -------------------------------------------------------
@@ -119,6 +130,10 @@ class Settings(BaseSettings):
 
     # --- diagnostics ----------------------------------------------------------
     ping_target: str = "8.8.8.8"
+
+    # --- endpoint visibility --------------------------------------------------
+    docs_enabled: bool = True
+    metrics_auth: bool = False
 
     # --- rate limiting --------------------------------------------------------
     rate_limit: str = "120/minute"
@@ -178,6 +193,8 @@ _SILENT_DEFAULTS: frozenset[str] = frozenset(
         "webhook_url",
         "webhook_secret",
         "history_db",
+        "docs_enabled",
+        "metrics_auth",
     }
 )
 

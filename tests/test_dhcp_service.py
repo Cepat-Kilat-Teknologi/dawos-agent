@@ -28,7 +28,7 @@ async def test_dhcp_status_active():
     calls = [proc_active, proc_leases]
 
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         side_effect=calls,
     ):
         result = await dhcp.dhcp_status()
@@ -42,7 +42,7 @@ async def test_dhcp_status_inactive():
     proc = _mock_proc("inactive", returncode=3)
     proc_leases = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         side_effect=[proc, proc_leases],
     ):
         result = await dhcp.dhcp_status()
@@ -64,7 +64,7 @@ LEASES = """\
 async def test_dhcp_leases():
     proc = _mock_proc(LEASES)
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.dhcp_leases()
@@ -79,7 +79,7 @@ async def test_dhcp_leases():
 async def test_dhcp_leases_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.dhcp_leases()
@@ -91,7 +91,7 @@ async def test_dhcp_leases_error():
 async def test_dhcp_leases_empty():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.dhcp_leases()
@@ -113,7 +113,7 @@ async def test_relay_status_active():
     )
 
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_config],
     ):
         result = await dhcp.relay_status()
@@ -128,7 +128,7 @@ async def test_relay_status_inactive():
     proc = _mock_proc("inactive", returncode=3)
     proc_config = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         side_effect=[proc, proc_config],
     ):
         result = await dhcp.relay_status()
@@ -145,7 +145,7 @@ async def test_relay_status_inactive():
 async def test_dhcp_restart():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.dhcp_restart()
@@ -157,7 +157,7 @@ async def test_dhcp_restart():
 async def test_dhcp_restart_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.dhcp_restart()
@@ -169,7 +169,7 @@ async def test_dhcp_restart_failure():
 async def test_relay_restart():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dhcp.relay_restart()
@@ -186,9 +186,9 @@ async def test_relay_restart():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.dhcp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dhcp.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await dhcp._run("systemctl restart dnsmasq", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

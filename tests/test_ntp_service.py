@@ -35,7 +35,7 @@ Frequency       : 1.234 ppm slow
 async def test_ntp_status():
     proc = _mock_proc(CHRONY_TRACKING)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_status()
@@ -50,7 +50,7 @@ async def test_ntp_status_not_synced():
     out = "Reference ID    : 00000000 ()\nStratum         : 0\n"
     proc = _mock_proc(out)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_status()
@@ -62,7 +62,7 @@ async def test_ntp_status_not_synced():
 async def test_ntp_status_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_status()
@@ -86,7 +86,7 @@ MS Name/IP address       Stratum  Poll  Reach  LastRx  Last sample
 async def test_ntp_sources():
     proc = _mock_proc(CHRONY_SOURCES)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_sources()
@@ -101,7 +101,7 @@ async def test_ntp_sources():
 async def test_ntp_sources_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_sources()
@@ -114,7 +114,7 @@ async def test_ntp_sources_error():
 async def test_ntp_sources_empty():
     proc = _mock_proc("MS Name/IP address\n===\n")
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_sources()
@@ -141,11 +141,11 @@ def test_safe_int():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await ntp._run("chronyc tracking", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")
 
 
@@ -164,7 +164,7 @@ async def test_ntp_status_synchronized_text():
     )
     proc = _mock_proc(out)
     with patch(
-        "dawos_agent.services.ntp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.ntp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await ntp.ntp_status()

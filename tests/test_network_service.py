@@ -150,7 +150,7 @@ def test_parse_ip_json_valid():
 async def test_list_interfaces():
     proc = _mock_proc(IP_ADDR_JSON)
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await network.list_interfaces()
@@ -174,7 +174,7 @@ async def test_list_interfaces():
 async def test_list_interfaces_include_loopback():
     proc = _mock_proc(IP_ADDR_JSON)
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await network.list_interfaces(include_loopback=True)
@@ -189,7 +189,7 @@ async def test_list_interfaces_error():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to list"),
@@ -206,7 +206,7 @@ async def test_list_interfaces_error():
 async def test_get_interface():
     proc = _mock_proc(SINGLE_IFACE_JSON)
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         iface = await network.get_interface("eth0")
@@ -221,7 +221,7 @@ async def test_get_interface_not_found():
     proc = _mock_proc("", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Interface not found"),
@@ -234,7 +234,7 @@ async def test_get_interface_empty_json():
     proc = _mock_proc("[]")
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="No data for"),
@@ -251,7 +251,7 @@ async def test_get_interface_empty_json():
 async def test_configure_interface_add_address():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.configure_interface("eth0", address="10.0.0.5/24")
@@ -263,7 +263,7 @@ async def test_configure_interface_add_address():
 async def test_configure_interface_remove_address():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.configure_interface("eth0", remove_address="10.0.0.5/24")
@@ -275,7 +275,7 @@ async def test_configure_interface_remove_address():
 async def test_configure_interface_mtu():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.configure_interface("eth0", mtu=9000)
@@ -287,7 +287,7 @@ async def test_configure_interface_mtu():
 async def test_configure_interface_state():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.configure_interface("eth0", state="down")
@@ -305,7 +305,7 @@ async def test_configure_interface_no_changes():
 async def test_configure_interface_multiple():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.configure_interface(
@@ -332,7 +332,7 @@ async def test_configure_interface_error():
     proc = _mock_proc("RTNETLINK error", returncode=2)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Command failed"),
@@ -349,7 +349,7 @@ async def test_configure_interface_error():
 async def test_create_vlan():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         name = await network.create_vlan("eth0", 100)
@@ -361,7 +361,7 @@ async def test_create_vlan():
 async def test_create_vlan_with_address():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         name = await network.create_vlan("eth0", 200, address="192.168.200.1/24")
@@ -374,7 +374,7 @@ async def test_create_vlan_error():
     proc = _mock_proc("exists", returncode=2)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError),
@@ -386,7 +386,7 @@ async def test_create_vlan_error():
 async def test_delete_vlan():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.delete_vlan("eth0.100")
@@ -403,7 +403,7 @@ async def test_delete_vlan():
 async def test_list_routes():
     proc = _mock_proc(IP_ROUTE_JSON)
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         routes = await network.list_routes()
@@ -420,7 +420,7 @@ async def test_list_routes_error():
     proc = _mock_proc("", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to list routes"),
@@ -432,7 +432,7 @@ async def test_list_routes_error():
 async def test_add_route():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.add_route("172.16.0.0/16", "10.0.0.254")
@@ -444,7 +444,7 @@ async def test_add_route():
 async def test_add_route_with_device_and_metric():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.add_route(
@@ -461,7 +461,7 @@ async def test_add_route_with_device_and_metric():
 async def test_delete_route():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.delete_route("172.16.0.0/16")
@@ -473,7 +473,7 @@ async def test_delete_route():
 async def test_delete_route_with_gateway():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.delete_route("172.16.0.0/16", gateway="10.0.0.254")
@@ -647,11 +647,11 @@ async def test_run_sudo():
     """Verify sudo prefix is added when sudo=True."""
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as mock_sub:
         out, rc = await network._run("ip link show", sudo=True)
-        cmd_arg = mock_sub.call_args[0][0]
+        cmd_arg = " ".join(mock_sub.call_args[0])
         assert cmd_arg.startswith("sudo ")
 
 
@@ -660,7 +660,7 @@ async def test_run_ok_raises():
     proc = _mock_proc("error msg", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Command failed"),
@@ -726,7 +726,7 @@ VLAN_LINK_JSON = json.dumps(
 async def test_list_vlans():
     proc = _mock_proc(VLAN_LINK_JSON)
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         vlans = await network.list_vlans()
@@ -754,7 +754,7 @@ async def test_list_vlans():
 async def test_list_vlans_empty():
     proc = _mock_proc("[]")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         vlans = await network.list_vlans()
@@ -767,7 +767,7 @@ async def test_list_vlans_error():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to list VLANs"),
@@ -784,7 +784,7 @@ async def test_list_vlans_error():
 async def test_set_vlan_state_up():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.set_vlan_state("eth0.100", "up")
@@ -797,7 +797,7 @@ async def test_set_vlan_state_up():
 async def test_set_vlan_state_down():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.network.asyncio.create_subprocess_shell",
+        "dawos_agent.services.network.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await network.set_vlan_state("eth0.100", "down")
@@ -816,7 +816,7 @@ async def test_set_vlan_state_error():
     proc = _mock_proc("no such device", returncode=1)
     with (
         patch(
-            "dawos_agent.services.network.asyncio.create_subprocess_shell",
+            "dawos_agent.services.network.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Command failed"),

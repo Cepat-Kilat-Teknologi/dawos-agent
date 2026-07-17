@@ -52,8 +52,8 @@ async def _run_cmd_once(args: str) -> str:
     full_cmd = f"{settings.accel_cmd} -p {settings.accel_cli_port} {args}"
     log.debug("exec: %s", full_cmd)
 
-    proc = await asyncio.create_subprocess_shell(
-        full_cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(full_cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )

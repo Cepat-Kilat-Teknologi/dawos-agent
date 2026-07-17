@@ -90,7 +90,7 @@ async def test_run_job():
     scheduler.add_job("run-test", "echo hello", 60, enabled=False)
     proc = _mock_proc("hello")
     with patch(
-        "dawos_agent.services.scheduler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.scheduler.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await scheduler.run_job("run-test")
@@ -111,7 +111,7 @@ async def test_run_job_failure():
     scheduler.add_job("fail-test", "false", 60, enabled=False)
     proc = _mock_proc("err", returncode=1)
     with patch(
-        "dawos_agent.services.scheduler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.scheduler.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await scheduler.run_job("fail-test")
@@ -226,12 +226,12 @@ async def test_start_loop_replaces_existing():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.scheduler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.scheduler.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await scheduler._run("echo hello", sudo=True)
-        cmd = m.call_args[0][0]
-        assert cmd.startswith("sudo ")
+        args = m.call_args[0]
+        assert args[0] == "sudo"
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +253,7 @@ async def test_loop_executes_job():
     }
     proc = _mock_proc("done")
     with patch(
-        "dawos_agent.services.scheduler.asyncio.create_subprocess_shell",
+        "dawos_agent.services.scheduler.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         asyncio.ensure_future(scheduler._loop("exec-test"))

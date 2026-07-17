@@ -25,11 +25,11 @@ def _mock_proc(stdout: str = "", returncode: int = 0):
 async def test_get_config():
     calls = iter(["262144", "50000", "65536"])
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return _mock_proc(next(calls))
 
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         result = await conntrack.get_config()
@@ -45,11 +45,11 @@ async def test_get_config_zero_max():
     """Cover zero-division guard."""
     calls = iter(["0", "0", "0"])
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return _mock_proc(next(calls))
 
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         result = await conntrack.get_config()
@@ -66,7 +66,7 @@ async def test_get_config_zero_max():
 async def test_set_table_size():
     proc = _mock_proc("500000")
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.set_table_size(500000)
@@ -83,7 +83,7 @@ async def test_set_table_size():
 async def test_get_timeouts():
     proc = _mock_proc("300")
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.get_timeouts()
@@ -96,7 +96,7 @@ async def test_get_timeouts():
 async def test_set_timeout():
     proc = _mock_proc("600")
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.set_timeout("tcp_timeout_established", 600)
@@ -115,7 +115,7 @@ async def test_set_table_size_failure():
     """A non-zero sysctl exit must raise, not report a false success."""
     proc = _mock_proc("", 1)
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         with pytest.raises(RuntimeError, match="nf_conntrack_max"):
@@ -127,7 +127,7 @@ async def test_set_table_size_persist_failure():
     """A failed persist (tee) must raise even if the live sysctl succeeded."""
     procs = [_mock_proc("500000", 0), _mock_proc("", 1)]
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         side_effect=procs,
     ):
         with pytest.raises(RuntimeError, match="persist"):
@@ -139,7 +139,7 @@ async def test_set_timeout_failure():
     """A non-zero sysctl exit must raise, not report a false success."""
     proc = _mock_proc("", 1)
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         with pytest.raises(RuntimeError, match="tcp_timeout_established"):
@@ -151,7 +151,7 @@ async def test_apply_profile_failure():
     """A non-zero sysctl exit while applying a profile must raise."""
     proc = _mock_proc("", 1)
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         with pytest.raises(RuntimeError, match="Failed to apply profile"):
@@ -174,7 +174,7 @@ nf_conntrack          172032  5 nf_conntrack_ftp,nf_conntrack_sip
 async def test_list_helpers():
     proc = _mock_proc(LSMOD_OUTPUT)
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.list_helpers()
@@ -187,7 +187,7 @@ async def test_list_helpers():
 async def test_list_helpers_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.list_helpers()
@@ -211,7 +211,7 @@ def test_list_profiles():
 async def test_apply_profile():
     proc = _mock_proc("300")
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await conntrack.apply_profile("gaming")
@@ -245,12 +245,12 @@ def test_safe_int():
 async def test_flush_table():
     calls = iter(["1500", ""])
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         val = next(calls)
         return _mock_proc(val)
 
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         result = await conntrack.flush_table()
@@ -264,14 +264,15 @@ async def test_flush_table():
 async def test_flush_table_failure():
     calls = iter(["500", ""])
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         val = next(calls)
+        cmd = " ".join(args)
         if "conntrack -F" in cmd:
             return _mock_proc(val, returncode=1)
         return _mock_proc(val)
 
     with patch(
-        "dawos_agent.services.conntrack.asyncio.create_subprocess_shell",
+        "dawos_agent.services.conntrack.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         with pytest.raises(RuntimeError, match="Failed to flush"):

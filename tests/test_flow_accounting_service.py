@@ -25,7 +25,7 @@ def _mock_proc(stdout: str = "", returncode: int = 0):
 async def test_flow_status_pmacctd():
     proc = _mock_proc("active")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await flow_accounting.flow_status()
@@ -39,7 +39,7 @@ async def test_flow_status_softflowd():
     proc_inactive = _mock_proc("inactive", returncode=3)
     proc_active = _mock_proc("active")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_inactive, proc_active],
     ):
         result = await flow_accounting.flow_status()
@@ -53,7 +53,7 @@ async def test_flow_status_none():
     proc1 = _mock_proc("inactive", returncode=3)
     proc2 = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc1, proc2],
     ):
         result = await flow_accounting.flow_status()
@@ -85,7 +85,7 @@ async def test_flow_collectors_softflowd():
     proc_sf = _mock_proc(SOFTFLOWD_CFG)
     proc_pm = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_sf, proc_pm],
     ):
         result = await flow_accounting.flow_collectors()
@@ -101,7 +101,7 @@ async def test_flow_collectors_pmacctd():
     proc_sf = _mock_proc("", returncode=1)
     proc_pm = _mock_proc(PMACCTD_CFG)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_sf, proc_pm],
     ):
         result = await flow_accounting.flow_collectors()
@@ -117,7 +117,7 @@ async def test_flow_collectors_none():
     proc1 = _mock_proc("", returncode=1)
     proc2 = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc1, proc2],
     ):
         result = await flow_accounting.flow_collectors()
@@ -132,7 +132,7 @@ async def test_flow_collectors_softflowd_no_port():
     proc_sf = _mock_proc(cfg)
     proc_pm = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_sf, proc_pm],
     ):
         result = await flow_accounting.flow_collectors()
@@ -156,7 +156,7 @@ Packets processed: 56789
 async def test_flow_stats():
     proc = _mock_proc(STATS_OUTPUT)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await flow_accounting.flow_stats()
@@ -171,7 +171,7 @@ async def test_flow_stats_fallback():
     proc_fail = _mock_proc("", returncode=1)
     proc_ok = _mock_proc("Flows exported: 10\nPackets processed: 20")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_fail, proc_ok],
     ):
         result = await flow_accounting.flow_stats()
@@ -184,7 +184,7 @@ async def test_flow_stats_fallback():
 async def test_flow_stats_empty():
     proc = _mock_proc("no stats")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await flow_accounting.flow_stats()
@@ -204,7 +204,7 @@ async def test_flow_restart_active_daemon():
     proc_status = _mock_proc("active")  # pmacctd active
     proc_restart = _mock_proc("")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_status, proc_restart],
     ):
         result = await flow_accounting.flow_restart()
@@ -220,7 +220,7 @@ async def test_flow_restart_no_daemon():
     proc2 = _mock_proc("inactive", returncode=3)
     proc_restart = _mock_proc("")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc1, proc2, proc_restart],
     ):
         result = await flow_accounting.flow_restart()
@@ -234,7 +234,7 @@ async def test_flow_restart_failure():
     proc_status = _mock_proc("active")  # pmacctd
     proc_restart = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         side_effect=[proc_status, proc_restart],
     ):
         result = await flow_accounting.flow_restart()
@@ -251,9 +251,9 @@ async def test_flow_restart_failure():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_shell",
+        "dawos_agent.services.flow_accounting.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await flow_accounting._run("systemctl restart softflowd", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

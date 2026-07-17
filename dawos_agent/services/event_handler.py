@@ -3,6 +3,11 @@
 In-memory registry of event hooks.  When a session lifecycle event
 fires (session-up, session-down, etc.), all matching enabled handlers
 execute — either as HTTP webhook POSTs or local shell commands.
+
+Security: shell commands are validated at the schema layer
+(``EventHookRequest.validate_action_safety``) against an allowlist
+of safe prefixes and forbidden shell metacharacters (QA-160726 / DAWOS-02).
+Execution uses ``create_subprocess_exec`` (no shell) for defense-in-depth.
 """
 
 # pylint: disable=broad-exception-caught
@@ -13,6 +18,7 @@ import asyncio
 import collections
 import json
 import logging
+import shlex
 from datetime import datetime, timezone
 
 import httpx
@@ -164,9 +170,10 @@ async def fire_event(event: str, payload: dict | None = None) -> dict:
                     resp.status_code,
                 )
             else:
-                # Shell command
-                proc = await asyncio.create_subprocess_shell(
-                    action,
+                # Shell command — exec without shell (QA-160726 / DAWOS-02)
+                args = shlex.split(action)
+                proc = await asyncio.create_subprocess_exec(
+                    *args,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )

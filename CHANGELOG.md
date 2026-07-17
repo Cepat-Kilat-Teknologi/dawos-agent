@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-17
+
+### Security
+
+- **Shell injection hardening (Phase 3.1)** -- All 19 service modules migrated
+  from `asyncio.create_subprocess_shell` to `asyncio.create_subprocess_exec`.
+  Commands are split via `shlex.split()` and passed as argument vectors,
+  eliminating shell metacharacter injection vectors entirely. Shell features
+  (pipes, heredocs, `2>/dev/null`, `|| true`, subshells) replaced with safe
+  Python equivalents:
+  - **Heredocs** replaced with `stdin_data` parameter feeding content via
+    `proc.communicate(input=...)` in 5 service modules (firewall, conntrack,
+    dns_forwarding, diagnostics, nat).
+  - **Pipes** (`cmd | grep/head`) replaced with Python string filtering.
+  - **Stderr redirects** (`2>/dev/null`) removed -- stderr already captured
+    via `asyncio.subprocess.PIPE`.
+  - **Error suppression** (`|| true`) removed -- callers already check `rc`.
+  - **Subshells** (`$(...)`) split into sequential steps.
+
+- **RBAC API key file (Phase 3.2)** -- New `DAWOS_API_KEYS_FILE` config option
+  supports loading multiple tiered API keys from a JSON file. Enables key
+  rotation without restarting the agent.
+
+- **API key rotation endpoints (Phase 3.3)** -- New admin-only router
+  (`/api/v1/auth/*`) with endpoints for generating cryptographically secure
+  API keys, viewing RBAC status, and triggering key file reload. Requires
+  AdminKey authentication.
+
+- **Endpoint exposure control (Phase 3.5)** -- `/docs`, `/redoc`, and
+  `/openapi.json` now disabled by default in production (`DAWOS_ENABLE_DOCS`).
+  `/metrics` endpoint gated behind `DAWOS_ENABLE_METRICS` with AdminKey
+  authentication when RBAC is active.
+
+### Changed
+
+- **1435 tests** -- up from 1410 (25 new tests covering auth management
+  router and metrics security). 100% coverage maintained across 6461
+  statements.
+- **17 test files updated** -- mock targets changed from
+  `create_subprocess_shell` to `create_subprocess_exec` with updated
+  side-effect signatures (`*args, **kw`).
+
 ## [0.4.0] - 2026-07-14
 
 ### Added
@@ -333,7 +375,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero known vulnerabilities (pip-audit clean).
 - Professional English docstrings on all public APIs.
 
-[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.3...v0.4.0
 [0.3.3]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Cepat-Kilat-Teknologi/dawos-agent/compare/v0.3.1...v0.3.2

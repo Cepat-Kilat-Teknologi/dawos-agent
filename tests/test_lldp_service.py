@@ -26,7 +26,7 @@ def _mock_proc(stdout: str = "", returncode: int = 0):
 async def test_lldp_status_running():
     proc = _mock_proc("lldp configuration")
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_status()
@@ -38,7 +38,7 @@ async def test_lldp_status_running():
 async def test_lldp_status_not_running():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_status()
@@ -78,7 +78,7 @@ LLDP_JSON = json.dumps(
 async def test_lldp_neighbors():
     proc = _mock_proc(LLDP_JSON)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_neighbors()
@@ -93,7 +93,7 @@ async def test_lldp_neighbors():
 async def test_lldp_neighbors_error():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_neighbors()
@@ -105,7 +105,7 @@ async def test_lldp_neighbors_error():
 async def test_lldp_neighbors_invalid_json():
     proc = _mock_proc("not json")
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_neighbors()
@@ -131,7 +131,7 @@ async def test_lldp_neighbors_dict_interface():
     )
     proc = _mock_proc(data)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_neighbors()
@@ -162,7 +162,7 @@ async def test_lldp_interface_found():
     )
     proc = _mock_proc(data)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_interface("eth0")
@@ -176,7 +176,7 @@ async def test_lldp_interface_found():
 async def test_lldp_interface_not_found():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_interface("eth99")
@@ -189,7 +189,7 @@ async def test_lldp_interface_invalid_json():
     """Cover JSON parse failure for interface query."""
     proc = _mock_proc("not json")
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_interface("eth0")
@@ -214,7 +214,7 @@ async def test_lldp_interface_dict_format():
     )
     proc = _mock_proc(data)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_interface("eth0")
@@ -231,11 +231,11 @@ async def test_lldp_interface_dict_format():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await lldp._run("lldpcli show neighbors", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")
 
 
@@ -282,7 +282,7 @@ async def test_lldp_neighbors_non_dict_iface():
     )
     proc = _mock_proc(data)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_neighbors()
@@ -310,7 +310,7 @@ async def test_lldp_interface_non_dict_iface():
     )
     proc = _mock_proc(data)
     with patch(
-        "dawos_agent.services.lldp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.lldp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await lldp.lldp_interface("eth0")

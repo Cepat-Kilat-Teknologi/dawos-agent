@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -55,7 +56,7 @@ async def vrrp_status() -> dict:
 
     groups: list[dict] = []
     if active:
-        detail, drc = await _run("cat /tmp/keepalived.stats 2>/dev/null || true")
+        detail, drc = await _run("cat /tmp/keepalived.stats")
         if drc == 0 and detail:
             current: dict | None = None
             for line in detail.splitlines():
@@ -116,9 +117,16 @@ async def vrrp_failover(group: str) -> dict:
     Returns:
         A dictionary with ``success`` (bool), ``group``, and ``message``.
     """
+    # Read PID and send USR1 signal in two steps to avoid shell features.
+    pid_out, pid_rc = await _run("cat /var/run/keepalived.pid")
+    if pid_rc != 0 or not pid_out.strip():
+        return {
+            "success": False,
+            "group": group,
+            "message": "Cannot read keepalived PID file",
+        }
     out, rc = await _run(
-        f"kill -USR1 $(cat /var/run/keepalived.pid) 2>/dev/null && "
-        f"echo 'Failover signal sent for {group}'",
+        f"kill -USR1 {pid_out.strip()}",
         sudo=True,
     )
     return {

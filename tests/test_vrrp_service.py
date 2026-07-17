@@ -37,7 +37,7 @@ async def test_vrrp_status_active():
     proc_active = _mock_proc("active")
     proc_stats = _mock_proc(KEEPALIVED_STATS)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_stats],
     ):
         result = await vrrp.vrrp_status()
@@ -56,7 +56,7 @@ async def test_vrrp_status_active():
 async def test_vrrp_status_inactive():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_status()
@@ -70,7 +70,7 @@ async def test_vrrp_status_active_no_stats():
     proc_active = _mock_proc("active")
     proc_stats = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_stats],
     ):
         result = await vrrp.vrrp_status()
@@ -89,7 +89,7 @@ async def test_vrrp_group_detail_found():
     proc_active = _mock_proc("active")
     proc_stats = _mock_proc(KEEPALIVED_STATS)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_stats],
     ):
         result = await vrrp.vrrp_group_detail("WAN_VIP")
@@ -102,7 +102,7 @@ async def test_vrrp_group_detail_found():
 async def test_vrrp_group_detail_not_found():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_group_detail("NONEXISTENT")
@@ -119,7 +119,7 @@ async def test_vrrp_group_detail_not_found():
 async def test_vrrp_failover():
     proc = _mock_proc("Failover signal sent for WAN_VIP")
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_failover("WAN_VIP")
@@ -132,7 +132,7 @@ async def test_vrrp_failover():
 async def test_vrrp_failover_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_failover("NONE")
@@ -149,7 +149,7 @@ async def test_vrrp_failover_failure():
 async def test_vrrp_restart():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_restart()
@@ -161,7 +161,7 @@ async def test_vrrp_restart():
 async def test_vrrp_restart_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await vrrp.vrrp_restart()
@@ -178,9 +178,9 @@ async def test_vrrp_restart_failure():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.vrrp.asyncio.create_subprocess_shell",
+        "dawos_agent.services.vrrp.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await vrrp._run("systemctl restart keepalived", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

@@ -2030,7 +2030,8 @@ class SchedulerJobRequest(BaseModel):
 
     Attributes:
         name: Unique human-readable identifier for the job.
-        command: Shell command to execute on each run.
+        command: Shell command to execute on each run.  Must start with
+            an allowed prefix (see ``ALLOWED_SCHEDULER_COMMANDS``).
         interval_seconds: Repeat interval (minimum 10 seconds).
         enabled: Whether the job should run on schedule.
     """
@@ -2039,6 +2040,46 @@ class SchedulerJobRequest(BaseModel):
     command: str = Field(description="Shell command to execute")
     interval_seconds: int = Field(ge=10, description="Repeat interval in seconds")
     enabled: bool = True
+
+    @field_validator("command")
+    @classmethod
+    def validate_command_safety(cls, v: str) -> str:
+        """Reject arbitrary commands — only allow safe, predefined prefixes.
+
+        Blocks shell metacharacters and enforces an allowlist of command
+        prefixes (QA-160726 / DAWOS-01).
+        """
+        # Block shell metacharacters regardless of prefix
+        shell_meta = frozenset(";|&`$(){}\\'\"\n\r")
+        if any(ch in shell_meta for ch in v):
+            raise ValueError("Command contains forbidden shell metacharacters")
+
+        # Allowlist of safe command prefixes
+        allowed_prefixes = (
+            "accel-cmd ",
+            "conntrack ",
+            "ip addr show",
+            "ip route show",
+            "ip link show",
+            "ip neigh show",
+            "nft list ",
+            "tc -s ",
+            "tc qdisc show",
+            "tc class show",
+            "cat /proc/",
+            "free ",
+            "uptime",
+            "df ",
+            "wc -l ",
+            "ss -s",
+            "ss -tunlp",
+        )
+        if not any(v.startswith(prefix) for prefix in allowed_prefixes):
+            raise ValueError(
+                f"Command not in allowlist. "
+                f"Allowed prefixes: {', '.join(repr(p.strip()) for p in allowed_prefixes)}"
+            )
+        return v
 
 
 class SchedulerJobResponse(BaseModel):
@@ -3052,6 +3093,10 @@ class FlowRestartResponse(BaseModel):
 class EventHookRequest(BaseModel):
     """Request to register a new event hook (webhook or shell command).
 
+    Webhook URLs (``http://`` / ``https://``) are accepted as-is.
+    Shell commands are validated against an allowlist and forbidden
+    metacharacters (QA-160726 / DAWOS-02).
+
     Attributes:
         name: Unique human-readable identifier for the hook.
         event: Event type to listen for (e.g. ``"session.up"``).
@@ -3063,6 +3108,52 @@ class EventHookRequest(BaseModel):
     event: str = Field(..., description="Event type", pattern=_RE_SAFE_NAME)
     action: str = Field(..., description="Webhook URL or shell command")
     enabled: bool = True
+
+    @field_validator("action")
+    @classmethod
+    def validate_action_safety(cls, v: str) -> str:
+        """Reject arbitrary shell commands — allow URLs or safe prefixes.
+
+        Webhook URLs (http/https) pass through unchanged.  Shell
+        commands must not contain metacharacters and must match the
+        allowlist (QA-160726 / DAWOS-02).
+        """
+        # Webhooks are safe — dispatched via httpx, not shell
+        if v.startswith(("http://", "https://")):
+            return v
+
+        # Block shell metacharacters
+        shell_meta = frozenset(";|&`$(){}\\'\"\n\r")
+        if any(ch in shell_meta for ch in v):
+            raise ValueError("Action contains forbidden shell metacharacters")
+
+        # Allowlist of safe command prefixes (same as scheduler)
+        allowed_prefixes = (
+            "accel-cmd ",
+            "conntrack ",
+            "ip addr show",
+            "ip route show",
+            "ip link show",
+            "ip neigh show",
+            "nft list ",
+            "tc -s ",
+            "tc qdisc show",
+            "tc class show",
+            "cat /proc/",
+            "free ",
+            "uptime",
+            "df ",
+            "wc -l ",
+            "ss -s",
+            "ss -tunlp",
+        )
+        if not any(v.startswith(prefix) for prefix in allowed_prefixes):
+            raise ValueError(
+                f"Action not in allowlist. "
+                f"Allowed: webhook URLs (http/https) or "
+                f"prefixes: {', '.join(repr(p.strip()) for p in allowed_prefixes)}"
+            )
+        return v
 
 
 class EventHookResponse(BaseModel):
@@ -3802,3 +3893,34 @@ class ConfigValidationResponse(BaseModel):
     warnings: int = 0
     sections: list[str] = Field(default_factory=list)
     issues: list[ConfigValidationIssue] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Auth management (DAWOS-16)
+# ---------------------------------------------------------------------------
+
+
+class GenerateKeyResponse(BaseModel):
+    """Response from the ``POST /api/v1/auth/generate-key`` endpoint.
+
+    Attributes:
+        key: Cryptographically secure API key (URL-safe base64, 32 bytes).
+        hint: Human-readable reminder on how to apply the new key.
+    """
+
+    key: str
+    hint: str
+
+
+class RbacStatusResponse(BaseModel):
+    """Response from the ``GET /api/v1/auth/rbac-status`` endpoint.
+
+    Attributes:
+        rbac_enabled: ``True`` when the RBAC keys file is loaded and
+            contains at least one extra key mapping.
+        extra_keys_count: Number of additional keys loaded from the
+            RBAC keys file (excludes the primary ``DAWOS_API_KEY``).
+    """
+
+    rbac_enabled: bool
+    extra_keys_count: int

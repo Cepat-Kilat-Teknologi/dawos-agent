@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 # ---------------------------------------------------------------------------
@@ -53,3 +55,37 @@ class TestMetricsEndpoint:
         for _ in range(10):
             resp = await client.get("/metrics")
             assert resp.status_code == 200
+
+
+class TestMetricsAuth:
+    """Tests for optional DAWOS_METRICS_AUTH guarding (DAWOS-14)."""
+
+    @pytest.mark.asyncio
+    async def test_metrics_auth_rejects_without_key(self, client) -> None:
+        """When metrics_auth is enabled, requests without API key get 401."""
+        with patch("dawos_agent.routers.metrics_router.settings") as mock_cfg:
+            mock_cfg.metrics_auth = True
+            resp = await client.get("/metrics")
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_metrics_auth_rejects_bad_key(self, client) -> None:
+        """When metrics_auth is enabled, an invalid key returns 401."""
+        with patch("dawos_agent.routers.metrics_router.settings") as mock_cfg:
+            mock_cfg.metrics_auth = True
+            resp = await client.get("/metrics", headers={"X-API-Key": "wrong-key"})
+            assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_metrics_auth_accepts_valid_key(self, client, headers) -> None:
+        """When metrics_auth is enabled, a valid key returns 200."""
+        with patch("dawos_agent.routers.metrics_router.settings") as mock_cfg:
+            mock_cfg.metrics_auth = True
+            resp = await client.get("/metrics", headers=headers)
+            assert resp.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_metrics_no_auth_by_default(self, client) -> None:
+        """Default settings.metrics_auth=False allows unauthenticated access."""
+        resp = await client.get("/metrics")
+        assert resp.status_code == 200

@@ -52,7 +52,7 @@ def test_safe_int():
 async def test_vtysh_success():
     proc = _mock_proc("BGP table version is 1")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing._vtysh("show bgp summary")
@@ -65,7 +65,7 @@ async def test_vtysh_failure():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+            "dawos_agent.services.routing.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="vtysh failed"),
@@ -89,7 +89,7 @@ Neighbor        V   AS   MsgRcvd  MsgSent  InQ OutQ  Up/Down State   PfxRcd
 async def test_bgp_summary():
     proc = _mock_proc(BGP_SUMMARY)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bgp_summary()
@@ -105,7 +105,7 @@ async def test_bgp_summary():
 async def test_bgp_summary_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bgp_summary()
@@ -119,7 +119,7 @@ async def test_bgp_routes():
         "*> 10.0.0.0/24  10.0.0.2  0 65001 i\n*> 10.1.0.0/24  10.0.0.3  0 65002 i"
     )
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bgp_routes()
@@ -132,7 +132,7 @@ async def test_bgp_routes():
 async def test_bgp_routes_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bgp_routes()
@@ -154,7 +154,7 @@ OSPF_OUTPUT = """\
 async def test_ospf_status():
     proc = _mock_proc(OSPF_OUTPUT)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_status()
@@ -167,7 +167,7 @@ async def test_ospf_status():
 async def test_ospf_status_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_status()
@@ -185,7 +185,7 @@ Neighbor ID   Pri State          Address        Interface
 async def test_ospf_neighbors():
     proc = _mock_proc(OSPF_NEIGHBORS)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_neighbors()
@@ -199,7 +199,7 @@ async def test_ospf_neighbors():
 async def test_ospf_neighbors_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_neighbors()
@@ -215,7 +215,7 @@ async def test_ospf_routes():
     )
     proc = _mock_proc(ospf_out)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_routes()
@@ -227,7 +227,7 @@ async def test_ospf_routes():
 async def test_ospf_routes_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.ospf_routes()
@@ -244,11 +244,11 @@ async def test_ospf_routes_not_configured():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await routing._run("vtysh -c 'test'", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")
 
 
@@ -256,11 +256,11 @@ async def test_run_sudo():
 async def test_run_no_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await routing._run("echo hello", sudo=False)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert not cmd.startswith("sudo ")
 
 
@@ -287,7 +287,7 @@ Routing Protocol is "rip"
 async def test_rip_status():
     proc = _mock_proc(RIP_STATUS)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_status()
@@ -304,7 +304,7 @@ async def test_rip_status():
 async def test_rip_status_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_status()
@@ -325,7 +325,7 @@ C    192.168.1.0/24     directly connected 1                      0
 async def test_rip_routes():
     proc = _mock_proc(RIP_ROUTES)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_routes()
@@ -347,7 +347,7 @@ async def test_rip_routes():
 async def test_rip_routes_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_routes()
@@ -360,7 +360,7 @@ async def test_rip_routes_not_configured():
 async def test_rip_routes_empty():
     proc = _mock_proc("Codes: R - RIP\n\n     Network            Next Hop\n")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_routes()
@@ -375,7 +375,7 @@ async def test_rip_status_version_in_protocol_line():
     rip_output = 'Routing Protocol is "rip" version 2\n'
     proc = _mock_proc(rip_output)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_status()
@@ -393,7 +393,7 @@ async def test_rip_routes_skips_colon_codes():
     )
     proc = _mock_proc(rip_data)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.rip_routes()
@@ -424,7 +424,7 @@ peer 10.0.0.3
 async def test_bfd_peers():
     proc = _mock_proc(BFD_PEERS)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bfd_peers()
@@ -440,7 +440,7 @@ async def test_bfd_peers():
 async def test_bfd_peers_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bfd_peers()
@@ -453,7 +453,7 @@ async def test_bfd_peers_not_configured():
 async def test_bfd_summary():
     proc = _mock_proc("peer 10.0.0.2 control-pkt-in 100 control-pkt-out 100")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bfd_summary()
@@ -465,7 +465,7 @@ async def test_bfd_summary():
 async def test_bfd_summary_not_configured():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bfd_summary()
@@ -477,7 +477,7 @@ async def test_bfd_summary_not_configured():
 async def test_bfd_summary_empty():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.routing.asyncio.create_subprocess_shell",
+        "dawos_agent.services.routing.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await routing.bfd_summary()

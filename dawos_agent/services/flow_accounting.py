@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+import shlex
 
 log = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -115,10 +116,10 @@ async def flow_stats() -> dict:
         A dictionary with ``flows_exported``, ``packets_processed``,
         and ``raw_output``.
     """
-    out, rc = await _run("softflowd -c /dev/null -d 2>&1 || true")
+    out, rc = await _run("softflowd -c /dev/null -d")
     if rc != 0 or not out:
         # Try reading from process stats
-        out, rc = await _run("softflowd -v 2>&1 || true")
+        out, rc = await _run("softflowd -v")
 
     # Parse basic stats from softflowd or report raw
     flows_exported = 0

@@ -231,7 +231,7 @@ async def get_queue_stats(username: str) -> dict:
     qdisc = await _tc(f"tc -s qdisc show dev {ifname}")
     classes = await _tc(f"tc -s class show dev {ifname}")
     filters = await _tc(
-        f"tc -s filter show dev {ifname} parent ffff: 2>/dev/null",
+        f"tc -s filter show dev {ifname} parent ffff:",
     )
     return {
         "username": username,
@@ -302,8 +302,8 @@ async def _tc(cmd: str) -> str:
     Returns:
         The stripped stdout text.
     """
-    proc = await asyncio.create_subprocess_shell(
-        f"sudo {cmd}",
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(f"sudo {cmd}"),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
     )

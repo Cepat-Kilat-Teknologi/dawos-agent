@@ -49,7 +49,7 @@ Jul 06 10:00:02 bng accel-ppp: session terminated
 async def test_get_logs():
     proc = _mock_proc(SAMPLE_LOGS)
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await logs.get_logs(lines=50)
@@ -63,13 +63,13 @@ async def test_get_logs():
 async def test_get_logs_custom_unit():
     proc = _mock_proc("line1\nline2")
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         result = await logs.get_logs(lines=10, unit="frr")
 
     assert result["source"] == "frr"
-    cmd = m.call_args[0][0]
+    cmd = " ".join(m.call_args[0])
     assert "-u frr" in cmd
     assert "-n 10" in cmd
 
@@ -78,7 +78,7 @@ async def test_get_logs_custom_unit():
 async def test_get_logs_empty():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await logs.get_logs()
@@ -92,7 +92,7 @@ async def test_get_logs_error():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+            "dawos_agent.services.logs.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Failed to read"),
@@ -125,7 +125,7 @@ async def test_log_stream_events():
     proc.wait = AsyncMock()
 
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         events = []
@@ -154,7 +154,7 @@ async def test_log_stream_events_empty_lines():
     proc.wait = AsyncMock()
 
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         events = []
@@ -178,7 +178,7 @@ async def test_log_stream_terminates_on_exit():
     proc.wait = AsyncMock()
 
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         async for _ in logs.log_stream_events():
@@ -196,7 +196,7 @@ async def test_log_stream_terminates_on_exit():
 async def test_run_helper():
     proc = _mock_proc("output")
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         out, rc = await logs._run("journalctl -u test")
@@ -209,7 +209,7 @@ async def test_run_helper():
 async def test_run_helper_error():
     proc = _mock_proc("fail", returncode=1)
     with patch(
-        "dawos_agent.services.logs.asyncio.create_subprocess_shell",
+        "dawos_agent.services.logs.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         out, rc = await logs._run("bad command")

@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 
 log = logging.getLogger(__name__)
 
 
-async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
+async def _run(
+    cmd: str, *, sudo: bool = False, stdin_data: str | None = None
+) -> tuple[str, int]:
     """Execute a shell command asynchronously.
 
     Args:
@@ -26,12 +29,15 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
+        stdin=asyncio.subprocess.PIPE if stdin_data else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await proc.communicate()
+    stdout, stderr = await proc.communicate(
+        input=stdin_data.encode() if stdin_data else None
+    )
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
@@ -122,8 +128,9 @@ async def set_forwarders(servers: list[str], cache_size: int = 1000) -> dict:
     conf = "\n".join(lines) + "\n"
 
     await _run(
-        f"tee /etc/dnsmasq.d/dawos-forwarding.conf <<< '{conf}'",
+        "tee /etc/dnsmasq.d/dawos-forwarding.conf",
         sudo=True,
+        stdin_data=conf,
     )
     _, rc = await _run("systemctl reload dnsmasq", sudo=True)
     if rc != 0:

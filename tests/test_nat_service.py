@@ -41,7 +41,7 @@ table ip accelnat {
 async def test_get_egress_map():
     proc = _mock_proc(EGRESS_MAP_OUTPUT)
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await nat.get_egress_map()
@@ -55,7 +55,7 @@ async def test_get_egress_map():
 async def test_get_egress_map_empty():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await nat.get_egress_map()
@@ -72,7 +72,7 @@ async def test_get_egress_map_empty():
 async def test_set_egress():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await nat.set_egress("10.0.0.2", "1.2.3.4")
@@ -86,7 +86,7 @@ async def test_set_egress_error():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError),
@@ -99,7 +99,8 @@ async def test_set_egress_snat_rule_not_duplicated():
     """An already-present SNAT rule is not re-added on each call (DA-H04)."""
     added = 0
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         nonlocal added
         if "list chain" in cmd:
             return _mock_proc("snat to ip saddr map @cust_egress")
@@ -108,7 +109,7 @@ async def test_set_egress_snat_rule_not_duplicated():
         return _mock_proc("")
 
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         side_effect=mock_shell,
     ):
         await nat.set_egress("10.0.0.2", "1.2.3.4")
@@ -120,7 +121,8 @@ async def test_set_egress_snat_rule_not_duplicated():
 async def test_ensure_egress_snat_rule_failure():
     """A failure adding the SNAT rule must raise (DA-H04)."""
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         if "list chain" in cmd:
             return _mock_proc("")  # rule absent → attempt add
         if "add rule" in cmd:
@@ -129,7 +131,7 @@ async def test_ensure_egress_snat_rule_failure():
 
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             side_effect=mock_shell,
         ),
         pytest.raises(RuntimeError, match="SNAT rule"),
@@ -141,7 +143,7 @@ async def test_ensure_egress_snat_rule_failure():
 async def test_clear_egress():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await nat.clear_egress("10.0.0.2")
@@ -154,7 +156,7 @@ async def test_clear_egress_error():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError),
@@ -171,7 +173,7 @@ async def test_clear_egress_error():
 async def test_add_public_ip_with_interface():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await nat.add_public_ip("1.2.3.4", "eth0")
@@ -184,7 +186,8 @@ async def test_add_public_ip_with_interface():
 async def test_add_public_ip_auto_detect():
     call_count = 0
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         nonlocal call_count
         call_count += 1
         if "ip route show default" in cmd:
@@ -192,7 +195,7 @@ async def test_add_public_ip_auto_detect():
         return _mock_proc("")
 
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         side_effect=mock_shell,
     ):
         msg = await nat.add_public_ip("1.2.3.4")
@@ -204,7 +207,8 @@ async def test_add_public_ip_auto_detect():
 async def test_add_public_ip_error():
     call_count = 0
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         nonlocal call_count
         call_count += 1
         if "ip route show default" in cmd:
@@ -213,7 +217,7 @@ async def test_add_public_ip_error():
 
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             side_effect=mock_shell,
         ),
         pytest.raises(RuntimeError),
@@ -225,7 +229,8 @@ async def test_add_public_ip_error():
 async def test_remove_public_ip():
     call_count = 0
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         nonlocal call_count
         call_count += 1
         if "ip route show default" in cmd:
@@ -233,7 +238,7 @@ async def test_remove_public_ip():
         return _mock_proc("")
 
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         side_effect=mock_shell,
     ):
         msg = await nat.remove_public_ip("1.2.3.4")
@@ -245,7 +250,8 @@ async def test_remove_public_ip():
 async def test_remove_public_ip_error():
     call_count = 0
 
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         nonlocal call_count
         call_count += 1
         if "ip route show default" in cmd:
@@ -254,7 +260,7 @@ async def test_remove_public_ip_error():
 
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             side_effect=mock_shell,
         ),
         pytest.raises(RuntimeError),
@@ -269,7 +275,8 @@ async def test_remove_public_ip_error():
 
 @pytest.mark.asyncio
 async def test_nat_status():
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         if "cust_egress" in cmd:
             return _mock_proc(EGRESS_MAP_OUTPUT)
         if "postrouting" in cmd:
@@ -277,7 +284,7 @@ async def test_nat_status():
         return _mock_proc("eth0  UP  1.2.3.4/32")
 
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         side_effect=mock_shell,
     ):
         result = await nat.nat_status()
@@ -295,7 +302,7 @@ async def test_nat_status():
 async def test_box_egress_status_enabled():
     proc = _mock_proc("table ip accelnat { }")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await nat.box_egress_status()
@@ -307,7 +314,7 @@ async def test_box_egress_status_enabled():
 async def test_box_egress_status_disabled():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await nat.box_egress_status()
@@ -319,7 +326,7 @@ async def test_box_egress_status_disabled():
 async def test_box_egress_set_on():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await nat.box_egress_set("on")
@@ -331,7 +338,7 @@ async def test_box_egress_set_on():
 async def test_box_egress_set_off():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         msg = await nat.box_egress_set("off")
@@ -354,7 +361,7 @@ async def test_box_egress_set_invalid():
 async def test_detect_uplink():
     proc = _mock_proc("default via 1.2.3.1 dev eth0 proto static")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await nat._detect_uplink()
@@ -367,7 +374,7 @@ async def test_detect_uplink_no_default():
     proc = _mock_proc("", returncode=1)
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Cannot detect"),
@@ -380,7 +387,7 @@ async def test_detect_uplink_no_dev():
     proc = _mock_proc("default via 1.2.3.1")
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Cannot parse"),
@@ -395,13 +402,14 @@ async def test_detect_uplink_no_dev():
 
 @pytest.mark.asyncio
 async def test_persist_success():
-    async def mock_shell(cmd, **kw):
+    async def mock_shell(*args, **kw):
+        cmd = " ".join(args)
         if "nft list" in cmd:
             return _mock_proc("table ip accelnat { }")
         return _mock_proc("")  # tee
 
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         side_effect=mock_shell,
     ):
         await nat._persist()  # should not raise
@@ -411,7 +419,7 @@ async def test_persist_success():
 async def test_persist_no_table():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         await nat._persist()  # should not raise (silent fail)
@@ -426,11 +434,11 @@ async def test_persist_no_table():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+        "dawos_agent.services.nat.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await nat._run("nft list table", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")
 
 
@@ -439,7 +447,7 @@ async def test_run_ok_raises():
     proc = _mock_proc("error", returncode=1)
     with (
         patch(
-            "dawos_agent.services.nat.asyncio.create_subprocess_shell",
+            "dawos_agent.services.nat.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="Command failed"),

@@ -36,6 +36,7 @@ from .middleware import (
 )
 from .routers import (
     audit_router,
+    auth_mgmt_router,
     bulk_router,
     checkpoint,
     config_router,
@@ -127,8 +128,8 @@ app = FastAPI(
     description="PPP router management agent",
     version=__version__,
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.docs_enabled else None,
+    redoc_url="/redoc" if settings.docs_enabled else None,
 )
 
 # Middleware (executes in reverse order — last added runs first) -------------
@@ -183,6 +184,7 @@ app.include_router(playbooks_router.router)
 app.include_router(diagnostics.router)
 app.include_router(logs.router)
 app.include_router(csv_export_router.router)
+app.include_router(auth_mgmt_router.router)
 
 # WebSocket (authenticated via query parameter) ----------------------------
 app.include_router(ws.router)

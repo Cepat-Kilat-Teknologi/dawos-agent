@@ -30,8 +30,8 @@ async def _run(cmd: str) -> tuple[str, int]:
         A tuple of (stdout_text, return_code).
     """
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -106,8 +106,8 @@ async def log_stream_events(
     cmd = f"journalctl -u {shlex.quote(unit)} --no-pager -f -n 0"
     log.debug("exec (stream): %s", cmd)
 
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )

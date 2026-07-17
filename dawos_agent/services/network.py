@@ -50,8 +50,8 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -233,12 +233,15 @@ async def configure_interface(
     actions: list[str] = []
 
     if address:
-        await _run_ok(f"ip addr add {address} dev {shlex.quote(name)}", sudo=True)
+        await _run_ok(
+            f"ip addr add {shlex.quote(address)} dev {shlex.quote(name)}", sudo=True
+        )
         actions.append(f"added {address}")
 
     if remove_address:
         await _run_ok(
-            f"ip addr del {remove_address} dev {shlex.quote(name)}", sudo=True
+            f"ip addr del {shlex.quote(remove_address)} dev {shlex.quote(name)}",
+            sudo=True,
         )
         actions.append(f"removed {remove_address}")
 
@@ -279,14 +282,16 @@ async def create_vlan(parent: str, vlan_id: int, address: str | None = None) -> 
         RuntimeError: If the ``ip`` command fails.
     """
     vlan_name = f"{parent}.{vlan_id}"
+    safe_parent = shlex.quote(parent)
+    safe_vlan = shlex.quote(vlan_name)
     await _run_ok(
-        f"ip link add link {parent} name {vlan_name} type vlan id {vlan_id}",
+        f"ip link add link {safe_parent} name {safe_vlan} type vlan id {vlan_id}",
         sudo=True,
     )
-    await _run_ok(f"ip link set {vlan_name} up", sudo=True)
+    await _run_ok(f"ip link set {safe_vlan} up", sudo=True)
 
     if address:
-        await _run_ok(f"ip addr add {address} dev {vlan_name}", sudo=True)
+        await _run_ok(f"ip addr add {shlex.quote(address)} dev {safe_vlan}", sudo=True)
 
     return vlan_name
 
@@ -436,9 +441,9 @@ async def add_route(
     Raises:
         RuntimeError: If the ``ip route add`` command fails.
     """
-    cmd = f"ip route add {destination} via {gateway}"
+    cmd = f"ip route add {shlex.quote(destination)} via {shlex.quote(gateway)}"
     if device:
-        cmd += f" dev {device}"
+        cmd += f" dev {shlex.quote(device)}"
     if metric is not None:
         cmd += f" metric {metric}"
 
@@ -459,9 +464,9 @@ async def delete_route(destination: str, gateway: str | None = None) -> str:
     Raises:
         RuntimeError: If the ``ip route del`` command fails.
     """
-    cmd = f"ip route del {destination}"
+    cmd = f"ip route del {shlex.quote(destination)}"
     if gateway:
-        cmd += f" via {gateway}"
+        cmd += f" via {shlex.quote(gateway)}"
 
     await _run_ok(cmd, sudo=True)
     return f"Route deleted: {destination}"

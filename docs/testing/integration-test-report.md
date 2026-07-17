@@ -555,142 +555,142 @@ Cycle: upgrade → uninstall → fresh install → verify all API endpoints → 
 
 ### 12.4 API Endpoint Results (138/138 PASS)
 
-#### Read endpoints (67 tested) — ALL PASS ✅
+#### Read endpoints (67 tested) — ALL PASS PASS
 
 | Group | Endpoints | Status |
 |-------|-----------|--------|
-| Health | `/health`, `/health/ready` | ✅ 200 |
-| System | `/api/v1/system/info`, `/api/v1/system/metrics` | ✅ 200 |
-| Sessions | `list`, `stats`, `by-ip`, `by-sid`, `find`, `snapshot` | ✅ 200 |
-| Config | `show`, `backups`, `revisions`, `apply-status` | ✅ 200 |
-| Network | `interfaces`, `routes`, `vlans`, `dns`, `interface/{name}` | ✅ 200 |
-| Firewall | `status`, `rules`, `groups`, `conntrack`, `sysctl`, `snmp` | ✅ 200 |
-| NAT | `status`, `egress`, `box-egress`, `public-ips` | ✅ 200 |
-| PPPoE | `interfaces`, `mac-filter`, `pado` | ✅ 200 |
-| Traffic | `stats`, `queue/{user}` | ✅ 200/404 |
-| Routing | `bgp`, `bgp-routes`, `ospf`, `ospf-neighbors`, `rip`, `rip-routes`, `bfd`, `bfd-peers` | ✅ 200 |
-| Pool | `list`, `usage` | ✅ 200 |
-| Conntrack | `config`, `table-size`, `timeouts`, `helpers`, `profiles` | ✅ 200 |
-| Events | `hooks`, `history` | ✅ 200 |
-| Scheduler | `list` | ✅ 200 |
-| DNS | `status`, `config` | ✅ 200 |
-| DHCP | `status`, `leases`, `relay` | ✅ 200 |
-| NTP | `status`, `sources` | ✅ 200 |
-| LLDP | `status`, `neighbors` | ✅ 200 |
-| VRRP | `status` | ✅ 200 |
-| Flow | `status`, `collectors`, `stats` | ✅ 200 |
-| Monitoring | `status`, `metrics` | ✅ 200 |
-| Limits | `show`, `interface/{name}` | ✅ 200 |
-| Zone | `list`, `show/{name}` | ✅ 200 |
-| Diagnostics | `doctor` | ✅ 200 |
-| Logs | `tail` | ✅ 200 |
-| Playbooks | `list` | ✅ 200 |
+| Health | `/health`, `/health/ready` | PASS 200 |
+| System | `/api/v1/system/info`, `/api/v1/system/metrics` | PASS 200 |
+| Sessions | `list`, `stats`, `by-ip`, `by-sid`, `find`, `snapshot` | PASS 200 |
+| Config | `show`, `backups`, `revisions`, `apply-status` | PASS 200 |
+| Network | `interfaces`, `routes`, `vlans`, `dns`, `interface/{name}` | PASS 200 |
+| Firewall | `status`, `rules`, `groups`, `conntrack`, `sysctl`, `snmp` | PASS 200 |
+| NAT | `status`, `egress`, `box-egress`, `public-ips` | PASS 200 |
+| PPPoE | `interfaces`, `mac-filter`, `pado` | PASS 200 |
+| Traffic | `stats`, `queue/{user}` | PASS 200/404 |
+| Routing | `bgp`, `bgp-routes`, `ospf`, `ospf-neighbors`, `rip`, `rip-routes`, `bfd`, `bfd-peers` | PASS 200 |
+| Pool | `list`, `usage` | PASS 200 |
+| Conntrack | `config`, `table-size`, `timeouts`, `helpers`, `profiles` | PASS 200 |
+| Events | `hooks`, `history` | PASS 200 |
+| Scheduler | `list` | PASS 200 |
+| DNS | `status`, `config` | PASS 200 |
+| DHCP | `status`, `leases`, `relay` | PASS 200 |
+| NTP | `status`, `sources` | PASS 200 |
+| LLDP | `status`, `neighbors` | PASS 200 |
+| VRRP | `status` | PASS 200 |
+| Flow | `status`, `collectors`, `stats` | PASS 200 |
+| Monitoring | `status`, `metrics` | PASS 200 |
+| Limits | `show`, `interface/{name}` | PASS 200 |
+| Zone | `list`, `show/{name}` | PASS 200 |
+| Diagnostics | `doctor` | PASS 200 |
+| Logs | `tail` | PASS 200 |
+| Playbooks | `list` | PASS 200 |
 
-#### Write/CRUD endpoints (69 tested) — ALL PASS ✅
+#### Write/CRUD endpoints (69 tested) — ALL PASS PASS
 
 | Operation | Endpoint | HTTP | Status |
 |-----------|----------|------|--------|
-| Config update | `PUT /config` | 200 | ✅ Backup created |
-| Config apply (guarded) | `POST /config/apply` | 200 | ✅ Auto-rollback armed |
-| Config confirm | `POST /config/confirm` | 200 | ✅ Rollback cancelled |
-| VLAN create | `POST /network/vlans` | 200 | ✅ Created + verified |
-| VLAN delete | `DELETE /network/vlans/{name}` | 204 | ✅ |
-| Route add | `POST /network/routes` | 200 | ✅ Verified in route table |
-| Route delete | `DELETE /network/routes` | 204 | ✅ |
-| DNS update | `PUT /network/dns` | 200 | ✅ |
-| PPPoE add | `POST /pppoe/interfaces` | 200 | ✅ Verified in listing |
-| PPPoE remove | `DELETE /pppoe/interfaces/{name}` | 204 | ✅ |
-| MAC filter add | `POST /pppoe/mac-filter` | 200 | ✅ |
-| MAC filter remove | `DELETE /pppoe/mac-filter/{mac}` | 204 | ✅ |
-| PADO delay set | `PUT /pppoe/pado` | 200 | ✅ |
-| IP pool add | `POST /ip-pool` | 201 | ✅ Verified in listing |
-| IP pool remove | `DELETE /ip-pool/{name}` | 204 | ✅ |
-| Event hook add | `POST /events/hooks` | 201 | ✅ Verified in listing |
-| Event hook remove | `DELETE /events/hooks/{name}` | 204 | ✅ |
-| Scheduler add | `POST /scheduler/jobs` | 201 | ✅ Verified in listing |
-| Scheduler run | `POST /scheduler/jobs/{name}/run` | 200 | ✅ Output: "test" |
-| Scheduler remove | `DELETE /scheduler/jobs/{name}` | 204 | ✅ |
-| Firewall group add | `POST /firewall/groups` | 201 | ✅ |
-| Firewall group remove | `DELETE /firewall/groups/{name}` | 204 | ✅ |
-| Firewall save | `POST /firewall/save` | 200 | ✅ |
-| Zone create | `POST /zones` | 201 | ✅ Verified in listing |
-| Zone delete | `DELETE /zones/{name}` | 204 | ✅ |
-| NAT masquerade | `POST /firewall/nat/masquerade` | 200 | ✅ |
-| NAT egress set | `POST /firewall/nat/egress` | 200 | ✅ |
-| NAT box-egress | `POST /firewall/nat/box-egress` | 200 | ✅ |
-| NAT public IP add | `POST /firewall/nat/public-ip` | 200 | ✅ |
-| NAT public IP remove | `DELETE /firewall/nat/public-ip/{ip}` | 204 | ✅ |
-| Conntrack table-size | `PUT /conntrack/table-size` | 200 | ✅ |
-| Conntrack timeouts | `PUT /conntrack/timeouts` | 200 | ✅ |
-| Conntrack profile | `POST /conntrack/profiles/apply` | 200 | ✅ |
-| Limits update | `PUT /limits` | 200 | ✅ |
-| DNS flush | `POST /dns/forwarding/flush` | 200 | ✅ |
-| Service restart | `POST /service/restart` | 200 | ✅ Recovered |
-| Service reload | `POST /service/reload` | 200 | ✅ |
-| Service command | `POST /service/command` | 200 | ✅ (BUG-8 fixed) |
-| Session terminate | `POST /sessions/terminate` | 200 | ✅ |
-| Session drop-by-mac | `POST /sessions/control/drop-by-mac` | 200 | ✅ |
-| Session restart | `POST /sessions/control/restart` | 200 | ✅ |
-| VRRP restart | `POST /vrrp/restart` | 200 | ✅ |
-| DHCP restart | `POST /dhcp/restart` | 200 | ✅ |
-| Flow restart | `POST /flow/restart` | 200 | ✅ |
-| Playbook health-check | `POST /playbooks/health-check/run` | 200 | ✅ 3/3 steps |
-| Playbook backup-config | `POST /playbooks/backup-config/run` | 200 | ✅ 2/2 steps |
-| Playbook safe-restart | `POST /playbooks/safe-restart/run` | 200 | ✅ 3/3 steps |
+| Config update | `PUT /config` | 200 | PASS Backup created |
+| Config apply (guarded) | `POST /config/apply` | 200 | PASS Auto-rollback armed |
+| Config confirm | `POST /config/confirm` | 200 | PASS Rollback cancelled |
+| VLAN create | `POST /network/vlans` | 200 | PASS Created + verified |
+| VLAN delete | `DELETE /network/vlans/{name}` | 204 | PASS |
+| Route add | `POST /network/routes` | 200 | PASS Verified in route table |
+| Route delete | `DELETE /network/routes` | 204 | PASS |
+| DNS update | `PUT /network/dns` | 200 | PASS |
+| PPPoE add | `POST /pppoe/interfaces` | 200 | PASS Verified in listing |
+| PPPoE remove | `DELETE /pppoe/interfaces/{name}` | 204 | PASS |
+| MAC filter add | `POST /pppoe/mac-filter` | 200 | PASS |
+| MAC filter remove | `DELETE /pppoe/mac-filter/{mac}` | 204 | PASS |
+| PADO delay set | `PUT /pppoe/pado` | 200 | PASS |
+| IP pool add | `POST /ip-pool` | 201 | PASS Verified in listing |
+| IP pool remove | `DELETE /ip-pool/{name}` | 204 | PASS |
+| Event hook add | `POST /events/hooks` | 201 | PASS Verified in listing |
+| Event hook remove | `DELETE /events/hooks/{name}` | 204 | PASS |
+| Scheduler add | `POST /scheduler/jobs` | 201 | PASS Verified in listing |
+| Scheduler run | `POST /scheduler/jobs/{name}/run` | 200 | PASS Output: "test" |
+| Scheduler remove | `DELETE /scheduler/jobs/{name}` | 204 | PASS |
+| Firewall group add | `POST /firewall/groups` | 201 | PASS |
+| Firewall group remove | `DELETE /firewall/groups/{name}` | 204 | PASS |
+| Firewall save | `POST /firewall/save` | 200 | PASS |
+| Zone create | `POST /zones` | 201 | PASS Verified in listing |
+| Zone delete | `DELETE /zones/{name}` | 204 | PASS |
+| NAT masquerade | `POST /firewall/nat/masquerade` | 200 | PASS |
+| NAT egress set | `POST /firewall/nat/egress` | 200 | PASS |
+| NAT box-egress | `POST /firewall/nat/box-egress` | 200 | PASS |
+| NAT public IP add | `POST /firewall/nat/public-ip` | 200 | PASS |
+| NAT public IP remove | `DELETE /firewall/nat/public-ip/{ip}` | 204 | PASS |
+| Conntrack table-size | `PUT /conntrack/table-size` | 200 | PASS |
+| Conntrack timeouts | `PUT /conntrack/timeouts` | 200 | PASS |
+| Conntrack profile | `POST /conntrack/profiles/apply` | 200 | PASS |
+| Limits update | `PUT /limits` | 200 | PASS |
+| DNS flush | `POST /dns/forwarding/flush` | 200 | PASS |
+| Service restart | `POST /service/restart` | 200 | PASS Recovered |
+| Service reload | `POST /service/reload` | 200 | PASS |
+| Service command | `POST /service/command` | 200 | PASS (BUG-8 fixed) |
+| Session terminate | `POST /sessions/terminate` | 200 | PASS |
+| Session drop-by-mac | `POST /sessions/control/drop-by-mac` | 200 | PASS |
+| Session restart | `POST /sessions/control/restart` | 200 | PASS |
+| VRRP restart | `POST /vrrp/restart` | 200 | PASS |
+| DHCP restart | `POST /dhcp/restart` | 200 | PASS |
+| Flow restart | `POST /flow/restart` | 200 | PASS |
+| Playbook health-check | `POST /playbooks/health-check/run` | 200 | PASS 3/3 steps |
+| Playbook backup-config | `POST /playbooks/backup-config/run` | 200 | PASS 2/2 steps |
+| Playbook safe-restart | `POST /playbooks/safe-restart/run` | 200 | PASS 3/3 steps |
 
-#### SSE streaming (2 tested) — ALL PASS ✅
+#### SSE streaming (2 tested) — ALL PASS PASS
 
 | Endpoint | Status |
 |----------|--------|
-| `GET /logs/stream` | ✅ Connected, SSE stream active |
-| `GET /traffic/stream` | ✅ Connected, returns `{"error": "no active sessions"}` (correct) |
+| `GET /logs/stream` | PASS Connected, SSE stream active |
+| `GET /traffic/stream` | PASS Connected, returns `{"error": "no active sessions"}` (correct) |
 
-### 12.5 dawos-cli Results (33 command groups, 100+ subcommands) — ALL PASS ✅
+### 12.5 dawos-cli Results (33 command groups, 100+ subcommands) — ALL PASS PASS
 
 | Group | Subcommands Tested | Status |
 |-------|-------------------|--------|
-| status | `status` | ✅ |
-| version | `version` | ✅ |
-| doctor | `doctor` | ✅ 8 checks (6 pass, 2 expected fail) |
-| profile | `list`, `test` | ✅ |
-| system | `health`, `info`, `metrics` | ✅ |
-| service | `status`, `cmd` | ✅ |
-| session | `list`, `stats`, `find`, `by-ip`, `by-sid` | ✅ |
-| config | `show`, `backups`, `revisions`, `apply-status` | ✅ |
-| network | `interfaces`, `interface`, `routes`, `add-route`, `del-route`, `vlans`, `vlan-add`, `vlan-del`, `dns`, `dns-set` | ✅ |
-| firewall | `status`, `rules`, `groups`, `group-add`, `group-del`, `save`, `sysctl`, `conntrack`, `conntrack-set`, `snmp` | ✅ |
-| nat | `status`, `egress`, `egress-set`, `egress-del`, `masquerade-on`, `box-egress`, `box-egress-set` | ✅ |
-| pppoe | `interfaces`, `add`, `remove`, `mac-filter`, `mac-add`, `mac-del`, `pado` | ✅ |
-| traffic | `queue` (requires username arg) | ✅ |
-| routing | `bgp`, `bgp-routes`, `ospf`, `ospf-neighbors`, `rip`, `rip-routes`, `bfd`, `bfd-peers` | ✅ |
-| pool | `list`, `usage`, `add`, `remove` | ✅ |
-| conntrack | `config`, `table-size`, `timeouts`, `timeout-set`, `helpers`, `profiles`, `profile-apply` | ✅ |
-| events | `hooks`, `hook-add`, `hook-del`, `history` | ✅ |
-| scheduler | `list`, `add`, `run`, `remove` | ✅ |
-| dns | `status`, `config`, `flush` | ✅ |
-| dhcp | `status`, `leases`, `relay` | ✅ |
-| ntp | `status`, `sources` | ✅ |
-| lldp | `status`, `neighbors` | ✅ |
-| vrrp | `status` | ✅ |
-| flow | `status`, `collectors`, `stats` | ✅ |
-| monitoring | `status`, `metrics` | ✅ |
-| limits | `show`, `set`, `interface` | ✅ |
-| zone | `list`, `show`, `add`, `remove` | ✅ |
-| diagnostics | `doctor` | ✅ |
-| logs | `tail` | ✅ |
+| status | `status` | PASS |
+| version | `version` | PASS |
+| doctor | `doctor` | PASS 8 checks (6 pass, 2 expected fail) |
+| profile | `list`, `test` | PASS |
+| system | `health`, `info`, `metrics` | PASS |
+| service | `status`, `cmd` | PASS |
+| session | `list`, `stats`, `find`, `by-ip`, `by-sid` | PASS |
+| config | `show`, `backups`, `revisions`, `apply-status` | PASS |
+| network | `interfaces`, `interface`, `routes`, `add-route`, `del-route`, `vlans`, `vlan-add`, `vlan-del`, `dns`, `dns-set` | PASS |
+| firewall | `status`, `rules`, `groups`, `group-add`, `group-del`, `save`, `sysctl`, `conntrack`, `conntrack-set`, `snmp` | PASS |
+| nat | `status`, `egress`, `egress-set`, `egress-del`, `masquerade-on`, `box-egress`, `box-egress-set` | PASS |
+| pppoe | `interfaces`, `add`, `remove`, `mac-filter`, `mac-add`, `mac-del`, `pado` | PASS |
+| traffic | `queue` (requires username arg) | PASS |
+| routing | `bgp`, `bgp-routes`, `ospf`, `ospf-neighbors`, `rip`, `rip-routes`, `bfd`, `bfd-peers` | PASS |
+| pool | `list`, `usage`, `add`, `remove` | PASS |
+| conntrack | `config`, `table-size`, `timeouts`, `timeout-set`, `helpers`, `profiles`, `profile-apply` | PASS |
+| events | `hooks`, `hook-add`, `hook-del`, `history` | PASS |
+| scheduler | `list`, `add`, `run`, `remove` | PASS |
+| dns | `status`, `config`, `flush` | PASS |
+| dhcp | `status`, `leases`, `relay` | PASS |
+| ntp | `status`, `sources` | PASS |
+| lldp | `status`, `neighbors` | PASS |
+| vrrp | `status` | PASS |
+| flow | `status`, `collectors`, `stats` | PASS |
+| monitoring | `status`, `metrics` | PASS |
+| limits | `show`, `set`, `interface` | PASS |
+| zone | `list`, `show`, `add`, `remove` | PASS |
+| diagnostics | `doctor` | PASS |
+| logs | `tail` | PASS |
 
 ### 12.6 Install Cycle Verification
 
 | Step | Command | Result |
 |------|---------|--------|
-| Upgrade | `pip install --upgrade dawos-agent` | ✅ 0.2.0 |
-| Uninstall | `pip uninstall dawos-agent -y` | ✅ Clean |
-| Fresh install | `pip install dawos-agent` | ✅ 0.2.0 |
-| Service restart | `systemctl restart dawos-agent` | ✅ |
-| Health check | `GET /health` | ✅ 200 |
-| Readiness check | `GET /health/ready` | ✅ 200 (BUG-9 fixed) |
-| Auth rejection | `GET /api/v1/sessions` (no key) | ✅ 401 |
-| Authenticated call | `GET /api/v1/sessions` (with key) | ✅ 200 |
+| Upgrade | `pip install --upgrade dawos-agent` | PASS 0.2.0 |
+| Uninstall | `pip uninstall dawos-agent -y` | PASS Clean |
+| Fresh install | `pip install dawos-agent` | PASS 0.2.0 |
+| Service restart | `systemctl restart dawos-agent` | PASS |
+| Health check | `GET /health` | PASS 200 |
+| Readiness check | `GET /health/ready` | PASS 200 (BUG-9 fixed) |
+| Auth rejection | `GET /api/v1/sessions` (no key) | PASS 401 |
+| Authenticated call | `GET /api/v1/sessions` (with key) | PASS 200 |
 
 ### 12.7 Phase 5 Summary
 
@@ -702,4 +702,4 @@ Cycle: upgrade → uninstall → fresh install → verify all API endpoints → 
 | Bugs fixed | 2/2 |
 | CI fixes | 2 (ruff lint, pylint R0903) |
 | Regressions | 0 |
-| CI status | ✅ GREEN (all workflows pass) |
+| CI status | PASS GREEN (all workflows pass) |

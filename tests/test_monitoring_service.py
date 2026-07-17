@@ -25,7 +25,7 @@ def _mock_proc(stdout: str = "", returncode: int = 0):
 async def test_monitoring_status_both_active():
     proc = _mock_proc("active")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.monitoring_status()
@@ -40,7 +40,7 @@ async def test_monitoring_status_both_active():
 async def test_monitoring_status_inactive():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.monitoring_status()
@@ -64,7 +64,7 @@ node_memory_MemTotal_bytes 8589934592
 async def test_exporter_metrics_node_exporter():
     proc = _mock_proc(METRICS_OUTPUT)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_metrics("node_exporter")
@@ -79,7 +79,7 @@ async def test_exporter_metrics_node_exporter():
 async def test_exporter_metrics_node_exporter_unavailable():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_metrics("node_exporter")
@@ -96,7 +96,7 @@ async def test_exporter_metrics_node_exporter_unavailable():
 async def test_exporter_metrics_snmpd():
     proc = _mock_proc("udp  UNCONN  0  0  0.0.0.0:161")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_metrics("snmpd")
@@ -109,7 +109,7 @@ async def test_exporter_metrics_snmpd():
 async def test_exporter_metrics_snmpd_unavailable():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_metrics("snmpd")
@@ -126,7 +126,7 @@ async def test_exporter_metrics_snmpd_unavailable():
 async def test_configure_exporter_enable():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.configure_exporter("node_exporter", enable=True)
@@ -139,7 +139,7 @@ async def test_configure_exporter_enable():
 async def test_configure_exporter_disable():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.configure_exporter("snmpd", enable=False)
@@ -152,7 +152,7 @@ async def test_configure_exporter_disable():
 async def test_configure_exporter_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.configure_exporter("bad", enable=True)
@@ -169,7 +169,7 @@ async def test_configure_exporter_failure():
 async def test_exporter_restart():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_restart("node_exporter")
@@ -181,7 +181,7 @@ async def test_exporter_restart():
 async def test_exporter_restart_failure():
     proc = _mock_proc("error", returncode=1)
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await monitoring.exporter_restart("bad")
@@ -198,9 +198,9 @@ async def test_exporter_restart_failure():
 async def test_run_sudo():
     proc = _mock_proc("ok")
     with patch(
-        "dawos_agent.services.monitoring.asyncio.create_subprocess_shell",
+        "dawos_agent.services.monitoring.asyncio.create_subprocess_exec",
         return_value=proc,
     ) as m:
         await monitoring._run("systemctl restart node_exporter", sudo=True)
-        cmd = m.call_args[0][0]
+        cmd = " ".join(m.call_args[0])
         assert cmd.startswith("sudo ")

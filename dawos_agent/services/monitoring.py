@@ -30,8 +30,8 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
@@ -89,9 +89,7 @@ async def exporter_metrics(service: str = "node_exporter") -> dict:
     port = port_map.get(service, NODE_EXPORTER_PORT)
 
     if service == "node_exporter":
-        out, rc = await _run(
-            f"curl -sf http://localhost:{port}/metrics 2>/dev/null | head -50"
-        )
+        out, rc = await _run(f"curl -sf http://localhost:{port}/metrics")
         if rc != 0:
             return {
                 "service": service,
@@ -100,8 +98,12 @@ async def exporter_metrics(service: str = "node_exporter") -> dict:
                 "raw_output": out,
             }
 
+        # Truncate to first 50 lines (replaces shell ``| head -50``).
+        lines = out.splitlines()[:50]
+        truncated = "\n".join(lines)
+
         metrics: list[dict] = []
-        for line in out.splitlines():
+        for line in lines:
             if line.startswith("#"):
                 continue
             m = re.match(r"(\S+?)(?:\{[^}]*\})?\s+([\d.eE+-]+)", line)
@@ -112,11 +114,14 @@ async def exporter_metrics(service: str = "node_exporter") -> dict:
             "service": service,
             "available": True,
             "metrics": metrics,
-            "raw_output": out,
+            "raw_output": truncated,
         }
 
     # SNMP — just check if listening
-    out, rc = await _run(f"ss -lnup | grep :{SNMPD_PORT}")
+    out, rc = await _run("ss -lnup")
+    # Filter for the SNMP port in Python instead of piping to grep.
+    if rc == 0:
+        rc = 0 if f":{SNMPD_PORT}" in out else 1
     return {
         "service": service,
         "available": rc == 0,

@@ -33,7 +33,7 @@ async def test_run_cmd_success():
     proc = _mock_process(stdout=b"output here")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await run_cmd("show stat")
 
@@ -46,7 +46,7 @@ async def test_run_cmd_failure():
 
     with (
         patch(
-            "dawos_agent.services.accel.asyncio.create_subprocess_shell",
+            "dawos_agent.services.accel.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="connection refused"),
@@ -60,7 +60,7 @@ async def test_run_cmd_failure_stdout_fallback():
 
     with (
         patch(
-            "dawos_agent.services.accel.asyncio.create_subprocess_shell",
+            "dawos_agent.services.accel.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="error in stdout"),
@@ -74,7 +74,7 @@ async def test_show_sessions():
     proc = _mock_process(stdout=table.encode())
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await show_sessions("ifname,username")
 
@@ -90,7 +90,7 @@ async def test_show_stat():
     proc = _mock_process(stdout=text.encode())
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await show_stat()
 
@@ -103,7 +103,7 @@ async def test_show_ippool():
     proc = _mock_process(stdout=text.encode())
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await show_ippool()
 
@@ -115,7 +115,7 @@ async def test_show_version():
     proc = _mock_process(stdout=b"1.13.0")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await show_version()
 
@@ -127,7 +127,7 @@ async def test_reload_config():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await reload_config()
 
@@ -139,7 +139,7 @@ async def test_terminate_by_username():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         await terminate_session(username="user1")
 
@@ -149,7 +149,7 @@ async def test_terminate_by_ifname():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         await terminate_session(ifname="ppp0")
 
@@ -171,7 +171,7 @@ async def test_ifname_of_found():
     proc = _mock_process(stdout=output.encode())
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await ifname_of("user1")
 
@@ -184,7 +184,7 @@ async def test_ifname_of_not_found():
     proc = _mock_process(stdout=output.encode())
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await ifname_of("offline")
 
@@ -201,7 +201,7 @@ async def test_shaper_change():
     proc = _mock_process(stdout=b"shaper changed")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await shaper_change("ppp0", "20000/5000")
 
@@ -213,7 +213,7 @@ async def test_shaper_restore():
     proc = _mock_process(stdout=b"shaper restored")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await shaper_restore("ppp0")
 
@@ -230,7 +230,7 @@ async def test_mac_filter_show():
     proc = _mock_process(stdout=b"AA:BB:CC:DD:EE:FF")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await mac_filter("show")
 
@@ -242,7 +242,7 @@ async def test_mac_filter_add():
     proc = _mock_process(stdout=b"ok")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await mac_filter("add", "AA:BB:CC:DD:EE:FF")
 
@@ -259,7 +259,7 @@ async def test_shutdown_soft():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await shutdown("soft")
 
@@ -271,7 +271,7 @@ async def test_shutdown_hard():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await shutdown("hard")
 
@@ -283,7 +283,7 @@ async def test_shutdown_cancel():
     proc = _mock_process(stdout=b"")
 
     with patch(
-        "dawos_agent.services.accel.asyncio.create_subprocess_shell", return_value=proc
+        "dawos_agent.services.accel.asyncio.create_subprocess_exec", return_value=proc
     ):
         result = await shutdown_cancel()
 

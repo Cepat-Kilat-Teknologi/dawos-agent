@@ -30,11 +30,11 @@ async def test_status_running():
         ]
     )
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return next(calls)
 
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         result = await dns_forwarding.status()
@@ -47,7 +47,7 @@ async def test_status_running():
 async def test_status_stopped():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dns_forwarding.status()
@@ -71,11 +71,11 @@ async def test_get_config():
         ]
     )
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return next(calls)
 
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         side_effect=fake_shell,
     ):
         result = await dns_forwarding.get_config()
@@ -89,7 +89,7 @@ async def test_get_config():
 async def test_get_config_empty():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dns_forwarding.get_config()
@@ -107,7 +107,7 @@ async def test_get_config_empty():
 async def test_set_forwarders():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dns_forwarding.set_forwarders(["8.8.8.8", "1.1.1.1"], 2000)
@@ -126,12 +126,12 @@ async def test_set_forwarders_reload_fail():
         ]
     )
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return next(calls)
 
     with (
         patch(
-            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
             side_effect=fake_shell,
         ),
         pytest.raises(RuntimeError, match="Failed to reload"),
@@ -144,7 +144,7 @@ async def test_set_forwarders_dnsmasq_not_installed():
     proc = _mock_proc("inactive", returncode=3)
     with (
         patch(
-            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="dnsmasq is not installed"),
@@ -161,7 +161,7 @@ async def test_set_forwarders_dnsmasq_not_installed():
 async def test_flush_cache():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+        "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await dns_forwarding.flush_cache()
@@ -178,12 +178,12 @@ async def test_flush_cache_fail():
         ]
     )
 
-    async def fake_shell(cmd, **kw):
+    async def fake_shell(*args, **kw):
         return next(calls)
 
     with (
         patch(
-            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
             side_effect=fake_shell,
         ),
         pytest.raises(RuntimeError, match="Failed to flush"),
@@ -196,7 +196,7 @@ async def test_flush_cache_dnsmasq_not_installed():
     proc = _mock_proc("inactive", returncode=3)
     with (
         patch(
-            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_shell",
+            "dawos_agent.services.dns_forwarding.asyncio.create_subprocess_exec",
             return_value=proc,
         ),
         pytest.raises(RuntimeError, match="dnsmasq is not installed"),

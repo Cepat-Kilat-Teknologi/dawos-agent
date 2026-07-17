@@ -397,7 +397,7 @@ async def test_restore_ratelimit_no_session():
 async def test_tc_helper():
     proc = _mock_proc("qdisc fq_codel 0: root")
     with patch(
-        "dawos_agent.services.traffic.asyncio.create_subprocess_shell",
+        "dawos_agent.services.traffic.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await traffic._tc("tc -s qdisc show dev ppp0")

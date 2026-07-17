@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 
 from ..config import settings
 from ..constants import CONNTRACK_RECOMMENDED_MIN, SNMPD_PORT
@@ -24,7 +25,9 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
+async def _run(
+    cmd: str, *, sudo: bool = False, stdin_data: str | None = None
+) -> tuple[str, int]:
     """Execute a shell command asynchronously.
 
     Args:
@@ -37,12 +40,15 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
+        stdin=asyncio.subprocess.PIPE if stdin_data else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await proc.communicate()
+    stdout, stderr = await proc.communicate(
+        input=stdin_data.encode() if stdin_data else None
+    )
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
@@ -78,7 +84,7 @@ async def check_pppoe() -> dict:
     Returns:
         A diagnostic result dict with ``name``, ``status``, and ``detail``.
     """
-    out, rc = await _run("lsmod | grep pppoe")
+    out, rc = await _run("lsmod")
     if rc == 0 and "pppoe" in out:
         return {"name": "pppoe", "status": "ok", "detail": "pppoe module loaded"}
     return {"name": "pppoe", "status": "warn", "detail": "pppoe module not found"}
@@ -90,7 +96,7 @@ async def check_nat() -> dict:
     Returns:
         A diagnostic result dict with ``name``, ``status``, and ``detail``.
     """
-    out, rc = await _run("nft list ruleset 2>/dev/null", sudo=True)
+    out, rc = await _run("nft list ruleset", sudo=True)
     if rc == 0 and "masquerade" in out:
         return {"name": "nat", "status": "ok", "detail": "NAT masquerade active"}
     return {"name": "nat", "status": "warn", "detail": "No NAT masquerade found"}
@@ -263,9 +269,9 @@ async def set_conntrack(max_value: int) -> dict:
     )
     # Persist
     await _run(
-        f"tee /etc/sysctl.d/90-conntrack.conf > /dev/null "
-        f"<<< 'net.netfilter.nf_conntrack_max = {max_value}'",
+        "tee /etc/sysctl.d/90-conntrack.conf",
         sudo=True,
+        stdin_data=f"net.netfilter.nf_conntrack_max = {max_value}",
     )
     return await get_conntrack()
 

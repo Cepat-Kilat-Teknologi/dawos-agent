@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 import tempfile
 
 from ..models.schemas import FirewallStatus, SysctlStatus
@@ -25,12 +26,15 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
-    """Execute a shell command asynchronously.
+async def _run(
+    cmd: str, *, sudo: bool = False, stdin_data: str | None = None
+) -> tuple[str, int]:
+    """Execute a command asynchronously.
 
     Args:
         cmd: The command string to execute.
         sudo: If True, prefix the command with ``sudo``.
+        stdin_data: Optional text to feed to the process via stdin.
 
     Returns:
         A tuple of (stdout_text, return_code).
@@ -38,12 +42,15 @@ async def _run(cmd: str, *, sudo: bool = False) -> tuple[str, int]:
     if sudo:
         cmd = f"sudo {cmd}"
     log.debug("exec: %s", cmd)
-    proc = await asyncio.create_subprocess_shell(
-        cmd,
+    proc = await asyncio.create_subprocess_exec(
+        *shlex.split(cmd),
+        stdin=asyncio.subprocess.PIPE if stdin_data else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, stderr = await proc.communicate()
+    stdout, stderr = await proc.communicate(
+        input=stdin_data.encode() if stdin_data else None
+    )
     out = stdout.decode().strip()
     if proc.returncode != 0:
         err = stderr.decode().strip()
@@ -153,7 +160,7 @@ async def set_sysctl(
         f"net.ipv4.ip_forward = {v4}\n"
         f"net.ipv6.conf.all.forwarding = {v6}\n"
     )
-    await _run(f"tee /etc/sysctl.d/90-dawos.conf <<< '{conf}'", sudo=True)
+    await _run("tee /etc/sysctl.d/90-dawos.conf", sudo=True, stdin_data=conf)
 
     return SysctlStatus(ip_forward=ip_forward, ip6_forward=ip6_forward)
 

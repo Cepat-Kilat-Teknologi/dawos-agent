@@ -29,7 +29,7 @@ def _mock_proc(stdout: str = "", returncode: int = 0):
 async def test_check_service_running():
     proc = _mock_proc("active")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_service()
@@ -41,7 +41,7 @@ async def test_check_service_running():
 async def test_check_service_stopped():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_service()
@@ -53,7 +53,7 @@ async def test_check_service_stopped():
 async def test_check_pppoe_loaded():
     proc = _mock_proc("pppoe                  12345  0")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_pppoe()
@@ -65,7 +65,7 @@ async def test_check_pppoe_loaded():
 async def test_check_pppoe_missing():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_pppoe()
@@ -77,7 +77,7 @@ async def test_check_pppoe_missing():
 async def test_check_nat_active():
     proc = _mock_proc("table dawos-nat { masquerade }")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_nat()
@@ -89,7 +89,7 @@ async def test_check_nat_active():
 async def test_check_nat_missing():
     proc = _mock_proc("table filter { }")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_nat()
@@ -101,7 +101,7 @@ async def test_check_nat_missing():
 async def test_check_firewall_active():
     proc = _mock_proc("active")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_firewall()
@@ -113,7 +113,7 @@ async def test_check_firewall_active():
 async def test_check_firewall_inactive():
     proc = _mock_proc("inactive", returncode=3)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_firewall()
@@ -125,7 +125,7 @@ async def test_check_firewall_inactive():
 async def test_check_conntrack_ok():
     proc = _mock_proc("524288")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_conntrack()
@@ -137,7 +137,7 @@ async def test_check_conntrack_ok():
 async def test_check_conntrack_low():
     proc = _mock_proc("65536")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_conntrack()
@@ -149,7 +149,7 @@ async def test_check_conntrack_low():
 async def test_check_conntrack_unavailable():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_conntrack()
@@ -211,7 +211,7 @@ async def test_check_pool_error():
 async def test_check_internet_ok():
     proc = _mock_proc("")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_internet()
@@ -223,7 +223,7 @@ async def test_check_internet_ok():
 async def test_check_internet_fail():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.check_internet()
@@ -239,7 +239,7 @@ async def test_check_snmp_running():
         "Netid  State  Recv-Q Send-Q  Local Address:Port\nudp    UNCONN 0      0      0.0.0.0:161"
     )
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_ss],
     ):
         result = await diagnostics.check_snmp()
@@ -253,7 +253,7 @@ async def test_check_snmp_not_running():
     proc_inactive = _mock_proc("inactive", returncode=3)
     proc_ss = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         side_effect=[proc_inactive, proc_ss],
     ):
         result = await diagnostics.check_snmp()
@@ -268,7 +268,7 @@ async def test_check_snmp_running_port_closed():
     proc_active = _mock_proc("active")
     proc_ss = _mock_proc("Netid  State  Recv-Q Send-Q  Local Address:Port")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_ss],
     ):
         result = await diagnostics.check_snmp()
@@ -286,7 +286,7 @@ async def test_check_snmp_running_port_closed():
 async def test_get_conntrack_ok():
     proc = _mock_proc("524288")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.get_conntrack()
@@ -299,7 +299,7 @@ async def test_get_conntrack_ok():
 async def test_get_conntrack_warn():
     proc = _mock_proc("65536")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.get_conntrack()
@@ -312,7 +312,7 @@ async def test_get_conntrack_warn():
 async def test_get_conntrack_unavailable():
     proc = _mock_proc("", returncode=1)
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.get_conntrack()
@@ -325,7 +325,7 @@ async def test_get_conntrack_unavailable():
 async def test_set_conntrack():
     proc = _mock_proc("524288")
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         return_value=proc,
     ):
         result = await diagnostics.set_conntrack(524288)
@@ -345,7 +345,7 @@ async def test_snmp_status():
         "Netid  State  Recv-Q Send-Q  Local Address:Port\nudp    UNCONN 0      0      0.0.0.0:161"
     )
     with patch(
-        "dawos_agent.services.diagnostics.asyncio.create_subprocess_shell",
+        "dawos_agent.services.diagnostics.asyncio.create_subprocess_exec",
         side_effect=[proc_active, proc_ss],
     ):
         result = await diagnostics.snmp_status()
