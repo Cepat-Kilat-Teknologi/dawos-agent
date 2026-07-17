@@ -1,0 +1,3713 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/configuration/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../../guides/troubleshooting/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Configuration - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editing-the-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Editing the Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overriding-via-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overriding via Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Settings Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-and-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit and Observability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session History
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rbac-multi-key-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC Multi-Key Auth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RBAC Multi-Key Auth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Locations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Locations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sudoers-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudoers Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sudoers Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nftables-usrsbinnft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nftables — /usr/sbin/nft
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iproute2-usrsbinip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iproute2 — /usr/sbin/ip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#traffic-control-usrsbintc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traffic Control — /usr/sbin/tc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frr-routing-usrbinvtysh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRR Routing — /usr/bin/vtysh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kernel-parameters-usrsbinsysctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Parameters — /usr/sbin/sysctl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-writer-usrbintee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Writer — /usr/bin/tee
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conntrack-usrsbinconntrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conntrack — /usr/sbin/conntrack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#systemd-unit-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Unit Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Systemd Unit Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Unit] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Service] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-directives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening Directives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-directives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Directives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Install] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Tracing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syslog-identifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syslog Identifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-and-firewall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network and Firewall
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network and Firewall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-listening-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default Listening Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firewall-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firewall Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-behind-a-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Behind a Reverse Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hardware-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/production-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/kernel-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#editing-the-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Editing the Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overriding-via-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overriding via Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Settings Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Identity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-and-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit and Observability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#session-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session History
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Configuration File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rbac-multi-key-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC Multi-Key Auth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="RBAC Multi-Key Auth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Locations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Locations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runtime-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sudoers-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudoers Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sudoers Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nftables-usrsbinnft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nftables — /usr/sbin/nft
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iproute2-usrsbinip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iproute2 — /usr/sbin/ip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#traffic-control-usrsbintc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traffic Control — /usr/sbin/tc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frr-routing-usrbinvtysh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FRR Routing — /usr/bin/vtysh
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kernel-parameters-usrsbinsysctl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Parameters — /usr/sbin/sysctl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-writer-usrbintee" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Writer — /usr/bin/tee
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conntrack-usrsbinconntrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conntrack — /usr/sbin/conntrack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#systemd-unit-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Unit Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Systemd Unit Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Unit] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Service] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-directives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening Directives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-directives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Directives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [Install] Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#log-destination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Destination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Viewing Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Tracing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syslog-identifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Syslog Identifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-and-firewall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network and Firewall
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network and Firewall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-listening-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Default Listening Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firewall-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firewall Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-behind-a-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Behind a Reverse Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Recommendations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hardware-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h1>
+<p>Complete configuration reference for <strong>DawOS Agent</strong> — PPP router management agent.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#configuration-methods">Configuration Methods</a></li>
+<li><a href="#settings-reference">Settings Reference</a></li>
+<li><a href="#file-locations">File Locations</a></li>
+<li><a href="#sudoers-reference">Sudoers Reference</a></li>
+<li><a href="#systemd-unit-configuration">Systemd Unit Configuration</a></li>
+<li><a href="#logging">Logging</a></li>
+<li><a href="#network-and-firewall">Network and Firewall</a></li>
+<li><a href="#production-recommendations">Production Recommendations</a></li>
+</ul>
+<hr />
+<h2 id="configuration-methods">Configuration Methods<a class="headerlink" href="#configuration-methods" title="Permanent link">&para;</a></h2>
+<p>DawOS Agent uses <a href="https://docs.pydantic.dev/latest/concepts/pydantic_settings/">pydantic-settings</a> for configuration. Settings are resolved in the following order of precedence (highest to lowest):</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Source</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (highest)</td>
+<td><strong>Environment variables</strong></td>
+<td><code>export DAWOS_PORT=9090</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong><code>/etc/dawos-agent/agent.env</code></strong></td>
+<td>Loaded by the systemd <code>EnvironmentFile</code> directive</td>
+</tr>
+<tr>
+<td>3 (lowest)</td>
+<td><strong><code>.env</code> file</strong> in the working directory</td>
+<td>For development / manual runs</td>
+</tr>
+</tbody>
+</table>
+<p>All environment variables use the <code>DAWOS_</code> prefix. For example, the <code>port</code> setting maps to <code>DAWOS_PORT</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> The <code>ACCEL_CMD</code>, <code>ACCEL_CLI_PORT</code>, <code>ACCEL_CONFIG_PATH</code>, and <code>ACCEL_SERVICE_NAME</code> variables are exceptions — they do <strong>not</strong> use the <code>DAWOS_</code> prefix (they use the <code>DAWOS_</code> prefix internally via pydantic-settings, but can also be set directly for compatibility).</p>
+</blockquote>
+<h3 id="editing-the-configuration">Editing the Configuration<a class="headerlink" href="#editing-the-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Edit the main config file</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/dawos-agent/agent.env
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Restart to apply changes</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+</code></pre></div>
+<h3 id="overriding-via-environment">Overriding via Environment<a class="headerlink" href="#overriding-via-environment" title="Permanent link">&para;</a></h3>
+<p>You can override any setting by exporting the environment variable before starting the service, or by adding it to the <code>[Service]</code> section of the systemd unit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">[Service]</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="na">Environment</span><span class="o">=</span><span class="s">DAWOS_LOG_LEVEL=debug</span>
+</code></pre></div>
+<p>Then reload and restart:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+</code></pre></div>
+<hr />
+<h2 id="settings-reference">Settings Reference<a class="headerlink" href="#settings-reference" title="Permanent link">&para;</a></h2>
+<h3 id="agent-identity">Agent Identity<a class="headerlink" href="#agent-identity" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_NODE_NAME</code></td>
+<td>System hostname</td>
+<td><code>string</code></td>
+<td>Human-readable identifier for this BNG node. Included in health-check responses to help operators identify which node answered.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="network">Network<a class="headerlink" href="#network" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_HOST</code></td>
+<td><code>0.0.0.0</code></td>
+<td><code>string</code></td>
+<td>IP address to bind the HTTP listener on. <code>0.0.0.0</code> listens on all interfaces. Set to a specific IP to restrict access.</td>
+</tr>
+<tr>
+<td><code>DAWOS_PORT</code></td>
+<td><code>8470</code></td>
+<td><code>integer</code></td>
+<td>TCP port for the HTTP listener. Chosen to avoid conflicts with accel-ppp CLI (2001) and common web server ports.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_API_KEY</code></td>
+<td><code>changeme-generate-a-strong-key</code></td>
+<td><code>string</code></td>
+<td>Shared secret for <code>X-API-Key</code> header authentication. <strong>Must be replaced in production.</strong> All API endpoints except <code>/health</code>, <code>/health/ready</code>, and <code>/metrics</code> require this key.</td>
+</tr>
+<tr>
+<td><code>DAWOS_API_KEYS_FILE</code></td>
+<td><em>(disabled)</em></td>
+<td><code>string</code></td>
+<td>Path to a JSON file mapping multiple API keys to RBAC roles (<code>viewer</code>, <code>operator</code>, <code>admin</code>). When set, enables multi-key authentication with role-based access control. See <a href="#rbac-multi-key-auth">RBAC Multi-Key Auth</a> below.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="accel-ppp-integration">accel-ppp Integration<a class="headerlink" href="#accel-ppp-integration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_ACCEL_CMD</code></td>
+<td><code>/usr/bin/accel-cmd</code></td>
+<td><code>string</code></td>
+<td>Absolute path to the <code>accel-cmd</code> CLI binary used to communicate with the running accel-ppp daemon.</td>
+</tr>
+<tr>
+<td><code>DAWOS_ACCEL_CLI_PORT</code></td>
+<td><code>2001</code></td>
+<td><code>integer</code></td>
+<td>TCP port that the accel-ppp CLI telnet interface listens on (used by <code>accel-cmd</code>).</td>
+</tr>
+<tr>
+<td><code>DAWOS_ACCEL_CONFIG_PATH</code></td>
+<td><code>/etc/accel-ppp.conf</code></td>
+<td><code>string</code></td>
+<td>Filesystem path to the main accel-ppp configuration file. The agent reads and modifies this file for config management operations.</td>
+</tr>
+<tr>
+<td><code>DAWOS_ACCEL_SERVICE_NAME</code></td>
+<td><code>accel-ppp</code></td>
+<td><code>string</code></td>
+<td>Systemd service unit name for accel-ppp. Used when starting, stopping, or restarting the daemon via <code>systemctl</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_LOG_LEVEL</code></td>
+<td><code>info</code></td>
+<td><code>string</code></td>
+<td>Uvicorn / Python log level. Valid values: <code>debug</code>, <code>info</code>, <code>warning</code>, <code>error</code>.</td>
+</tr>
+<tr>
+<td><code>DAWOS_LOG_FORMAT</code></td>
+<td><code>text</code></td>
+<td><code>string</code></td>
+<td>Log output format. <code>text</code> for human-readable output (development), <code>json</code> for structured JSON lines (production log aggregators).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="diagnostics">Diagnostics<a class="headerlink" href="#diagnostics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_PING_TARGET</code></td>
+<td><code>8.8.8.8</code></td>
+<td><code>string</code></td>
+<td>Host used by the internet reachability diagnostic check. Override when the BNG node cannot reach Google DNS (e.g. air-gapped networks).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_RATE_LIMIT</code></td>
+<td><code>120/minute</code></td>
+<td><code>string</code></td>
+<td>Global per-IP rate limit in slowapi format (e.g. <code>120/minute</code>, <code>5/second</code>). Set to an empty string to disable rate limiting. Health endpoints are exempt.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="retry">Retry<a class="headerlink" href="#retry" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_RETRY_MAX</code></td>
+<td><code>3</code></td>
+<td><code>integer</code></td>
+<td>Maximum retry attempts for transient accel-cmd failures (connection refused, timeout). Set to <code>0</code> to disable retries.</td>
+</tr>
+<tr>
+<td><code>DAWOS_RETRY_DELAY</code></td>
+<td><code>1.0</code></td>
+<td><code>float</code></td>
+<td>Base delay in seconds between retry attempts. Uses exponential backoff (1s, 2s, 4s, ...).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="audit-and-observability">Audit and Observability<a class="headerlink" href="#audit-and-observability" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_AUDIT_BUFFER_SIZE</code></td>
+<td><code>1000</code></td>
+<td><code>integer</code></td>
+<td>Maximum number of entries in the in-memory audit ring buffer. The audit log records all write operations (POST/PUT/DELETE) with timestamp, method, path, and client IP. Oldest entries are evicted when the buffer is full.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_WEBHOOK_URL</code></td>
+<td><em>(disabled)</em></td>
+<td><code>string</code></td>
+<td>HTTP(S) endpoint to receive event notifications (session up/down, config changes, service restarts). When set, the agent fires asynchronous POST requests with JSON payloads on relevant events.</td>
+</tr>
+<tr>
+<td><code>DAWOS_WEBHOOK_SECRET</code></td>
+<td><em>(disabled)</em></td>
+<td><code>string</code></td>
+<td>HMAC-SHA256 secret for webhook payload signing. When set, a <code>X-Webhook-Signature</code> header is included in each webhook request. Receivers should validate this signature to verify payload authenticity.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="session-history">Session History<a class="headerlink" href="#session-history" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_HISTORY_DB</code></td>
+<td><code>/var/lib/dawos-agent/history.db</code></td>
+<td><code>string</code></td>
+<td>Filesystem path to the SQLite database used for session history snapshots. The database is created automatically on first snapshot. The parent directory is created if it does not exist. WAL mode is enabled for concurrent read performance. Set to a path on fast storage (SSD preferred) for production workloads with frequent snapshots.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-configuration-file">Example Configuration File<a class="headerlink" href="#example-configuration-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># /etc/dawos-agent/agent.env</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># API authentication</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nv">DAWOS_API_KEY</span><span class="o">=</span>dGhpcyBpcyBhIHNlY3VyZSBrZXkgZXhhbXBsZQ
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Network binding</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">DAWOS_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nv">DAWOS_PORT</span><span class="o">=</span><span class="m">8470</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Node identity</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="nv">DAWOS_NODE_NAME</span><span class="o">=</span>bng-jakarta-01
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># accel-ppp integration</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="nv">DAWOS_ACCEL_CMD</span><span class="o">=</span>/usr/bin/accel-cmd
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="nv">DAWOS_ACCEL_CLI_PORT</span><span class="o">=</span><span class="m">2001</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="nv">DAWOS_ACCEL_CONFIG_PATH</span><span class="o">=</span>/etc/accel-ppp.conf
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="nv">DAWOS_ACCEL_SERVICE_NAME</span><span class="o">=</span>accel-ppp
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># Logging</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="nv">DAWOS_LOG_LEVEL</span><span class="o">=</span>info
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="nv">DAWOS_LOG_FORMAT</span><span class="o">=</span>text
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="c1"># Diagnostics</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="nv">DAWOS_PING_TARGET</span><span class="o">=</span><span class="m">8</span>.8.8.8
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="c1"># Rate limiting (empty string to disable)</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="nv">DAWOS_RATE_LIMIT</span><span class="o">=</span><span class="m">120</span>/minute
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="c1"># Retry (for transient accel-cmd failures)</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="nv">DAWOS_RETRY_MAX</span><span class="o">=</span><span class="m">3</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="nv">DAWOS_RETRY_DELAY</span><span class="o">=</span><span class="m">1</span>.0
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="c1"># Audit buffer size</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="nv">DAWOS_AUDIT_BUFFER_SIZE</span><span class="o">=</span><span class="m">1000</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="c1"># Webhooks (optional — comment out to disable)</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="c1"># DAWOS_WEBHOOK_URL=https://hooks.example.com/dawos</span>
+<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="c1"># DAWOS_WEBHOOK_SECRET=your-hmac-sha256-secret</span>
+<a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>
+<a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a><span class="c1"># RBAC multi-key auth (optional — comment out to use single-key mode)</span>
+<a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a><span class="c1"># DAWOS_API_KEYS_FILE=/etc/dawos-agent/api-keys.json</span>
+</code></pre></div>
+<hr />
+<h2 id="rbac-multi-key-auth">RBAC Multi-Key Auth<a class="headerlink" href="#rbac-multi-key-auth" title="Permanent link">&para;</a></h2>
+<p>By default, DawOS Agent uses a single API key (<code>DAWOS_API_KEY</code>) which grants <strong>admin</strong> access. For production environments with multiple operators, enable RBAC by setting <code>DAWOS_API_KEYS_FILE</code> to point to a JSON file that maps API keys to roles.</p>
+<h3 id="roles">Roles<a class="headerlink" href="#roles" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Access</th>
+<th>Typical Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>viewer</code></td>
+<td><code>GET</code> endpoints only</td>
+<td>Monitoring dashboards, read-only scripts, NOC displays</td>
+</tr>
+<tr>
+<td><code>operator</code></td>
+<td><code>GET</code> + <code>POST</code> / <code>PUT</code> / <code>DELETE</code></td>
+<td>Day-to-day session management, firewall updates, network changes</td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td>Full access including service restart, config apply, audit log, playbooks, shutdown</td>
+<td>Senior engineers, automation platforms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create the API keys file:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;your-admin-api-key-here&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;viewer-key-for-grafana-dashboards&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;viewer&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">&quot;operator-key-for-noc-team&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;operator&quot;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
+</code></pre></div>
+<ol>
+<li>Set file permissions:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>chown<span class="w"> </span>root:dawos<span class="w"> </span>/etc/dawos-agent/api-keys.json
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0640</span><span class="w"> </span>/etc/dawos-agent/api-keys.json
+</code></pre></div>
+<ol>
+<li>Add to agent.env:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">DAWOS_API_KEYS_FILE</span><span class="o">=</span>/etc/dawos-agent/api-keys.json
+</code></pre></div>
+<ol>
+<li>Restart the agent:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+</code></pre></div>
+<blockquote>
+<p><strong>Note:</strong> When <code>DAWOS_API_KEYS_FILE</code> is set, the primary <code>DAWOS_API_KEY</code> still works and always grants admin access. Keys in the file are checked first; if no match is found, the primary key is tried as a fallback.</p>
+</blockquote>
+<h2 id="file-locations">File Locations<a class="headerlink" href="#file-locations" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+<th>Owner</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/opt/dawos-agent/</code></td>
+<td>Installation root directory</td>
+<td><code>dawos:dawos</code></td>
+<td><code>0755</code></td>
+</tr>
+<tr>
+<td><code>/opt/dawos-agent/venv/</code></td>
+<td>Python virtual environment (interpreter, dependencies)</td>
+<td><code>dawos:dawos</code></td>
+<td><code>0755</code></td>
+</tr>
+<tr>
+<td><code>/opt/dawos-agent/venv/bin/dawos-agent</code></td>
+<td>Agent executable (console script entry point)</td>
+<td><code>dawos:dawos</code></td>
+<td><code>0755</code></td>
+</tr>
+<tr>
+<td><code>/etc/dawos-agent/</code></td>
+<td>Configuration directory</td>
+<td><code>root:dawos</code></td>
+<td><code>0750</code></td>
+</tr>
+<tr>
+<td><code>/etc/dawos-agent/agent.env</code></td>
+<td>Main configuration file (contains API key)</td>
+<td><code>root:dawos</code></td>
+<td><code>0640</code></td>
+</tr>
+<tr>
+<td><code>/etc/systemd/system/dawos-agent.service</code></td>
+<td>Systemd service unit file</td>
+<td><code>root:root</code></td>
+<td><code>0644</code></td>
+</tr>
+<tr>
+<td><code>/etc/sudoers.d/dawos-agent</code></td>
+<td>Sudo rules for the <code>dawos</code> user</td>
+<td><code>root:root</code></td>
+<td><code>0440</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="runtime-paths">Runtime Paths<a class="headerlink" href="#runtime-paths" title="Permanent link">&para;</a></h3>
+<p>The agent reads and writes these paths during normal operation (whitelisted in the systemd unit via <code>ReadWritePaths</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc/accel-ppp.conf</code></td>
+<td>Main accel-ppp configuration file</td>
+</tr>
+<tr>
+<td><code>/etc/accel-ppp.d/</code></td>
+<td>Backup directory for config checkpoints</td>
+</tr>
+<tr>
+<td><code>/etc/accel-nat-egress.nft</code></td>
+<td>NAT egress nftables rules</td>
+</tr>
+<tr>
+<td><code>/etc/sysctl.d/</code></td>
+<td>Kernel parameter configuration files</td>
+</tr>
+<tr>
+<td><code>/etc/nftables.conf</code></td>
+<td>Main nftables configuration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sudoers-reference">Sudoers Reference<a class="headerlink" href="#sudoers-reference" title="Permanent link">&para;</a></h2>
+<p>The sudoers file at <code>/etc/sudoers.d/dawos-agent</code> grants the <code>dawos</code> user passwordless <code>sudo</code> access to a minimal set of commands. Each command is listed below with the service modules that use it.</p>
+<h3 id="nftables-usrsbinnft">nftables — <code>/usr/sbin/nft</code><a class="headerlink" href="#nftables-usrsbinnft" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft
+</code></pre></div>
+<p><strong>Used by:</strong> <code>nat.py</code>, <code>firewall.py</code>, <code>diagnostics.py</code></p>
+<p>Manages nftables rules for:
+- NAT masquerade and SNAT/DNAT rules
+- Firewall rule creation, deletion, and listing
+- Diagnostic queries (listing rulesets, counters)</p>
+<h3 id="iproute2-usrsbinip">iproute2 — <code>/usr/sbin/ip</code><a class="headerlink" href="#iproute2-usrsbinip" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/sbin/ip
+</code></pre></div>
+<p><strong>Used by:</strong> <code>nat.py</code>, <code>network.py</code></p>
+<p>Manages network configuration for:
+- Interface address assignment and status changes
+- Route table management for NAT and policy routing
+- Network diagnostics (link state, neighbor table)</p>
+<h3 id="traffic-control-usrsbintc">Traffic Control — <code>/usr/sbin/tc</code><a class="headerlink" href="#traffic-control-usrsbintc" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc
+</code></pre></div>
+<p><strong>Used by:</strong> <code>traffic.py</code></p>
+<p>Manages traffic shaping for:
+- HTB/TBF queueing disciplines for subscriber bandwidth
+- Traffic class creation and rate limiting
+- Shaper statistics and diagnostics</p>
+<h3 id="frr-routing-usrbinvtysh">FRR Routing — <code>/usr/bin/vtysh</code><a class="headerlink" href="#frr-routing-usrbinvtysh" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh
+</code></pre></div>
+<p><strong>Used by:</strong> <code>routing.py</code></p>
+<p>Interacts with the FRR routing daemon for:
+- BGP / OSPF / static route management
+- Routing table inspection
+- Running configuration display</p>
+<h3 id="kernel-parameters-usrsbinsysctl">Kernel Parameters — <code>/usr/sbin/sysctl</code><a class="headerlink" href="#kernel-parameters-usrsbinsysctl" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
+</code></pre></div>
+<p><strong>Used by:</strong> <code>firewall.py</code>, <code>diagnostics.py</code></p>
+<p>Manages kernel tunables for:
+- IP forwarding (<code>net.ipv4.ip_forward</code>)
+- Conntrack tuning
+- Network stack diagnostics</p>
+<h3 id="file-writer-usrbintee">File Writer — <code>/usr/bin/tee</code><a class="headerlink" href="#file-writer-usrbintee" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/bin/tee
+</code></pre></div>
+<p><strong>Used by:</strong> <code>firewall.py</code>, <code>nat.py</code>, <code>diagnostics.py</code></p>
+<p>Writes configuration files to paths owned by root:
+- nftables rule files
+- sysctl configuration snippets
+- NAT egress configuration</p>
+<h3 id="conntrack-usrsbinconntrack">Conntrack — <code>/usr/sbin/conntrack</code><a class="headerlink" href="#conntrack-usrsbinconntrack" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack
+</code></pre></div>
+<p><strong>Used by:</strong> <code>conntrack.py</code></p>
+<p>Manages the kernel connection tracking table:
+- Flushing all conntrack entries (<code>conntrack -F</code>)</p>
+<hr />
+<h2 id="systemd-unit-configuration">Systemd Unit Configuration<a class="headerlink" href="#systemd-unit-configuration" title="Permanent link">&para;</a></h2>
+<p>The service unit at <code>/etc/systemd/system/dawos-agent.service</code> controls how the agent runs. Each directive is explained below.</p>
+<h3 id="unit-section">[Unit] Section<a class="headerlink" href="#unit-section" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>dawos-agent — PPP router management daemon</code></td>
+<td>Human-readable service description shown in <code>systemctl status</code></td>
+</tr>
+<tr>
+<td><code>Documentation</code></td>
+<td><code>https://github.com/...</code></td>
+<td>Link to project documentation</td>
+</tr>
+<tr>
+<td><code>After</code></td>
+<td><code>network-online.target accel-ppp.service</code></td>
+<td>Delays startup until networking is ready and accel-ppp has started</td>
+</tr>
+<tr>
+<td><code>Wants</code></td>
+<td><code>network-online.target</code></td>
+<td>Soft dependency — request network but don't fail if unavailable</td>
+</tr>
+</tbody>
+</table>
+<h3 id="service-section">[Service] Section<a class="headerlink" href="#service-section" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Type</code></td>
+<td><code>simple</code></td>
+<td>The process started by <code>ExecStart</code> is the main service process</td>
+</tr>
+<tr>
+<td><code>User</code></td>
+<td><code>dawos</code></td>
+<td>Run the agent as the unprivileged <code>dawos</code> system user</td>
+</tr>
+<tr>
+<td><code>Group</code></td>
+<td><code>dawos</code></td>
+<td>Primary group for file access</td>
+</tr>
+<tr>
+<td><code>EnvironmentFile</code></td>
+<td><code>-/etc/dawos-agent/agent.env</code></td>
+<td>Load configuration from this file. The <code>-</code> prefix means "don't fail if the file is missing"</td>
+</tr>
+<tr>
+<td><code>ExecStart</code></td>
+<td><code>/opt/dawos-agent/venv/bin/dawos-agent</code></td>
+<td>Command to start the agent (Uvicorn ASGI server)</td>
+</tr>
+<tr>
+<td><code>Restart</code></td>
+<td><code>always</code></td>
+<td>Automatically restart the agent on any exit (clean or crash). Ensures the management API remains available after transient failures</td>
+</tr>
+<tr>
+<td><code>RestartSec</code></td>
+<td><code>3</code></td>
+<td>Wait 3 seconds between restart attempts to avoid tight crash loops while keeping recovery fast</td>
+</tr>
+<tr>
+<td><code>StartLimitBurst</code></td>
+<td><code>5</code></td>
+<td>Allow at most 5 restart attempts...</td>
+</tr>
+<tr>
+<td><code>StartLimitIntervalSec</code></td>
+<td><code>300</code></td>
+<td>...within a 300-second (5-minute) window. Prevents indefinite crash-loop storms while giving enough headroom for transient issues</td>
+</tr>
+</tbody>
+</table>
+<h3 id="security-hardening-directives">Security Hardening Directives<a class="headerlink" href="#security-hardening-directives" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NoNewPrivileges</code></td>
+<td><code>false</code></td>
+<td>Set to <code>false</code> because the agent needs <code>sudo</code> to escalate privileges for system commands. Setting <code>true</code> would break sudoers rules</td>
+</tr>
+<tr>
+<td><code>ProtectSystem</code></td>
+<td><code>strict</code></td>
+<td>Mounts the entire filesystem read-only except paths listed in <code>ReadWritePaths</code>. Prevents accidental writes to system files</td>
+</tr>
+<tr>
+<td><code>ProtectHome</code></td>
+<td><code>true</code></td>
+<td>Makes <code>/home</code>, <code>/root</code>, and <code>/run/user</code> completely inaccessible to the service</td>
+</tr>
+<tr>
+<td><code>ReadWritePaths</code></td>
+<td><code>/etc/accel-ppp.conf /etc/accel-ppp.d ...</code></td>
+<td>Explicitly whitelists the config files the agent needs to modify</td>
+</tr>
+<tr>
+<td><code>PrivateTmp</code></td>
+<td><code>true</code></td>
+<td>Gives the service its own isolated <code>/tmp</code> directory, invisible to other processes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-directives">Logging Directives<a class="headerlink" href="#logging-directives" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>StandardOutput</code></td>
+<td><code>journal</code></td>
+<td>Route stdout to the systemd journal</td>
+</tr>
+<tr>
+<td><code>StandardError</code></td>
+<td><code>journal</code></td>
+<td>Route stderr to the systemd journal</td>
+</tr>
+<tr>
+<td><code>SyslogIdentifier</code></td>
+<td><code>dawos-agent</code></td>
+<td>Tag all journal entries with <code>dawos-agent</code> for easy filtering</td>
+</tr>
+</tbody>
+</table>
+<h3 id="install-section">[Install] Section<a class="headerlink" href="#install-section" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WantedBy</code></td>
+<td><code>multi-user.target</code></td>
+<td>Start the service automatically on normal (non-graphical) boot</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="logging_1">Logging<a class="headerlink" href="#logging_1" title="Permanent link">&para;</a></h2>
+<h3 id="log-destination">Log Destination<a class="headerlink" href="#log-destination" title="Permanent link">&para;</a></h3>
+<p>All log output is sent to the <strong>systemd journal</strong> via stdout/stderr. No log files are written to disk by the agent itself.</p>
+<h3 id="viewing-logs">Viewing Logs<a class="headerlink" href="#viewing-logs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Follow logs in real time</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-f
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># View the last 50 log entries</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># View logs since the last boot</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-b
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="c1"># View logs from a specific time range</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;2024-01-01 10:00:00&quot;</span><span class="w"> </span>--until<span class="w"> </span><span class="s2">&quot;2024-01-01 11:00:00&quot;</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="c1"># View only errors</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-p<span class="w"> </span>err
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="c1"># Export logs as JSON</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span>--no-pager
+</code></pre></div>
+<h3 id="log-levels">Log Levels<a class="headerlink" href="#log-levels" title="Permanent link">&para;</a></h3>
+<p>Set via <code>DAWOS_LOG_LEVEL</code> in the configuration file:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Description</th>
+<th>Recommended For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>debug</code></td>
+<td>Verbose output including request/response details</td>
+<td>Development, troubleshooting</td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>Normal operational messages (startup, requests)</td>
+<td>Default for staging</td>
+</tr>
+<tr>
+<td><code>warning</code></td>
+<td>Potential issues that don't prevent operation</td>
+<td>Production (recommended)</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Errors that affect functionality</td>
+<td>Quiet production environments</td>
+</tr>
+</tbody>
+</table>
+<h3 id="log-formats">Log Formats<a class="headerlink" href="#log-formats" title="Permanent link">&para;</a></h3>
+<p>Set via <code>DAWOS_LOG_FORMAT</code> in the configuration file:</p>
+<p><strong>Text format</strong> (default) — human-readable output for development and interactive use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>2026-07-09 10:00:00,123 INFO [req-abc123] dawos_agent: Request processed
+</code></pre></div>
+<p><strong>JSON format</strong> — structured output for log aggregation systems (Loki, Elasticsearch, Datadog):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>DAWOS_LOG_FORMAT=json
+</code></pre></div>
+<p>Each log line is a valid JSON object:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-07-09T10:00:00.123Z&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dawos_agent&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Request processed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123-def456&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>JSON fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>timestamp</code></td>
+<td>ISO 8601 timestamp</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>Log level (DEBUG, INFO, WARNING, ERROR)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Logger name (Python module path)</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Log message text</td>
+</tr>
+<tr>
+<td><code>request_id</code></td>
+<td>Trace ID for the current HTTP request (empty outside request context)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-tracing">Request Tracing<a class="headerlink" href="#request-tracing" title="Permanent link">&para;</a></h3>
+<p>Every HTTP request is assigned a unique trace ID (UUID v4). This ID is:</p>
+<ol>
+<li><strong>Returned in the response</strong> as the <code>X-Request-ID</code> header</li>
+<li><strong>Injected into all log records</strong> produced during that request's lifecycle</li>
+<li><strong>Accepted from the client</strong> — if the incoming request includes an <code>X-Request-ID</code> header, the agent uses that value instead of generating a new one</li>
+</ol>
+<p>This allows end-to-end tracing from client through the agent to log aggregation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Send a request with a custom trace ID</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-API-Key: </span><span class="nv">$KEY</span><span class="s2">&quot;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-Request-ID: my-trace-123&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span>http://localhost:8470/api/v1/sessions
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1"># The response includes the same ID</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># X-Request-ID: my-trace-123</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="c1"># Filter logs for that specific request</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;my-trace-123&quot;</span>
+</code></pre></div>
+<h3 id="access-logs">Access Logs<a class="headerlink" href="#access-logs" title="Permanent link">&para;</a></h3>
+<p>The agent runs on Uvicorn with <code>access_log=True</code>, so every HTTP request is logged with method, path, status code, and response time. These appear in the journal alongside application logs.</p>
+<h3 id="syslog-identifier">Syslog Identifier<a class="headerlink" href="#syslog-identifier" title="Permanent link">&para;</a></h3>
+<p>All journal entries are tagged with <code>SyslogIdentifier=dawos-agent</code>, allowing you to filter exclusively for agent logs even when other services share the same journal.</p>
+<hr />
+<h2 id="network-and-firewall">Network and Firewall<a class="headerlink" href="#network-and-firewall" title="Permanent link">&para;</a></h2>
+<h3 id="default-listening-configuration">Default Listening Configuration<a class="headerlink" href="#default-listening-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Address</td>
+<td><code>0.0.0.0</code></td>
+<td>All interfaces</td>
+</tr>
+<tr>
+<td>Port</td>
+<td><code>8470</code></td>
+<td>Avoids conflicts with accel-ppp CLI (2001) and web servers (80/443)</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>HTTP/1.1</td>
+<td>Plain HTTP — use a reverse proxy for TLS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="firewall-rules">Firewall Rules<a class="headerlink" href="#firewall-rules" title="Permanent link">&para;</a></h3>
+<p>If the host runs <code>nftables</code> or <code>iptables</code>, allow inbound access on the agent port:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># nftables</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>accept
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># iptables (legacy)</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>sudo<span class="w"> </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+</code></pre></div>
+<p>To restrict access to a management subnet:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># nftables — allow only 10.0.0.0/24</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>ip<span class="w"> </span>saddr<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>accept
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># iptables</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>sudo<span class="w"> </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>--dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+</code></pre></div>
+<h3 id="running-behind-a-reverse-proxy">Running Behind a Reverse Proxy<a class="headerlink" href="#running-behind-a-reverse-proxy" title="Permanent link">&para;</a></h3>
+<p>For TLS termination and additional security, place the agent behind nginx or Caddy:</p>
+<p><strong>nginx example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">443</span><span class="w"> </span><span class="s">ssl</span><span class="p">;</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">bng-agent.example.com</span><span class="p">;</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="kn">ssl_certificate</span><span class="w">     </span><span class="s">/etc/ssl/certs/bng-agent.pem</span><span class="p">;</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="kn">ssl_certificate_key</span><span class="w"> </span><span class="s">/etc/ssl/private/bng-agent.key</span><span class="p">;</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://127.0.0.1:8470</span><span class="p">;</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a><span class="p">}</span>
+</code></pre></div>
+<p>When using a reverse proxy, bind the agent to localhost only:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>DAWOS_HOST=127.0.0.1
+</code></pre></div>
+<hr />
+<h2 id="production-recommendations">Production Recommendations<a class="headerlink" href="#production-recommendations" title="Permanent link">&para;</a></h2>
+<h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Generate a strong API key</strong> — never use the default value:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_urlsafe(32))&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Restrict the listen address</strong> if the agent only serves local or management-network traffic:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>DAWOS_HOST=10.0.0.1
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use TLS</strong> — deploy a reverse proxy (nginx, Caddy) in front of the agent for HTTPS.</p>
+</li>
+<li>
+<p><strong>Rotate API keys</strong> periodically. Update <code>/etc/dawos-agent/agent.env</code> and restart the service.</p>
+</li>
+</ol>
+<h3 id="logging_2">Logging<a class="headerlink" href="#logging_2" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Set log level to <code>warning</code></strong> in production to reduce journal volume:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>DAWOS_LOG_LEVEL=warning
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Enable JSON logging</strong> when forwarding to a log aggregator (Loki, Elasticsearch, Datadog):
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>DAWOS_LOG_FORMAT=json
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Configure log rotation</strong> — systemd journal handles this automatically via <code>/etc/systemd/journald.conf</code>. Set <code>SystemMaxUse</code> to control disk usage.</p>
+</li>
+</ol>
+<h3 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Monitor the <code>/health</code> endpoint</strong> -- it is unauthenticated and returns the agent version, node name, and status. Use it as a liveness check target in your monitoring system (Prometheus blackbox exporter, Uptime Kuma, etc.):
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>curl<span class="w"> </span>-sf<span class="w"> </span>http://localhost:8470/health
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Use <code>/health/ready</code> for readiness checks</strong> -- verifies accel-ppp connectivity in addition to agent health. Returns HTTP 200 when all dependencies are reachable, HTTP 503 when a dependency is down:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>curl<span class="w"> </span>-sf<span class="w"> </span>http://localhost:8470/health/ready
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Scrape Prometheus metrics</strong> -- the agent exposes a <code>GET /metrics</code> endpoint in Prometheus text exposition format. No authentication required. Add the agent as a scrape target in your <code>prometheus.yml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># prometheus.yml</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="nt">scrape_configs</span><span class="p">:</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dawos-agent</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">    </span><span class="nt">scrape_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15s</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">targets</span><span class="p">:</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;10.0.1.1:8470&quot;</span><span class="w">   </span><span class="c1"># production BNG</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;10.0.0.1:8470&quot;</span><span class="w">    </span><span class="c1"># development BNG</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dawos-agent</span>
+</code></pre></div>
+<p>The <code>/metrics</code> endpoint exposes these application-level metrics:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dawos_http_requests_total</code></td>
+<td>Counter</td>
+<td>HTTP request count by method, endpoint, and status code</td>
+</tr>
+<tr>
+<td><code>dawos_http_request_duration_seconds</code></td>
+<td>Histogram</td>
+<td>HTTP request latency distribution</td>
+</tr>
+<tr>
+<td><code>dawos_accel_cmd_errors_total</code></td>
+<td>Counter</td>
+<td>accel-cmd non-zero exit codes (CLI failures)</td>
+</tr>
+<tr>
+<td><code>dawos_accel_cmd_retries_total</code></td>
+<td>Counter</td>
+<td>Transient retry attempts for accel-cmd calls</td>
+</tr>
+<tr>
+<td><code>dawos_rate_limit_hits_total</code></td>
+<td>Counter</td>
+<td>HTTP 429 rate-limit rejections</td>
+</tr>
+</tbody>
+</table>
+<p>Health and metrics paths (<code>/health</code>, <code>/health/ready</code>, <code>/metrics</code>) are excluded from metric recording to prevent self-instrumentation loops.</p>
+<p>Example Grafana query for request rate:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="kr">rate</span><span class="o">(</span><span class="nv">dawos_http_requests_total</span><span class="p">{</span><span class="nl">job</span><span class="o">=</span><span class="p">&quot;</span><span class="s">dawos-agent</span><span class="p">&quot;}[</span><span class="s">5m</span><span class="p">]</span><span class="o">)</span>
+</code></pre></div>
+<p>Example alert rule for accel-cmd failures:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># prometheus alert rule</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nt">groups</span><span class="p">:</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dawos</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AccelCmdErrorRate</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">        </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rate(dawos_accel_cmd_errors_total[5m]) &gt; 0.1</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">        </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a><span class="w">        </span><span class="nt">annotations</span><span class="p">:</span>
+<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a><span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;accel-cmd</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">rate</span><span class="nv"> </span><span class="s">elevated</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.instance</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>Set up alerting</strong> on systemd service failures:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># Check if the service is active</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>systemctl<span class="w"> </span>is-active<span class="w"> </span>dawos-agent
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="backup">Backup<a class="headerlink" href="#backup" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Back up the configuration file</strong> — it contains your API key and node-specific settings:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>cp<span class="w"> </span>/etc/dawos-agent/agent.env<span class="w"> </span>/etc/dawos-agent/agent.env.bak
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Include in your infrastructure-as-code</strong> — the <code>agent.env</code> file is the only node-specific state. Everything else can be reinstalled from the repository.</p>
+</li>
+</ol>
+<h3 id="resource-usage">Resource Usage<a class="headerlink" href="#resource-usage" title="Permanent link">&para;</a></h3>
+<p>The agent is lightweight by design:</p>
+<ul>
+<li><strong>Memory:</strong> ~60 MB RSS (Python + Uvicorn + FastAPI)</li>
+<li><strong>CPU:</strong> Near zero at idle; brief spikes during API calls that invoke system commands</li>
+<li><strong>Disk:</strong> ~55 MB for the virtualenv and dependencies</li>
+<li><strong>Network:</strong> Only active when serving API requests — no background polling or outbound connections</li>
+</ul>
+<h3 id="hardware-requirements">Hardware Requirements<a class="headerlink" href="#hardware-requirements" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Minimum</th>
+<th>Recommended</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU</strong></td>
+<td>1 vCPU (x86_64)</td>
+<td>2+ vCPU</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>512 MB</td>
+<td>1 GB+</td>
+</tr>
+<tr>
+<td><strong>Disk</strong></td>
+<td>2 GB free</td>
+<td>5 GB+</td>
+</tr>
+<tr>
+<td><strong>OS</strong></td>
+<td>Debian 11+ / Ubuntu 22.04+</td>
+<td>Ubuntu 24.04 LTS</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../installation/">Installation</a> for detailed hardware sizing guidance.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

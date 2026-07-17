@@ -1,0 +1,2670 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/guides/production-hardening/">
+      
+      
+        <link rel="prev" href="../monitoring/">
+      
+      
+        <link rel="next" href="../kernel-tuning/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Production Hardening - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#production-hardening" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Production Hardening
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#resource-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Planning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resource Planning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#measured-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measured Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sizing-by-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing by Scale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Rotation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Rotation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-journald-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure journald Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-log-volume-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Log Volume Estimation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-disk-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Disk Space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#swap-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Swap Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Swap Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-matters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-swap-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a Swap File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-swap-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Swap Size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tune-swappiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tune Swappiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kernel-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Tuning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-supervision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Supervision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Supervision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Risk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-agent-uptime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Agent Uptime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-check-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Check Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scaling-beyond-a-single-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scaling Beyond a Single Node
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scaling Beyond a Single Node">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-architecture-single-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Architecture (Single Node)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Node Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centralized-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centralized Orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-strength" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Key Strength
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disable-unnecessary-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disable Unnecessary Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSH Hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backup Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-to-back-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Back Up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-config-backup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Config Backup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-hardening-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Hardening Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kernel-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#resource-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Planning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Resource Planning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#measured-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measured Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sizing-by-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing by Scale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-rotation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Rotation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Rotation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-matters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-journald-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure journald Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-log-volume-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Log Volume Estimation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-disk-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Disk Space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#swap-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Swap Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Swap Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-this-matters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Matters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-swap-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create a Swap File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-swap-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Swap Size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tune-swappiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tune Swappiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kernel-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kernel Tuning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-supervision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Supervision
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Supervision">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Risk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-agent-uptime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Agent Uptime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health-check-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Check Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scaling-beyond-a-single-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scaling Beyond a Single Node
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scaling Beyond a Single Node">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-architecture-single-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Architecture (Single Node)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Node Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centralized-orchestration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centralized Orchestration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-strength" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Key Strength
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disable-unnecessary-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disable Unnecessary Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSH Hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backup Strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backup Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-to-back-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Back Up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-config-backup-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Config Backup Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-hardening-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Hardening Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="production-hardening">Production Hardening<a class="headerlink" href="#production-hardening" title="Permanent link">&para;</a></h1>
+<p>Recommendations for running DawOS Agent reliably in production environments. This guide covers resource planning, log management, memory safety, process supervision, scaling, and operational best practices.</p>
+<hr />
+<h2 id="resource-planning">Resource Planning<a class="headerlink" href="#resource-planning" title="Permanent link">&para;</a></h2>
+<h3 id="measured-footprint">Measured Footprint<a class="headerlink" href="#measured-footprint" title="Permanent link">&para;</a></h3>
+<p>These numbers are measured from a live deployment on a 2 vCPU / 2 GB RAM / 12 GB disk virtual machine running Ubuntu 22.04:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: center;">Memory (RSS)</th>
+<th style="text-align: center;">CPU (idle)</th>
+<th style="text-align: center;">CPU (under load)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dawos-agent (FastAPI + Uvicorn)</td>
+<td style="text-align: center;">64 MB</td>
+<td style="text-align: center;">&lt; 0.1%</td>
+<td style="text-align: center;">&lt; 2%</td>
+</tr>
+<tr>
+<td>accel-ppp daemon (0 sessions)</td>
+<td style="text-align: center;">6 MB</td>
+<td style="text-align: center;">0%</td>
+<td style="text-align: center;">varies</td>
+</tr>
+<tr>
+<td>Combined management stack</td>
+<td style="text-align: center;"><strong>70 MB</strong></td>
+<td style="text-align: center;"><strong>&lt; 0.2%</strong></td>
+<td style="text-align: center;"><strong>&lt; 3%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The 170 API endpoints are function registrations, not running processes. At runtime, only the endpoint being called executes. Each request spawns a single lightweight subprocess (<code>accel-cmd</code>, <code>nft</code>, <code>ip</code>, etc.), collects the output, and returns JSON. The entire cycle typically completes in under 100 milliseconds.</p>
+<h3 id="sizing-by-scale">Sizing by Scale<a class="headerlink" href="#sizing-by-scale" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scale</th>
+<th style="text-align: center;">Sessions</th>
+<th style="text-align: center;">CPU</th>
+<th style="text-align: center;">RAM</th>
+<th style="text-align: center;">Disk</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small</td>
+<td style="text-align: center;">&lt; 500</td>
+<td style="text-align: center;">2 vCPU</td>
+<td style="text-align: center;">2 GB</td>
+<td style="text-align: center;">10 GB</td>
+<td>Sufficient for most deployments</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td style="text-align: center;">500 -- 2,000</td>
+<td style="text-align: center;">2 vCPU</td>
+<td style="text-align: center;">4 GB</td>
+<td style="text-align: center;">20 GB</td>
+<td>Extra RAM for traffic bursts and session state</td>
+</tr>
+<tr>
+<td>Large</td>
+<td style="text-align: center;">2,000 -- 10,000</td>
+<td style="text-align: center;">4 vCPU</td>
+<td style="text-align: center;">8 GB</td>
+<td style="text-align: center;">40 GB</td>
+<td>accel-ppp needs more CPU for packet processing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>RAM breakdown for a small deployment (2 GB total):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Consumer</th>
+<th style="text-align: center;">Allocation</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux kernel + systemd</td>
+<td style="text-align: center;">~200 MB</td>
+<td>Base OS overhead</td>
+</tr>
+<tr>
+<td>dawos-agent</td>
+<td style="text-align: center;">~64 MB</td>
+<td>Stable regardless of endpoint count</td>
+</tr>
+<tr>
+<td>accel-ppp</td>
+<td style="text-align: center;">~6 MB + ~2 KB/session</td>
+<td>Scales linearly with session count</td>
+</tr>
+<tr>
+<td>Swap safety buffer</td>
+<td style="text-align: center;">—</td>
+<td>Covered by swap file (see below)</td>
+</tr>
+<tr>
+<td><strong>Available for caching/burst</strong></td>
+<td style="text-align: center;"><strong>~1.5 GB</strong></td>
+<td>OS page cache, subprocess overhead</td>
+</tr>
+</tbody>
+</table>
+<p>Even at 500 concurrent sessions, accel-ppp adds only ~1 MB of memory. The 2 GB configuration provides over 1 GB of headroom.</p>
+<hr />
+<h2 id="log-rotation">Log Rotation<a class="headerlink" href="#log-rotation" title="Permanent link">&para;</a></h2>
+<h3 id="why-this-matters">Why This Matters<a class="headerlink" href="#why-this-matters" title="Permanent link">&para;</a></h3>
+<p>On a 10 GB disk, unmanaged logs can fill the partition within weeks. A full disk causes service failures, prevents config checkpoint creation, and can make the system unresponsive.</p>
+<h3 id="configure-journald-limits">Configure journald Limits<a class="headerlink" href="#configure-journald-limits" title="Permanent link">&para;</a></h3>
+<p>Edit <code>/etc/systemd/journald.conf</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">[Journal]</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="na">SystemMaxUse</span><span class="o">=</span><span class="s">500M</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="na">SystemMaxFileSize</span><span class="o">=</span><span class="s">50M</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="na">MaxRetentionSec</span><span class="o">=</span><span class="s">30day</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="na">Compress</span><span class="o">=</span><span class="s">yes</span>
+</code></pre></div>
+<p>Apply the changes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>systemd-journald
+</code></pre></div>
+<p>Verify the current journal disk usage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>--disk-usage
+</code></pre></div>
+<p>If the journal is already oversized, vacuum it immediately:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Reduce to 500 MB now</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>--vacuum-size<span class="o">=</span>500M
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Or remove entries older than 30 days</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>sudo<span class="w"> </span>journalctl<span class="w"> </span>--vacuum-time<span class="o">=</span>30d
+</code></pre></div>
+<h3 id="application-log-volume-estimation">Application Log Volume Estimation<a class="headerlink" href="#application-log-volume-estimation" title="Permanent link">&para;</a></h3>
+<p>DawOS Agent log volume depends on the <code>DAWOS_LOG_FORMAT</code> and traffic patterns:</p>
+<table>
+<thead>
+<tr>
+<th>Log Format</th>
+<th style="text-align: center;">Approx. Size per Request</th>
+<th style="text-align: center;">1,000 req/day</th>
+<th style="text-align: center;">10,000 req/day</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td style="text-align: center;">~200 bytes</td>
+<td style="text-align: center;">~6 MB/month</td>
+<td style="text-align: center;">~60 MB/month</td>
+</tr>
+<tr>
+<td><code>json</code></td>
+<td style="text-align: center;">~400 bytes</td>
+<td style="text-align: center;">~12 MB/month</td>
+<td style="text-align: center;">~120 MB/month</td>
+</tr>
+</tbody>
+</table>
+<p>Audit log entries (write operations only) add roughly 300 bytes each in JSON format.</p>
+<p>With <code>SystemMaxUse=500M</code>, journald automatically manages rotation. No additional logrotate configuration is needed for the agent's stdout/stderr logs.</p>
+<h3 id="monitoring-disk-space">Monitoring Disk Space<a class="headerlink" href="#monitoring-disk-space" title="Permanent link">&para;</a></h3>
+<p>Add a cron job to alert when disk usage exceeds 80%:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># /etc/cron.d/disk-alert</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>*/15<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>root<span class="w"> </span>df<span class="w"> </span>/<span class="w"> </span>--output<span class="o">=</span>pcent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39; %&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>awk<span class="w"> </span><span class="s1">&#39;$1 &gt; 80 {print &quot;DISK WARNING: &quot; $1 &quot;% used&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span>logger<span class="w"> </span>-t<span class="w"> </span>disk-check<span class="w"> </span>-p<span class="w"> </span>local0.warning
+</code></pre></div>
+<p>Or use the Prometheus node exporter metric:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Alert when root partition is above 85%</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">node_filesystem_avail_bytes</span><span class="p">{</span><span class="nl">mountpoint</span><span class="o">=</span><span class="p">&quot;</span><span class="s">/</span><span class="p">&quot;}</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nv">node_filesystem_size_bytes</span><span class="p">{</span><span class="nl">mountpoint</span><span class="o">=</span><span class="p">&quot;</span><span class="s">/</span><span class="p">&quot;}</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.15</span>
+</code></pre></div>
+<hr />
+<h2 id="swap-configuration">Swap Configuration<a class="headerlink" href="#swap-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="why-this-matters_1">Why This Matters<a class="headerlink" href="#why-this-matters_1" title="Permanent link">&para;</a></h3>
+<p>The dev server currently runs with <strong>zero swap</strong>. While 2 GB RAM is sufficient for normal operations, a swap file provides a safety net against unexpected memory spikes (large accel-cmd output, many concurrent API requests, or OS memory pressure from updates).</p>
+<p>Without swap, the Linux OOM killer may terminate accel-ppp or DawOS Agent if memory is exhausted. Losing accel-ppp disconnects all active PPPoE sessions.</p>
+<h3 id="create-a-swap-file">Create a Swap File<a class="headerlink" href="#create-a-swap-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Create a 1 GB swap file</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>sudo<span class="w"> </span>fallocate<span class="w"> </span>-l<span class="w"> </span>1G<span class="w"> </span>/swapfile
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/swapfile
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>sudo<span class="w"> </span>mkswap<span class="w"> </span>/swapfile
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>sudo<span class="w"> </span>swapon<span class="w"> </span>/swapfile
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Verify</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>free<span class="w"> </span>-h
+</code></pre></div>
+<p>Make it persistent across reboots:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;/swapfile none swap sw 0 0&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/fstab
+</code></pre></div>
+<h3 id="recommended-swap-size">Recommended Swap Size<a class="headerlink" href="#recommended-swap-size" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">System RAM</th>
+<th style="text-align: center;">Swap Size</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2 GB</td>
+<td style="text-align: center;">1 GB</td>
+<td>Safety net for memory spikes</td>
+</tr>
+<tr>
+<td style="text-align: center;">4 GB</td>
+<td style="text-align: center;">2 GB</td>
+<td>Standard recommendation</td>
+</tr>
+<tr>
+<td style="text-align: center;">8 GB+</td>
+<td style="text-align: center;">2 GB</td>
+<td>Diminishing returns beyond 2 GB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tune-swappiness">Tune Swappiness<a class="headerlink" href="#tune-swappiness" title="Permanent link">&para;</a></h3>
+<p>For a BNG node, avoid aggressive swapping. Set <code>vm.swappiness</code> to a low value so the kernel only uses swap under real memory pressure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Set immediately</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>sysctl<span class="w"> </span>vm.swappiness<span class="o">=</span><span class="m">10</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Make persistent</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;vm.swappiness=10&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sysctl.d/99-swappiness.conf
+</code></pre></div>
+<p>The default value (60) is too aggressive for a network appliance where latency matters.</p>
+<hr />
+<h2 id="kernel-tuning">Kernel Tuning<a class="headerlink" href="#kernel-tuning" title="Permanent link">&para;</a></h2>
+<p>A BNG requires extensive kernel parameter tuning for IP forwarding, socket buffers, ARP table sizing, connection tracking, network security hardening, and anti-bufferbloat packet scheduling.</p>
+<p>This is a large topic with its own dedicated guide:</p>
+<p><strong>:material-arrow-right: <a href="../kernel-tuning/">Kernel Tuning for BNG</a></strong> — complete parameter-by-parameter reference with explanations, scaling tables, and production-ready config files.</p>
+<hr />
+<h2 id="process-supervision">Process Supervision<a class="headerlink" href="#process-supervision" title="Permanent link">&para;</a></h2>
+<h3 id="the-risk">The Risk<a class="headerlink" href="#the-risk" title="Permanent link">&para;</a></h3>
+<p>DawOS Agent is a single Python process. If it crashes or becomes unresponsive, remote API management is unavailable until the process restarts. However, <strong>PPPoE sessions are not affected</strong> — accel-ppp runs as a completely separate process and continues serving subscribers independently.</p>
+<h3 id="automatic-restart">Automatic Restart<a class="headerlink" href="#automatic-restart" title="Permanent link">&para;</a></h3>
+<p>The systemd unit file should include restart directives:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># /etc/systemd/system/dawos-agent.service</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">[Service]</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="na">Restart</span><span class="o">=</span><span class="s">always</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="na">RestartSec</span><span class="o">=</span><span class="s">3</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="na">WatchdogSec</span><span class="o">=</span><span class="s">30</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="na">StartLimitIntervalSec</span><span class="o">=</span><span class="s">300</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="na">StartLimitBurst</span><span class="o">=</span><span class="s">5</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Restart=always</code></td>
+<td>—</td>
+<td>Restart on any exit (crash, signal, clean exit)</td>
+</tr>
+<tr>
+<td><code>RestartSec=3</code></td>
+<td>3 seconds</td>
+<td>Wait before restarting to avoid tight crash loops</td>
+</tr>
+<tr>
+<td><code>WatchdogSec=30</code></td>
+<td>30 seconds</td>
+<td>systemd kills the process if it stops responding</td>
+</tr>
+<tr>
+<td><code>StartLimitIntervalSec=300</code></td>
+<td>5 minutes</td>
+<td>Window for counting restart attempts</td>
+</tr>
+<tr>
+<td><code>StartLimitBurst=5</code></td>
+<td>5 attempts</td>
+<td>Max restarts within the window before giving up</td>
+</tr>
+</tbody>
+</table>
+<p>Verify the current unit configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>cat<span class="w"> </span>dawos-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;Restart|Watchdog|StartLimit&#39;</span>
+</code></pre></div>
+<p>If any directive is missing, add it via an override:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>edit<span class="w"> </span>dawos-agent
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">[Service]</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="na">Restart</span><span class="o">=</span><span class="s">always</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="na">RestartSec</span><span class="o">=</span><span class="s">3</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="na">WatchdogSec</span><span class="o">=</span><span class="s">30</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="na">StartLimitIntervalSec</span><span class="o">=</span><span class="s">300</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="na">StartLimitBurst</span><span class="o">=</span><span class="s">5</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+</code></pre></div>
+<h3 id="monitoring-agent-uptime">Monitoring Agent Uptime<a class="headerlink" href="#monitoring-agent-uptime" title="Permanent link">&para;</a></h3>
+<p>Use the Prometheus scrape target health to detect agent downtime:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># /etc/prometheus/rules/dawos.yml</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">groups</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dawos-agent</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DawosAgentDown</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">        </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">up{job=&quot;dawos-agent&quot;} == 0</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">        </span><span class="nt">for</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2m</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">        </span><span class="nt">annotations</span><span class="p">:</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dawos-agent</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">unreachable</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.instance</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">            </span><span class="no">The agent has not responded to Prometheus scrapes for over</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">            </span><span class="no">2 minutes. Remote management is unavailable. PPPoE sessions</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">            </span><span class="no">are unaffected. Check: sudo systemctl status dawos-agent</span>
+</code></pre></div>
+<h3 id="health-check-script">Health Check Script<a class="headerlink" href="#health-check-script" title="Permanent link">&para;</a></h3>
+<p>For environments without Prometheus, use a simple health check script:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="ch">#!/usr/bin/env bash</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="c1"># /usr/local/bin/dawos-health-check.sh</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="nv">ENDPOINT</span><span class="o">=</span><span class="s2">&quot;http://localhost:8470/health&quot;</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="nv">TIMEOUT</span><span class="o">=</span><span class="m">5</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>curl<span class="w"> </span>-sf<span class="w"> </span>--max-time<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$TIMEOUT</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ENDPOINT</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-Iseconds<span class="k">)</span><span class="s2"> dawos-agent health check failed&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">        </span>logger<span class="w"> </span>-t<span class="w"> </span>dawos-health<span class="w"> </span>-p<span class="w"> </span>local0.crit
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">    </span><span class="c1"># Attempt restart</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">    </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-Iseconds<span class="k">)</span><span class="s2"> dawos-agent restarted&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">        </span>logger<span class="w"> </span>-t<span class="w"> </span>dawos-health<span class="w"> </span>-p<span class="w"> </span>local0.warning
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="k">fi</span>
+</code></pre></div>
+<p>Schedule it via cron:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># /etc/cron.d/dawos-health</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>*/2<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>root<span class="w"> </span>/usr/local/bin/dawos-health-check.sh
+</code></pre></div>
+<hr />
+<h2 id="scaling-beyond-a-single-node">Scaling Beyond a Single Node<a class="headerlink" href="#scaling-beyond-a-single-node" title="Permanent link">&para;</a></h2>
+<h3 id="current-architecture-single-node">Current Architecture (Single Node)<a class="headerlink" href="#current-architecture-single-node" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>                    BNG Node
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>              +------------------+
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  Operator ---| dawos-agent:8470 |
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  Billing  ---|   accel-ppp      |
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>              +------------------+
+</code></pre></div>
+<p>This architecture is appropriate for:</p>
+<ul>
+<li>Single-site ISPs with one BNG node.</li>
+<li>Small to medium ISPs (up to ~5,000 subscribers on one node).</li>
+<li>Lab and development environments.</li>
+</ul>
+<h3 id="multi-node-architecture">Multi-Node Architecture<a class="headerlink" href="#multi-node-architecture" title="Permanent link">&para;</a></h3>
+<p>For ISPs operating multiple BNG nodes, dawos-cli provides built-in multi-node management:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>              Operator Workstation
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>              +------------------+
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>              |   dawos-cli      |
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>              |   (multi-node)   |
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>              +--------+---------+
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>                       |
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>          +------------+------------+
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>          |            |            |
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>    +-----+----+ +----+-----+ +----+-----+
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    | BNG-01   | | BNG-02   | | BNG-03   |
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    | agent    | | agent    | | agent    |
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    | :8470    | | :8470    | | :8470    |
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    +----------+ +----------+ +----------+
+</code></pre></div>
+<p>dawos-cli node groups allow running commands across multiple nodes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Define a node group</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>dawos<span class="w"> </span>node<span class="w"> </span>add<span class="w"> </span>bng-01<span class="w"> </span>--url<span class="w"> </span>http://10.0.1.1:8470<span class="w"> </span>--key<span class="w"> </span>KEY1
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>dawos<span class="w"> </span>node<span class="w"> </span>add<span class="w"> </span>bng-02<span class="w"> </span>--url<span class="w"> </span>http://10.0.1.2:8470<span class="w"> </span>--key<span class="w"> </span>KEY2
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>dawos<span class="w"> </span>node<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span>production<span class="w"> </span>--nodes<span class="w"> </span>bng-01,bng-02
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># Execute across all nodes</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>dawos<span class="w"> </span>node<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>production<span class="w"> </span>--<span class="w"> </span>session<span class="w"> </span>list
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>dawos<span class="w"> </span>node<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>production<span class="w"> </span>--<span class="w"> </span>system<span class="w"> </span>health
+</code></pre></div>
+<h3 id="centralized-orchestration">Centralized Orchestration<a class="headerlink" href="#centralized-orchestration" title="Permanent link">&para;</a></h3>
+<p>For larger deployments (10+ nodes, automated subscriber lifecycle), consider adding a central orchestrator between the billing system and the BNG agents:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>  Billing System
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>       |
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  +----+----+
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  | Central  |  (isp-agent, Temporal workflows)
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>  | Orches.  |
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>  +----+----+
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>       |
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>  +----+----+----+----+
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>  |    |    |    |    |
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a> BNG  BNG  BNG  BNG  BNG
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>  01   02   03   04   05
+</code></pre></div>
+<p>Benefits of central orchestration:</p>
+<ul>
+<li><strong>Workflow coordination</strong> — Multi-step operations (activate subscriber: provision RADIUS, configure OLT, assign IP pool) are managed as a single transaction.</li>
+<li><strong>Retry and rollback</strong> — Failed operations are automatically retried or rolled back.</li>
+<li><strong>Audit centralization</strong> — All operations are logged in one place.</li>
+<li><strong>Multi-vendor support</strong> — The orchestrator abstracts differences between BNG vendors.</li>
+</ul>
+<p>This is the role of <code>isp-agent</code> in the broader ecosystem.</p>
+<hr />
+<h2 id="security-hardening">Security Hardening<a class="headerlink" href="#security-hardening" title="Permanent link">&para;</a></h2>
+<h3 id="network-isolation">Network Isolation<a class="headerlink" href="#network-isolation" title="Permanent link">&para;</a></h3>
+<p>The agent API port (8470) should only be accessible from the management network:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># Allow management network only</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>ip<span class="w"> </span>saddr<span class="w"> </span><span class="m">192</span>.168.0.0/16<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>accept
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>drop
+</code></pre></div>
+<p>Or configure the agent to listen only on the management interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># /etc/dawos-agent/agent.env</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nv">DAWOS_HOST</span><span class="o">=</span><span class="m">10</span>.0.1.1
+</code></pre></div>
+<h3 id="api-key-strength">API Key Strength<a class="headerlink" href="#api-key-strength" title="Permanent link">&para;</a></h3>
+<p>Generate a strong random API key:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_urlsafe(32))&quot;</span>
+</code></pre></div>
+<p>Recommended minimum: 32 characters, URL-safe random string. Avoid short or predictable keys.</p>
+<h3 id="file-permissions">File Permissions<a class="headerlink" href="#file-permissions" title="Permanent link">&para;</a></h3>
+<p>Verify permissions after installation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># agent.env should be readable only by root and dawos</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>root:dawos<span class="w"> </span>/etc/dawos-agent/agent.env
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0640</span><span class="w"> </span>/etc/dawos-agent/agent.env
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="c1"># accel-ppp config should be writable by dawos (for config management)</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.conf
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.d/
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="c1"># venv should be owned by dawos</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/opt/dawos-agent/
+</code></pre></div>
+<h3 id="disable-unnecessary-services">Disable Unnecessary Services<a class="headerlink" href="#disable-unnecessary-services" title="Permanent link">&para;</a></h3>
+<p>On a BNG node, remove or disable services that are not needed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Remove snap (frees ~40 MB RAM)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>remove<span class="w"> </span>--purge<span class="w"> </span>snapd
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/snap<span class="w"> </span>/var/snap<span class="w"> </span>/var/lib/snapd
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="c1"># Disable unneeded services</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>packagekit
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>unattended-upgrades
+</code></pre></div>
+<h3 id="ssh-hardening">SSH Hardening<a class="headerlink" href="#ssh-hardening" title="Permanent link">&para;</a></h3>
+<p>Restrict SSH access to key-based authentication:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># /etc/ssh/sshd_config</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>PasswordAuthentication<span class="w"> </span>no
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>PermitRootLogin<span class="w"> </span>no
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>AllowUsers<span class="w"> </span>danu
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>MaxAuthTries<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+<hr />
+<h2 id="backup-strategy">Backup Strategy<a class="headerlink" href="#backup-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="what-to-back-up">What to Back Up<a class="headerlink" href="#what-to-back-up" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Path</th>
+<th>Frequency</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>accel-ppp config</td>
+<td><code>/etc/accel-ppp.conf</code></td>
+<td>Before every change</td>
+<td>Config checkpoint API</td>
+</tr>
+<tr>
+<td>Config checkpoints</td>
+<td><code>/etc/accel-ppp.d/</code></td>
+<td>Daily</td>
+<td>rsync to backup server</td>
+</tr>
+<tr>
+<td>Agent config</td>
+<td><code>/etc/dawos-agent/agent.env</code></td>
+<td>After changes</td>
+<td>Manual copy</td>
+</tr>
+<tr>
+<td>RADIUS database</td>
+<td>MySQL/MariaDB</td>
+<td>Hourly</td>
+<td>mysqldump</td>
+</tr>
+<tr>
+<td>Systemd units</td>
+<td><code>/etc/systemd/system/dawos-agent.service</code></td>
+<td>After changes</td>
+<td>Version control</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automated-config-backup-script">Automated Config Backup Script<a class="headerlink" href="#automated-config-backup-script" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="ch">#!/usr/bin/env bash</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="c1"># /usr/local/bin/dawos-backup.sh</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/var/backups/dawos&quot;</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="nv">KEEP_DAYS</span><span class="o">=</span><span class="m">30</span>
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BACKUP_DIR</span><span class="s2">&quot;</span>
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a><span class="c1"># Create a checkpoint via the API</span>
+<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>curl<span class="w"> </span>-sf<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-API-Key: </span><span class="nv">$DAWOS_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a><span class="w">  </span>http://localhost:8470/api/v1/config/checkpoint<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+<a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a>
+<a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a><span class="c1"># Archive config files</span>
+<a id="__codelineno-27-15" name="__codelineno-27-15" href="#__codelineno-27-15"></a>tar<span class="w"> </span>czf<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BACKUP_DIR</span><span class="s2">/dawos-config-</span><span class="nv">$DATE</span><span class="s2">.tar.gz&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-16" name="__codelineno-27-16" href="#__codelineno-27-16"></a><span class="w">  </span>/etc/accel-ppp.conf<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-17" name="__codelineno-27-17" href="#__codelineno-27-17"></a><span class="w">  </span>/etc/accel-ppp.d/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-18" name="__codelineno-27-18" href="#__codelineno-27-18"></a><span class="w">  </span>/etc/dawos-agent/agent.env<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-19" name="__codelineno-27-19" href="#__codelineno-27-19"></a><span class="w">  </span><span class="m">2</span>&gt;/dev/null
+<a id="__codelineno-27-20" name="__codelineno-27-20" href="#__codelineno-27-20"></a>
+<a id="__codelineno-27-21" name="__codelineno-27-21" href="#__codelineno-27-21"></a><span class="c1"># Remove old backups</span>
+<a id="__codelineno-27-22" name="__codelineno-27-22" href="#__codelineno-27-22"></a>find<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BACKUP_DIR</span><span class="s2">&quot;</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;dawos-config-*.tar.gz&quot;</span><span class="w"> </span>-mtime<span class="w"> </span>+<span class="nv">$KEEP_DAYS</span><span class="w"> </span>-delete
+<a id="__codelineno-27-23" name="__codelineno-27-23" href="#__codelineno-27-23"></a>
+<a id="__codelineno-27-24" name="__codelineno-27-24" href="#__codelineno-27-24"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>date<span class="w"> </span>-Iseconds<span class="k">)</span><span class="s2"> backup completed: dawos-config-</span><span class="nv">$DATE</span><span class="s2">.tar.gz&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-27-25" name="__codelineno-27-25" href="#__codelineno-27-25"></a><span class="w">  </span>logger<span class="w"> </span>-t<span class="w"> </span>dawos-backup
+</code></pre></div>
+<p>Schedule via cron:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># /etc/cron.d/dawos-backup</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="m">0</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>root<span class="w"> </span><span class="nv">DAWOS_API_KEY</span><span class="o">=</span>YOUR_KEY<span class="w"> </span>/usr/local/bin/dawos-backup.sh
+</code></pre></div>
+<hr />
+<h2 id="post-hardening-checklist">Post-Hardening Checklist<a class="headerlink" href="#post-hardening-checklist" title="Permanent link">&para;</a></h2>
+<p>After applying these recommendations, verify each item:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># 1. Journal rotation configured</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>grep<span class="w"> </span>SystemMaxUse<span class="w"> </span>/etc/systemd/journald.conf
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="c1"># 2. Swap is active</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>free<span class="w"> </span>-h<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Swap
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="c1"># 3. Swappiness is low</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>cat<span class="w"> </span>/proc/sys/vm/swappiness<span class="w">  </span><span class="c1"># expect: 10</span>
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="c1"># 4. Systemd restart policy in place</span>
+<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>show<span class="w"> </span>dawos-agent<span class="w"> </span>--property<span class="o">=</span>Restart<span class="w">  </span><span class="c1"># expect: always</span>
+<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>
+<a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a><span class="c1"># 5. File permissions correct</span>
+<a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a>ls<span class="w"> </span>-la<span class="w"> </span>/etc/dawos-agent/agent.env<span class="w">  </span><span class="c1"># expect: -rw-r----- root dawos</span>
+<a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a>ls<span class="w"> </span>-la<span class="w"> </span>/etc/accel-ppp.conf<span class="w">         </span><span class="c1"># expect: owned by dawos</span>
+<a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a>
+<a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a><span class="c1"># 6. Agent is running and healthy</span>
+<a id="__codelineno-29-18" name="__codelineno-29-18" href="#__codelineno-29-18"></a>curl<span class="w"> </span>-sf<span class="w"> </span>http://localhost:8470/health
+<a id="__codelineno-29-19" name="__codelineno-29-19" href="#__codelineno-29-19"></a>curl<span class="w"> </span>-sf<span class="w"> </span>http://localhost:8470/health/ready
+<a id="__codelineno-29-20" name="__codelineno-29-20" href="#__codelineno-29-20"></a>
+<a id="__codelineno-29-21" name="__codelineno-29-21" href="#__codelineno-29-21"></a><span class="c1"># 7. Metrics are being scraped</span>
+<a id="__codelineno-29-22" name="__codelineno-29-22" href="#__codelineno-29-22"></a>curl<span class="w"> </span>-sf<span class="w"> </span>http://localhost:8470/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>dawos_http_requests_total
+<a id="__codelineno-29-23" name="__codelineno-29-23" href="#__codelineno-29-23"></a>
+<a id="__codelineno-29-24" name="__codelineno-29-24" href="#__codelineno-29-24"></a><span class="c1"># 8. Disk space is healthy</span>
+<a id="__codelineno-29-25" name="__codelineno-29-25" href="#__codelineno-29-25"></a>df<span class="w"> </span>-h<span class="w"> </span>/<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;NR==2 {print &quot;Disk usage: &quot; $5}&#39;</span>
+<a id="__codelineno-29-26" name="__codelineno-29-26" href="#__codelineno-29-26"></a>
+<a id="__codelineno-29-27" name="__codelineno-29-27" href="#__codelineno-29-27"></a><span class="c1"># 9. Swap file persists across reboot</span>
+<a id="__codelineno-29-28" name="__codelineno-29-28" href="#__codelineno-29-28"></a>grep<span class="w"> </span>swapfile<span class="w"> </span>/etc/fstab
+<a id="__codelineno-29-29" name="__codelineno-29-29" href="#__codelineno-29-29"></a>
+<a id="__codelineno-29-30" name="__codelineno-29-30" href="#__codelineno-29-30"></a><span class="c1"># 10. API key is strong (at least 32 chars)</span>
+<a id="__codelineno-29-31" name="__codelineno-29-31" href="#__codelineno-29-31"></a>sudo<span class="w"> </span>grep<span class="w"> </span>DAWOS_API_KEY<span class="w"> </span>/etc/dawos-agent/agent.env<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-29-32" name="__codelineno-29-32" href="#__codelineno-29-32"></a><span class="w">  </span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;{print &quot;Key length: &quot; length($2) &quot; chars&quot;}&#39;</span>
+</code></pre></div>
+<p>All 10 checks should pass before considering the node production-ready.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

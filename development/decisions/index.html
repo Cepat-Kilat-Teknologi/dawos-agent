@@ -1,0 +1,3064 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/development/decisions/">
+      
+      
+        <link rel="prev" href="../changelog/">
+      
+      
+        <link rel="next" href="../security/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture Decisions - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture-decision-records" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Decisions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/production-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/kernel-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-001-fastapi-as-the-http-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-001: FastAPI as the HTTP Framework
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-001: FastAPI as the HTTP Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-002-router-service-shell-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-002: Router-Service-Shell Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-002: Router-Service-Shell Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-003-api-key-authentication-with-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-003: API Key Authentication with RBAC
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-003: API Key Authentication with RBAC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-004-prometheus-metrics-via-prometheus_client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-004: Prometheus Metrics via prometheus_client
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-004: Prometheus Metrics via prometheus_client">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-005-pure-asgi-middleware-for-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-005: Pure ASGI Middleware for Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-005: Pure ASGI Middleware for Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-006-in-memory-audit-buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-006: In-Memory Audit Buffer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-006: In-Memory Audit Buffer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-007-webhook-event-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-007: Webhook Event Delivery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-007: Webhook Event Delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-008-websocket-event-bus-for-real-time-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-008: WebSocket Event Bus for Real-time Streaming
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-008: WebSocket Event Bus for Real-time Streaming">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-009-rate-limiting-with-slowapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-009: Rate Limiting with SlowAPI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-009: Rate Limiting with SlowAPI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-010-retry-with-exponential-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-010: Retry with Exponential Backoff
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-010: Retry with Exponential Backoff">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-011-delete-returns-204-no-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-011: DELETE Returns 204 No Content
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-011: DELETE Returns 204 No Content">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-012-least-privilege-sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-012: Least-Privilege Sudoers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-012: Least-Privilege Sudoers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-013-structured-logging-with-textjson-toggle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-013: Structured Logging with Text/JSON Toggle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-013: Structured Logging with Text/JSON Toggle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-014-config-checkpoint-and-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-014: Config Checkpoint and Rollback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-014: Config Checkpoint and Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-015-security-hardening-error-responses-and-input-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-015: Security Hardening — Error Responses and Input Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-015: Security Hardening — Error Responses and Input Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-001-fastapi-as-the-http-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-001: FastAPI as the HTTP Framework
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-001: FastAPI as the HTTP Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-002-router-service-shell-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-002: Router-Service-Shell Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-002: Router-Service-Shell Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-003-api-key-authentication-with-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-003: API Key Authentication with RBAC
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-003: API Key Authentication with RBAC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-004-prometheus-metrics-via-prometheus_client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-004: Prometheus Metrics via prometheus_client
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-004: Prometheus Metrics via prometheus_client">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-005-pure-asgi-middleware-for-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-005: Pure ASGI Middleware for Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-005: Pure ASGI Middleware for Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-006-in-memory-audit-buffer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-006: In-Memory Audit Buffer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-006: In-Memory Audit Buffer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-007-webhook-event-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-007: Webhook Event Delivery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-007: Webhook Event Delivery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-008-websocket-event-bus-for-real-time-streaming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-008: WebSocket Event Bus for Real-time Streaming
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-008: WebSocket Event Bus for Real-time Streaming">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-009-rate-limiting-with-slowapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-009: Rate Limiting with SlowAPI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-009: Rate Limiting with SlowAPI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-010-retry-with-exponential-backoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-010: Retry with Exponential Backoff
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-010: Retry with Exponential Backoff">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-011-delete-returns-204-no-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-011: DELETE Returns 204 No Content
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-011: DELETE Returns 204 No Content">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-012-least-privilege-sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-012: Least-Privilege Sudoers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-012: Least-Privilege Sudoers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-013-structured-logging-with-textjson-toggle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-013: Structured Logging with Text/JSON Toggle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-013: Structured Logging with Text/JSON Toggle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-014-config-checkpoint-and-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-014: Config Checkpoint and Rollback
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-014: Config Checkpoint and Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-015-security-hardening-error-responses-and-input-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-015: Security Hardening — Error Responses and Input Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-015: Security Hardening — Error Responses and Input Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture-decision-records">Architecture Decision Records<a class="headerlink" href="#architecture-decision-records" title="Permanent link">&para;</a></h1>
+<p>This document captures the key architectural decisions made during DawOS Agent development, their context, and their consequences. Each record follows the format: context (why the decision was needed), decision (what was chosen), and consequences (trade-offs accepted).</p>
+<hr />
+<h2 id="adr-001-fastapi-as-the-http-framework">ADR-001: FastAPI as the HTTP Framework<a class="headerlink" href="#adr-001-fastapi-as-the-http-framework" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2025-12-01</p>
+<h3 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h3>
+<p>DawOS Agent needs to expose a REST API that wraps accel-ppp CLI commands and Linux system utilities. The framework must support async operations (subprocess calls), automatic OpenAPI documentation, request validation, and middleware composition.</p>
+<h3 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h3>
+<p>Use FastAPI with Uvicorn as the ASGI server, Pydantic v2 for request/response validation, and pydantic-settings for configuration management.</p>
+<h3 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Automatic OpenAPI/Swagger documentation for all 170 endpoints.</li>
+<li>Native async support for subprocess-based service calls without blocking the event loop.</li>
+<li>Pydantic v2 provides strict type validation and serialization with minimal boilerplate.</li>
+<li>Python 3.9+ requirement excludes older distributions (Ubuntu 18.04 and below).</li>
+<li>Single-process deployment is sufficient for the expected load profile (one BNG node, operational API traffic).</li>
+</ul>
+<hr />
+<h2 id="adr-002-router-service-shell-architecture">ADR-002: Router-Service-Shell Architecture<a class="headerlink" href="#adr-002-router-service-shell-architecture" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2025-12-01</p>
+<h3 id="context_1">Context<a class="headerlink" href="#context_1" title="Permanent link">&para;</a></h3>
+<p>The codebase needs a clear separation between HTTP handling, business logic, and system command execution. Without structure, endpoint handlers tend to accumulate shell commands, validation, and response formatting in a single function.</p>
+<h3 id="decision_1">Decision<a class="headerlink" href="#decision_1" title="Permanent link">&para;</a></h3>
+<p>Adopt a three-layer architecture:</p>
+<ol>
+<li><strong>Routers</strong> (<code>routers/</code>) handle HTTP concerns only — request parsing, response models, error codes.</li>
+<li><strong>Services</strong> (<code>services/</code>) contain business logic and orchestrate shell commands.</li>
+<li><strong>Shell execution</strong> uses a per-module <code>_run()</code> helper that wraps <code>asyncio.create_subprocess_exec</code>.</li>
+</ol>
+<p>Each service module defines its own <code>_run()</code> function rather than sharing a global one. This duplication is intentional (<code>duplicate-code</code> is disabled in pylint configuration).</p>
+<h3 id="consequences_1">Consequences<a class="headerlink" href="#consequences_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Clear responsibility boundaries make it easy to test each layer independently.</li>
+<li>Router tests mock at the service level; service tests mock at the subprocess level.</li>
+<li>The duplicated <code>_run()</code> pattern means each service is self-contained and can be modified without affecting others.</li>
+<li>Adding a new domain requires three files (router, service, test) following the established pattern.</li>
+</ul>
+<hr />
+<h2 id="adr-003-api-key-authentication-with-rbac">ADR-003: API Key Authentication with RBAC<a class="headerlink" href="#adr-003-api-key-authentication-with-rbac" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-01-15</p>
+<h3 id="context_2">Context<a class="headerlink" href="#context_2" title="Permanent link">&para;</a></h3>
+<p>The agent runs on BNG nodes that are not internet-facing but are accessible from the operator network. Authentication must be simple to configure (single environment variable) while supporting role-based access control for multi-user scenarios.</p>
+<h3 id="decision_2">Decision<a class="headerlink" href="#decision_2" title="Permanent link">&para;</a></h3>
+<p>Implement API key authentication via the <code>X-API-Key</code> HTTP header with three role tiers:</p>
+<ul>
+<li><strong>Viewer</strong> — read-only access (GET endpoints).</li>
+<li><strong>Operator</strong> — read + write access (POST, PUT, DELETE).</li>
+<li><strong>Admin</strong> — full access including audit logs and system configuration.</li>
+</ul>
+<p>Keys are configured in <code>agent.env</code> using the <code>DAWOS_API_KEY</code> (operator), <code>DAWOS_VIEWER_KEY</code>, and <code>DAWOS_ADMIN_KEY</code> variables. Invalid or missing keys return HTTP 401 (not 403).</p>
+<h3 id="consequences_2">Consequences<a class="headerlink" href="#consequences_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Simple single-header auth works with all HTTP clients, scripts, and automation tools.</li>
+<li>WebSocket connections cannot use header-based auth during the handshake, so the <code>/ws/events</code> endpoint accepts the key as a query parameter (<code>?key=...</code>).</li>
+<li>No session management, token refresh, or OAuth complexity.</li>
+<li>Key rotation requires a service restart (the agent reads configuration at startup only).</li>
+<li>Suitable for internal network deployments; not intended for public-facing use without a reverse proxy.</li>
+</ul>
+<hr />
+<h2 id="adr-004-prometheus-metrics-via-prometheus_client">ADR-004: Prometheus Metrics via prometheus_client<a class="headerlink" href="#adr-004-prometheus-metrics-via-prometheus_client" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-02-01</p>
+<h3 id="context_3">Context<a class="headerlink" href="#context_3" title="Permanent link">&para;</a></h3>
+<p>Operators need visibility into API request rates, error rates, response latency, and accel-ppp command health. The monitoring solution must integrate with existing ISP infrastructure (typically Prometheus + Grafana).</p>
+<h3 id="decision_3">Decision<a class="headerlink" href="#decision_3" title="Permanent link">&para;</a></h3>
+<p>Use the <code>prometheus_client</code> library to instrument the application. Expose metrics at <code>GET /metrics</code> in Prometheus text exposition format. The endpoint is public (no auth) and exempt from rate limiting.</p>
+<p>Metrics are collected by a pure ASGI middleware (<code>MetricsMiddleware</code>) rather than <code>BaseHTTPMiddleware</code> to avoid known stacking issues in Starlette.</p>
+<h3 id="consequences_3">Consequences<a class="headerlink" href="#consequences_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Standard Prometheus integration with no additional exporters required.</li>
+<li>The <code>endpoint</code> label uses route templates (e.g. <code>/api/v1/sessions/{username}</code>) to prevent cardinality explosion from dynamic path segments.</li>
+<li>Self-instrumentation paths (<code>/metrics</code>, <code>/health</code>, <code>/health/ready</code>) are excluded from recording.</li>
+<li>No authentication on <code>/metrics</code> means it should not be exposed to untrusted networks without a reverse proxy.</li>
+</ul>
+<hr />
+<h2 id="adr-005-pure-asgi-middleware-for-metrics">ADR-005: Pure ASGI Middleware for Metrics<a class="headerlink" href="#adr-005-pure-asgi-middleware-for-metrics" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-02-01</p>
+<h3 id="context_4">Context<a class="headerlink" href="#context_4" title="Permanent link">&para;</a></h3>
+<p>The application uses three middleware layers: <code>RequestIdMiddleware</code>, <code>AuditLogMiddleware</code>, and <code>MetricsMiddleware</code>. Stacking three or more <code>BaseHTTPMiddleware</code> instances in Starlette can cause issues with request body consumption and response streaming.</p>
+<h3 id="decision_4">Decision<a class="headerlink" href="#decision_4" title="Permanent link">&para;</a></h3>
+<p>Implement <code>MetricsMiddleware</code> as a pure ASGI middleware (raw <code>__call__</code> with <code>scope/receive/send</code>) instead of inheriting from <code>BaseHTTPMiddleware</code>. The other two middlewares remain as <code>BaseHTTPMiddleware</code> since they execute before the metrics layer.</p>
+<h3 id="consequences_4">Consequences<a class="headerlink" href="#consequences_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Avoids the known Starlette issue with deeply stacked <code>BaseHTTPMiddleware</code>.</li>
+<li>The ASGI middleware captures the response status code via a <code>send_wrapper</code> without interfering with streaming responses (SSE, WebSocket upgrades).</li>
+<li>Slightly more verbose implementation compared to <code>BaseHTTPMiddleware</code>, but more reliable.</li>
+</ul>
+<hr />
+<h2 id="adr-006-in-memory-audit-buffer">ADR-006: In-Memory Audit Buffer<a class="headerlink" href="#adr-006-in-memory-audit-buffer" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-03-01</p>
+<h3 id="context_5">Context<a class="headerlink" href="#context_5" title="Permanent link">&para;</a></h3>
+<p>Operators need to review recent write operations without parsing log files. A persistent database would add deployment complexity (the agent runs on BNG nodes with minimal infrastructure).</p>
+<h3 id="decision_5">Decision<a class="headerlink" href="#decision_5" title="Permanent link">&para;</a></h3>
+<p>Maintain an in-memory ring buffer (<code>collections.deque</code> with <code>maxlen</code>) that stores the most recent audit entries. Expose the buffer via <code>GET /api/v1/audit</code> (admin-only). The buffer size is configurable via <code>DAWOS_AUDIT_BUFFER_SIZE</code> (default: 1000).</p>
+<p>Audit entries are also written to the application log and fired as webhook events for external persistence.</p>
+<h3 id="consequences_5">Consequences<a class="headerlink" href="#consequences_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>No database dependency — the agent remains a single-binary deployment.</li>
+<li>Audit data is lost on service restart (acceptable because the log and webhooks provide persistent alternatives).</li>
+<li>Fixed memory footprint regardless of request volume.</li>
+<li>The ring buffer naturally evicts the oldest entries, providing a rolling window of recent activity.</li>
+</ul>
+<hr />
+<h2 id="adr-007-webhook-event-delivery">ADR-007: Webhook Event Delivery<a class="headerlink" href="#adr-007-webhook-event-delivery" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-03-15</p>
+<h3 id="context_6">Context<a class="headerlink" href="#context_6" title="Permanent link">&para;</a></h3>
+<p>External systems (billing, monitoring, CMDB) need to react to events on the BNG node. Polling the API is inefficient and introduces latency.</p>
+<h3 id="decision_6">Decision<a class="headerlink" href="#decision_6" title="Permanent link">&para;</a></h3>
+<p>Implement a fire-and-forget webhook system that sends HTTP POST requests to configured URLs when specific events occur. Webhooks are non-blocking — delivery failures do not affect API response times or availability.</p>
+<h3 id="consequences_6">Consequences<a class="headerlink" href="#consequences_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>External systems receive near-real-time notifications without polling.</li>
+<li>Fire-and-forget means no delivery guarantees — if the receiver is down, events are lost.</li>
+<li>No retry mechanism for failed webhook deliveries (by design, to avoid blocking the event loop).</li>
+<li>Webhook URLs are configured in <code>agent.env</code> and require a restart to change.</li>
+</ul>
+<hr />
+<h2 id="adr-008-websocket-event-bus-for-real-time-streaming">ADR-008: WebSocket Event Bus for Real-time Streaming<a class="headerlink" href="#adr-008-websocket-event-bus-for-real-time-streaming" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-07-01</p>
+<h3 id="context_7">Context<a class="headerlink" href="#context_7" title="Permanent link">&para;</a></h3>
+<p>The webhook system provides push notifications to external services, but operators and dashboards need a persistent, low-latency connection for real-time monitoring of session events, configuration changes, and audit trail.</p>
+<h3 id="decision_7">Decision<a class="headerlink" href="#decision_7" title="Permanent link">&para;</a></h3>
+<p>Implement an in-memory event bus (<code>EventBus</code>) backed by per-subscriber <code>asyncio.Queue</code> objects. Expose it via a WebSocket endpoint at <code>/ws/events</code> with API key authentication via query parameter.</p>
+<p>The bus supports four channels (<code>session</code>, <code>config</code>, <code>audit</code>, <code>system</code>) with client-controlled subscriptions via JSON control messages.</p>
+<h3 id="consequences_7">Consequences<a class="headerlink" href="#consequences_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Sub-second event delivery to connected clients.</li>
+<li>Per-subscriber queues prevent slow consumers from blocking the publisher (full queues are skipped).</li>
+<li>Authentication via query parameter is necessary because WebSocket handshakes cannot use standard HTTP header dependencies.</li>
+<li>In-memory only — no event persistence or replay. Clients that disconnect miss events during the disconnection period.</li>
+<li>The <code>asyncio.Queue</code> maxsize (default 100) bounds memory usage per subscriber.</li>
+</ul>
+<hr />
+<h2 id="adr-009-rate-limiting-with-slowapi">ADR-009: Rate Limiting with SlowAPI<a class="headerlink" href="#adr-009-rate-limiting-with-slowapi" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-02-15</p>
+<h3 id="context_8">Context<a class="headerlink" href="#context_8" title="Permanent link">&para;</a></h3>
+<p>The API is exposed on the operator network where automated scripts or misconfigured clients could overwhelm the agent. A rate limiter protects the accel-ppp daemon from excessive subprocess spawning.</p>
+<h3 id="decision_8">Decision<a class="headerlink" href="#decision_8" title="Permanent link">&para;</a></h3>
+<p>Use SlowAPI (a Starlette-compatible rate limiter) with per-IP limiting. The default limit is <code>120/minute</code>, configurable via <code>DAWOS_RATE_LIMIT</code>. Health and metrics endpoints are exempt.</p>
+<h3 id="consequences_8">Consequences<a class="headerlink" href="#consequences_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Protects against accidental API abuse from scripts or monitoring tools with aggressive intervals.</li>
+<li>Per-IP limiting means a misbehaving client does not affect other clients.</li>
+<li>Rate-limited requests return HTTP 429 with a <code>Retry-After</code> header.</li>
+<li>The <code>dawos_rate_limit_hits_total</code> Prometheus metric tracks rejection volume.</li>
+<li>Setting <code>DAWOS_RATE_LIMIT=</code> (empty) disables limiting entirely.</li>
+</ul>
+<hr />
+<h2 id="adr-010-retry-with-exponential-backoff">ADR-010: Retry with Exponential Backoff<a class="headerlink" href="#adr-010-retry-with-exponential-backoff" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-02-15</p>
+<h3 id="context_9">Context<a class="headerlink" href="#context_9" title="Permanent link">&para;</a></h3>
+<p><code>accel-cmd</code> occasionally fails with transient errors (CLI port busy, momentary process contention). Without retry logic, these transient failures propagate as HTTP 500 errors to the caller.</p>
+<h3 id="decision_9">Decision<a class="headerlink" href="#decision_9" title="Permanent link">&para;</a></h3>
+<p>Wrap <code>accel-cmd</code> calls in an exponential backoff retry loop. The maximum number of attempts (<code>DAWOS_RETRY_MAX</code>, default 3) and base delay (<code>DAWOS_RETRY_DELAY</code>, default 1.0s) are configurable. Each retry is tracked by the <code>dawos_accel_cmd_retries_total</code> Prometheus counter.</p>
+<h3 id="consequences_9">Consequences<a class="headerlink" href="#consequences_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Transient <code>accel-cmd</code> failures are automatically recovered without caller intervention.</li>
+<li>The retry counter provides visibility into accel-ppp stability — a rising retry rate indicates an underlying issue.</li>
+<li>Maximum latency for a retried request is bounded: <code>sum(delay * 2^i for i in range(max_retries))</code>.</li>
+<li>Only <code>accel-cmd</code> calls are retried, not arbitrary shell commands — this prevents retrying destructive operations.</li>
+</ul>
+<hr />
+<h2 id="adr-011-delete-returns-204-no-content">ADR-011: DELETE Returns 204 No Content<a class="headerlink" href="#adr-011-delete-returns-204-no-content" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-01-15</p>
+<h3 id="context_10">Context<a class="headerlink" href="#context_10" title="Permanent link">&para;</a></h3>
+<p>REST API conventions vary on DELETE response bodies. Some APIs return the deleted resource, others return a confirmation message, and others return no body.</p>
+<h3 id="decision_10">Decision<a class="headerlink" href="#decision_10" title="Permanent link">&para;</a></h3>
+<p>All DELETE endpoints return HTTP 204 with no response body. No <code>response_model</code> is declared on DELETE route decorators. Error conditions still raise <code>HTTPException</code> with appropriate status codes and detail messages.</p>
+<h3 id="consequences_10">Consequences<a class="headerlink" href="#consequences_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Consistent behavior across all DELETE endpoints.</li>
+<li>Clients can check for <code>204</code> without parsing a response body.</li>
+<li>If a client needs to verify the deletion, it should follow up with a GET request.</li>
+</ul>
+<hr />
+<h2 id="adr-012-least-privilege-sudoers">ADR-012: Least-Privilege Sudoers<a class="headerlink" href="#adr-012-least-privilege-sudoers" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2025-12-15</p>
+<h3 id="context_11">Context<a class="headerlink" href="#context_11" title="Permanent link">&para;</a></h3>
+<p>DawOS Agent runs as an unprivileged <code>dawos</code> user but needs to execute certain system commands (<code>nft</code>, <code>ip</code>, <code>tc</code>, <code>vtysh</code>, <code>sysctl</code>, <code>tee</code>, <code>conntrack</code>) that require root privileges.</p>
+<h3 id="decision_11">Decision<a class="headerlink" href="#decision_11" title="Permanent link">&para;</a></h3>
+<p>Grant passwordless sudo access to exactly seven commands via <code>/etc/sudoers.d/dawos-agent</code>. The agent process runs as <code>dawos:dawos</code> with no other elevated privileges. The systemd unit uses <code>ReadWritePaths</code> to restrict filesystem access.</p>
+<h3 id="consequences_11">Consequences<a class="headerlink" href="#consequences_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The attack surface is limited to seven well-defined system commands.</li>
+<li>Compromising the agent process does not grant unrestricted root access.</li>
+<li>Adding new privileged operations requires updating the sudoers file, systemd unit, and documentation — a deliberate friction that forces security review.</li>
+</ul>
+<hr />
+<h2 id="adr-013-structured-logging-with-textjson-toggle">ADR-013: Structured Logging with Text/JSON Toggle<a class="headerlink" href="#adr-013-structured-logging-with-textjson-toggle" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-02-01</p>
+<h3 id="context_12">Context<a class="headerlink" href="#context_12" title="Permanent link">&para;</a></h3>
+<p>Development environments benefit from human-readable text logs, while production deployments need structured JSON for log aggregators (ELK, Loki, CloudWatch).</p>
+<h3 id="decision_12">Decision<a class="headerlink" href="#decision_12" title="Permanent link">&para;</a></h3>
+<p>Support two log formats controlled by <code>DAWOS_LOG_FORMAT</code>:</p>
+<ul>
+<li><code>text</code> (default) — human-readable, colored output suitable for <code>journalctl</code> and terminal viewing.</li>
+<li><code>json</code> — structured JSON with consistent fields (<code>timestamp</code>, <code>level</code>, <code>message</code>, <code>request_id</code>) for machine parsing.</li>
+</ul>
+<p>Both formats include the request ID from <code>X-Request-ID</code> for distributed tracing.</p>
+<h3 id="consequences_12">Consequences<a class="headerlink" href="#consequences_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Same codebase serves both development and production logging needs.</li>
+<li>JSON format integrates with Filebeat, Promtail, Fluentd, and other log shippers without custom parsing rules.</li>
+<li>The audit logger (<code>dawos_agent.audit</code>) uses the same format, allowing log aggregators to filter audit entries by logger name.</li>
+<li>No external logging dependencies — uses Python's built-in <code>logging</code> module with custom formatters.</li>
+</ul>
+<hr />
+<h2 id="adr-014-config-checkpoint-and-rollback">ADR-014: Config Checkpoint and Rollback<a class="headerlink" href="#adr-014-config-checkpoint-and-rollback" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-04-01</p>
+<h3 id="context_13">Context<a class="headerlink" href="#context_13" title="Permanent link">&para;</a></h3>
+<p>Applying configuration changes to a production BNG node carries risk. A misconfigured <code>accel-ppp.conf</code> can disconnect all active PPPoE sessions. Operators need a way to quickly revert to a known-good configuration.</p>
+<h3 id="decision_13">Decision<a class="headerlink" href="#decision_13" title="Permanent link">&para;</a></h3>
+<p>Implement a checkpoint system that:</p>
+<ol>
+<li>Creates a timestamped backup before applying changes (<code>POST /api/v1/config/checkpoint</code>).</li>
+<li>Stores checkpoints in <code>/etc/accel-ppp.d/checkpoints/</code> with ISO 8601 filenames.</li>
+<li>Supports rollback to any checkpoint (<code>POST /api/v1/config/checkpoint/rollback</code>).</li>
+<li>Lists available checkpoints (<code>GET /api/v1/config/checkpoints</code>).</li>
+</ol>
+<h3 id="consequences_13">Consequences<a class="headerlink" href="#consequences_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Operators can safely apply changes knowing they can roll back in seconds.</li>
+<li>Checkpoint storage is local to the BNG node — no external dependencies.</li>
+<li>The <code>dawos</code> user needs write access to <code>/etc/accel-ppp.d/</code> (documented in installation guide).</li>
+<li>No automatic rollback on failure — the operator must explicitly trigger rollback if the health check fails after applying changes. The deploy wizard in dawos-cli automates this workflow.</li>
+</ul>
+<hr />
+<h2 id="adr-015-security-hardening-error-responses-and-input-validation">ADR-015: Security Hardening — Error Responses and Input Validation<a class="headerlink" href="#adr-015-security-hardening-error-responses-and-input-validation" title="Permanent link">&para;</a></h2>
+<p><strong>Status:</strong> Accepted<br />
+<strong>Date:</strong> 2026-07-10</p>
+<h3 id="context_14">Context<a class="headerlink" href="#context_14" title="Permanent link">&para;</a></h3>
+<p>A comprehensive security review of the codebase identified several areas where the API exposed more information than necessary or handled edge cases incorrectly:</p>
+<ol>
+<li>HTTP 500 error handlers forwarded raw <code>str(exc)</code> to clients, potentially leaking internal paths, library names, and system details.</li>
+<li>Caller-supplied <code>X-Request-ID</code> headers were accepted verbatim without validation, allowing header injection and log pollution.</li>
+<li>The WebSocket endpoint only accepted API keys via query parameters, which appear in server access logs.</li>
+<li>The SNMP health check used an unreliable UDP socket probe that produced false positives.</li>
+<li>Event handler webhooks simulated success without making actual HTTP requests.</li>
+<li>The in-memory event log had no size bound, creating a potential memory leak.</li>
+</ol>
+<h3 id="decision_14">Decision<a class="headerlink" href="#decision_14" title="Permanent link">&para;</a></h3>
+<p>Apply targeted fixes across the codebase:</p>
+<ol>
+<li><strong>Generic error responses</strong>: All 27 router modules now log the full exception server-side at ERROR level and return <code>"Internal server error"</code> to clients. Client-facing 4xx errors retain descriptive messages.</li>
+<li><strong>Request ID validation</strong>: Validate against <code>[\x20-\x7E]{1,128}</code> (printable ASCII, max 128 chars). Invalid values are replaced with a generated UUID v4.</li>
+<li><strong>WebSocket header auth</strong>: Check <code>X-API-Key</code> header first, fall back to query parameter only when absent.</li>
+<li><strong>SNMP check</strong>: Replace <code>socket.sendto()</code> with <code>ss -lun sport = :161</code> for reliable port listening detection.</li>
+<li><strong>Webhook execution</strong>: Use <code>httpx.AsyncClient</code> with a 10-second timeout for actual HTTP POST delivery.</li>
+<li><strong>Event log bound</strong>: Wrap in <code>collections.deque(maxlen=1000)</code>.</li>
+</ol>
+<h3 id="consequences_14">Consequences<a class="headerlink" href="#consequences_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>API clients can no longer extract internal system information from error responses. Operators must check server logs for debugging.</li>
+<li>Distributed tracing still works — valid <code>X-Request-ID</code> values are preserved; only malformed values are rejected.</li>
+<li>WebSocket clients that can set headers should prefer <code>X-API-Key</code> header over query parameter. The query parameter remains for environments where headers are not available.</li>
+<li>The SNMP check now has an additional subprocess call (<code>ss</code>) per invocation, adding negligible latency.</li>
+<li>Webhook hooks now create real network connections, which means they can fail on unreachable URLs (failures are caught and logged).</li>
+<li>Event history is automatically bounded; operators monitoring high-frequency events see only the most recent 1000 entries.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

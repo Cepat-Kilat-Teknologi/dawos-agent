@@ -1,0 +1,2890 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/development/security/">
+      
+      
+        <link rel="prev" href="../decisions/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Security - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#security" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Security
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/production-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/kernel-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generating-a-strong-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating a Strong API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#role-based-access-control-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role-Based Access Control (RBAC)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Role-Based Access Control (RBAC)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-key-mode-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Key Mode (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-key-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Key Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-rbac-is-enforced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How RBAC Is Enforced
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#systemd-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Systemd Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#writable-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writable Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#least-privilege-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Least-Privilege Sudo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subprocess-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subprocess Safety
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subprocess Safety">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-form-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List-Form Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defense-in-depth-shlexquote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense-in-Depth: shlex.quote()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-dangerous-constructs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No Dangerous Constructs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#input-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-response-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Response Hardening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#webhook-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Webhook Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#payload-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payload Signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delivery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Log
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Tracing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Permissions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Isolation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listen-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listen Address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls-termination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TLS Termination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firewall-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firewall Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#csv-export-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CSV Export Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CSV Export Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formula-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formula Injection Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-size-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export Size Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#session-history-database-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session History Database Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Session History Database Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sql-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL Injection Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-validator-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Validator Safety
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radius-secret-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RADIUS Secret Protection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Security
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-checklist-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Checklist for Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generating-a-strong-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating a Strong API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#role-based-access-control-rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role-Based Access Control (RBAC)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Role-Based Access Control (RBAC)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-key-mode-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Key Mode (Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-key-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Key Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-rbac-is-enforced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How RBAC Is Enforced
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#systemd-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Systemd Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#writable-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writable Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#least-privilege-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Least-Privilege Sudo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subprocess-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subprocess Safety
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subprocess Safety">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-form-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List-Form Arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defense-in-depth-shlexquote" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense-in-Depth: shlex.quote()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-dangerous-constructs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No Dangerous Constructs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#input-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-response-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Response Hardening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#webhook-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webhook Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Webhook Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#payload-signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payload Signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delivery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#audit-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Log
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Tracing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Permissions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Isolation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listen-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listen Address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls-termination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TLS Termination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firewall-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firewall Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#csv-export-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CSV Export Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CSV Export Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formula-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formula Injection Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-size-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export Size Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#session-history-database-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Session History Database Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Session History Database Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sql-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL Injection Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-validator-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Validator Safety
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#radius-secret-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RADIUS Secret Protection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependency Security
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-checklist-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Checklist for Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h1>
+<p>This document describes the security architecture and practices used in DawOS Agent.</p>
+<p>For vulnerability reporting, see the <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/SECURITY.md">Security Policy</a>.</p>
+<hr />
+<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h2>
+<p>All API endpoints except <code>/health</code>, <code>/health/ready</code>, and <code>/metrics</code> require an <code>X-API-Key</code> header. Missing or invalid keys receive HTTP 401 Unauthorized.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Authenticated request</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-API-Key: your-key&quot;</span><span class="w"> </span>http://bng-node:8470/api/v1/system/info
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Without key -&gt; 401</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>curl<span class="w"> </span>http://bng-node:8470/api/v1/system/info
+</code></pre></div>
+<p>The WebSocket endpoint at <code>/ws/events</code> accepts the API key via the <code>X-API-Key</code> header (preferred) or as a <code>key</code> query parameter (fallback). Header-based authentication is preferred because query parameters may appear in server access logs and browser history.</p>
+<h3 id="generating-a-strong-api-key">Generating a Strong API Key<a class="headerlink" href="#generating-a-strong-api-key" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_urlsafe(32))&quot;</span>
+</code></pre></div>
+<p>This produces a 43-character URL-safe base64 string with 256 bits of entropy.</p>
+<hr />
+<h2 id="role-based-access-control-rbac">Role-Based Access Control (RBAC)<a class="headerlink" href="#role-based-access-control-rbac" title="Permanent link">&para;</a></h2>
+<p>DawOS Agent supports three access tiers that restrict which endpoints a given API key can reach.</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Allowed Methods</th>
+<th>Restricted Endpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>viewer</td>
+<td>GET only</td>
+<td>Cannot access any write operations</td>
+</tr>
+<tr>
+<td>operator</td>
+<td>GET, POST, PUT, DELETE</td>
+<td>Cannot access audit log, playbooks, service restart</td>
+</tr>
+<tr>
+<td>admin</td>
+<td>All methods, all endpoints</td>
+<td>Full access</td>
+</tr>
+</tbody>
+</table>
+<h3 id="single-key-mode-default">Single-Key Mode (Default)<a class="headerlink" href="#single-key-mode-default" title="Permanent link">&para;</a></h3>
+<p>The <code>DAWOS_API_KEY</code> environment variable defines a single key with admin access. This is the simplest setup and is backward compatible with versions before RBAC was introduced.</p>
+<h3 id="multi-key-mode">Multi-Key Mode<a class="headerlink" href="#multi-key-mode" title="Permanent link">&para;</a></h3>
+<p>For teams that need different access levels, create a JSON file mapping keys to roles:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;readonly-dashboard-key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;viewer&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;noc-operator-key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;operator&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;infra-admin-key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>Point <code>DAWOS_API_KEYS_FILE</code> at this file. The primary <code>DAWOS_API_KEY</code> always remains an admin key regardless of what the file contains.</p>
+<h3 id="how-rbac-is-enforced">How RBAC Is Enforced<a class="headerlink" href="#how-rbac-is-enforced" title="Permanent link">&para;</a></h3>
+<p>Each router endpoint declares its minimum required role. The RBAC middleware checks the authenticated key's role against the endpoint requirement and returns HTTP 403 Forbidden if the role is insufficient.</p>
+<hr />
+<h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+<p>Per-IP rate limiting protects the agent from abuse and accidental request floods.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_RATE_LIMIT</code></td>
+<td><code>120/minute</code></td>
+<td>Requests per IP per window</td>
+</tr>
+</tbody>
+</table>
+<p>When a client exceeds the limit, the agent returns HTTP 429 Too Many Requests with a <code>Retry-After</code> header indicating when the client can retry.</p>
+<p>Exempt endpoints (not rate-limited):</p>
+<ul>
+<li><code>GET /health</code></li>
+<li><code>GET /health/ready</code></li>
+<li><code>GET /metrics</code></li>
+</ul>
+<p>Rate limit violations are tracked by the <code>dawos_rate_limit_hits_total</code> Prometheus counter, which can be used for alerting on suspicious traffic patterns.</p>
+<p>To disable rate limiting entirely, set <code>DAWOS_RATE_LIMIT</code> to an empty string.</p>
+<hr />
+<h2 id="systemd-sandboxing">Systemd Sandboxing<a class="headerlink" href="#systemd-sandboxing" title="Permanent link">&para;</a></h2>
+<p>The systemd service unit restricts the agent's access to the host system.</p>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ProtectSystem</code></td>
+<td><code>strict</code></td>
+<td>Makes the entire filesystem read-only except paths listed in <code>ReadWritePaths</code></td>
+</tr>
+<tr>
+<td><code>ProtectHome</code></td>
+<td><code>true</code></td>
+<td>Makes <code>/home</code>, <code>/root</code>, and <code>/run/user</code> inaccessible</td>
+</tr>
+<tr>
+<td><code>PrivateTmp</code></td>
+<td><code>true</code></td>
+<td>Gives the service its own isolated <code>/tmp</code> directory</td>
+</tr>
+<tr>
+<td><code>NoNewPrivileges</code></td>
+<td><code>false</code></td>
+<td>Set to false because the agent needs sudo for system commands</td>
+</tr>
+<tr>
+<td><code>Restart</code></td>
+<td><code>always</code></td>
+<td>Restarts on any exit -- crash, clean exit, or signal</td>
+</tr>
+<tr>
+<td><code>WatchdogSec</code></td>
+<td><code>30</code></td>
+<td>Kills the process if it becomes unresponsive for 30 seconds</td>
+</tr>
+<tr>
+<td><code>StartLimitBurst</code></td>
+<td><code>5</code></td>
+<td>Maximum 5 restarts within the interval before systemd stops retrying</td>
+</tr>
+<tr>
+<td><code>StartLimitIntervalSec</code></td>
+<td><code>300</code></td>
+<td>The 5-minute window for the restart burst limit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="writable-paths">Writable Paths<a class="headerlink" href="#writable-paths" title="Permanent link">&para;</a></h3>
+<p>Only the following paths are explicitly allowed for writes via <code>ReadWritePaths</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc/accel-ppp.conf</code></td>
+<td>accel-ppp main configuration</td>
+</tr>
+<tr>
+<td><code>/etc/accel-ppp.d</code></td>
+<td>accel-ppp configuration fragments</td>
+</tr>
+<tr>
+<td><code>/etc/accel-nat-egress.nft</code></td>
+<td>NAT egress nftables rules</td>
+</tr>
+<tr>
+<td><code>/etc/sysctl.d</code></td>
+<td>Kernel parameter overrides</td>
+</tr>
+<tr>
+<td><code>/etc/nftables.conf</code></td>
+<td>Main nftables configuration</td>
+</tr>
+<tr>
+<td><code>/etc/resolv.conf</code></td>
+<td>DNS resolver configuration</td>
+</tr>
+<tr>
+<td><code>/etc/systemd/resolved.conf.d</code></td>
+<td>systemd-resolved drop-in configs</td>
+</tr>
+<tr>
+<td><code>/etc/dnsmasq.d</code></td>
+<td>dnsmasq configuration fragments</td>
+</tr>
+<tr>
+<td><code>/etc/dnsmasq.conf</code></td>
+<td>dnsmasq main configuration</td>
+</tr>
+</tbody>
+</table>
+<p>All other filesystem locations are read-only to the service process.</p>
+<hr />
+<h2 id="least-privilege-sudo">Least-Privilege Sudo<a class="headerlink" href="#least-privilege-sudo" title="Permanent link">&para;</a></h2>
+<p>The <code>dawos</code> service user has passwordless sudo access for exactly 7 commands. No shell access, no wildcards, no unrestricted commands.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Full Path</th>
+<th>Used By</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nft</code></td>
+<td><code>/usr/sbin/nft</code></td>
+<td>Firewall rules, NAT, zone firewall</td>
+</tr>
+<tr>
+<td><code>ip</code></td>
+<td><code>/usr/sbin/ip</code></td>
+<td>Network interfaces, VLANs, routes</td>
+</tr>
+<tr>
+<td><code>tc</code></td>
+<td><code>/usr/sbin/tc</code></td>
+<td>Traffic shaping and QoS</td>
+</tr>
+<tr>
+<td><code>vtysh</code></td>
+<td><code>/usr/bin/vtysh</code></td>
+<td>FRR routing daemon (BGP, OSPF, RIP, BFD)</td>
+</tr>
+<tr>
+<td><code>sysctl</code></td>
+<td><code>/usr/sbin/sysctl</code></td>
+<td>Kernel parameter tuning</td>
+</tr>
+<tr>
+<td><code>tee</code></td>
+<td><code>/usr/bin/tee</code></td>
+<td>Writing to system configuration files</td>
+</tr>
+<tr>
+<td><code>conntrack</code></td>
+<td><code>/usr/sbin/conntrack</code></td>
+<td>Conntrack table flush</td>
+</tr>
+</tbody>
+</table>
+<p>The sudoers file is installed at <code>/etc/sudoers.d/dawos-agent</code> with mode <code>0440</code> owned by <code>root:root</code>.</p>
+<hr />
+<h2 id="subprocess-safety">Subprocess Safety<a class="headerlink" href="#subprocess-safety" title="Permanent link">&para;</a></h2>
+<p>DawOS Agent executes system commands to manage the BNG node. Several layers prevent command injection:</p>
+<h3 id="list-form-arguments">List-Form Arguments<a class="headerlink" href="#list-form-arguments" title="Permanent link">&para;</a></h3>
+<p>All subprocess calls use Python's <code>asyncio.create_subprocess_exec</code> with list-form arguments. The command and each argument are separate list elements, which prevents shell metacharacter interpretation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># How commands are executed (safe)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span><span class="s2">&quot;ip&quot;</span><span class="p">,</span> <span class="s2">&quot;addr&quot;</span><span class="p">,</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span> <span class="s2">&quot;ens18&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># What is NOT done (unsafe)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_shell</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ip addr show </span><span class="si">{</span><span class="n">interface</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="defense-in-depth-shlexquote">Defense-in-Depth: shlex.quote()<a class="headerlink" href="#defense-in-depth-shlexquote" title="Permanent link">&para;</a></h3>
+<p>User-supplied values are passed through <code>shlex.quote()</code> before being used in subprocess arguments. This is a secondary defense layer -- even if a future code change accidentally introduced string interpolation, the quoting would prevent injection.</p>
+<p>This defense is applied in the following service modules:</p>
+<ul>
+<li><code>firewall_service.py</code></li>
+<li><code>nat_service.py</code></li>
+<li><code>network_service.py</code></li>
+<li><code>traffic_service.py</code></li>
+<li><code>config_service.py</code></li>
+</ul>
+<h3 id="no-dangerous-constructs">No Dangerous Constructs<a class="headerlink" href="#no-dangerous-constructs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>No <code>eval()</code> or <code>exec()</code></strong> anywhere in the codebase</li>
+<li><strong>No <code>shell=True</code></strong> in any subprocess call</li>
+<li><strong>No string interpolation</strong> into shell commands</li>
+<li><strong>No <code>os.system()</code></strong> calls</li>
+</ul>
+<hr />
+<h2 id="input-validation">Input Validation<a class="headerlink" href="#input-validation" title="Permanent link">&para;</a></h2>
+<p>All API request bodies are validated by Pydantic v2 models before reaching any business logic. Invalid requests receive HTTP 422 with structured error details.</p>
+<hr />
+<h2 id="error-response-hardening">Error Response Hardening<a class="headerlink" href="#error-response-hardening" title="Permanent link">&para;</a></h2>
+<p>All HTTP 500 error responses return a generic <code>"Internal server error"</code> message
+instead of exposing raw exception text. This prevents information disclosure of
+internal paths, stack traces, and system details to API clients.</p>
+<p>Client-facing 4xx errors (400, 404, 409, 422) retain descriptive messages since
+those contain controlled, non-sensitive text that helps callers diagnose request
+issues.</p>
+<p>Internal error details are logged server-side at ERROR level with the full
+exception message for debugging purposes.</p>
+<p>Validation includes:</p>
+<ul>
+<li><strong>Type constraints</strong> -- integers, strings, booleans, enums</li>
+<li><strong>Regex patterns</strong> -- interface names, IP addresses, CIDR notation</li>
+<li><strong>Length limits</strong> -- minimum and maximum string lengths</li>
+<li><strong>Enum values</strong> -- restricted to known-good values for protocol types, actions, etc.</li>
+</ul>
+<p>The config apply endpoint (<code>PUT /api/v1/config</code> and <code>POST /api/v1/checkpoint/apply</code>) has additional validation: content must be at least 10 characters to prevent accidental writes of empty or near-empty configurations.</p>
+<hr />
+<h2 id="webhook-security">Webhook Security<a class="headerlink" href="#webhook-security" title="Permanent link">&para;</a></h2>
+<p>When <code>DAWOS_WEBHOOK_URL</code> is configured, the agent sends HTTP POST notifications on every mutating (write) request.</p>
+<h3 id="payload-signing">Payload Signing<a class="headerlink" href="#payload-signing" title="Permanent link">&para;</a></h3>
+<p>Set <code>DAWOS_WEBHOOK_SECRET</code> to enable HMAC-SHA256 signing. The signature is sent in the <code>X-Dawos-Signature</code> header.</p>
+<p>Consumers should verify the signature before processing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hmac</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">verify_webhook</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">expected</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">secret</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">payload</span><span class="p">,</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="k">return</span> <span class="n">hmac</span><span class="o">.</span><span class="n">compare_digest</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span> <span class="n">signature</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="delivery">Delivery<a class="headerlink" href="#delivery" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Webhook delivery sends an actual HTTP POST to the configured URL via <code>httpx.AsyncClient</code> with a 10-second timeout.</li>
+<li>Failures do not affect the API response.</li>
+<li>The webhook payload includes: event type, hook name, and optional context payload as JSON.</li>
+<li>The response status code is captured and <code>success</code> is set based on whether the status is below 400.</li>
+</ul>
+<hr />
+<h2 id="audit-log">Audit Log<a class="headerlink" href="#audit-log" title="Permanent link">&para;</a></h2>
+<p>All mutating requests (POST, PUT, DELETE) are recorded in an in-memory ring buffer with the following fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>timestamp</code></td>
+<td>ISO 8601 UTC timestamp</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td>HTTP method</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>Request path</td>
+</tr>
+<tr>
+<td><code>client_ip</code></td>
+<td>Client IP address</td>
+</tr>
+<tr>
+<td><code>request_id</code></td>
+<td>UUID v4 trace ID</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>RBAC role of the authenticated key</td>
+</tr>
+<tr>
+<td><code>status_code</code></td>
+<td>HTTP response status code</td>
+</tr>
+<tr>
+<td><code>duration_ms</code></td>
+<td>Request processing time</td>
+</tr>
+</tbody>
+</table>
+<p>The buffer size is configurable via <code>DAWOS_AUDIT_BUFFER_SIZE</code> (default: 1000 entries). When the buffer is full, the oldest entries are discarded.</p>
+<p>Access the audit log via <code>GET /api/v1/audit</code> (admin role required).</p>
+<hr />
+<h2 id="request-tracing">Request Tracing<a class="headerlink" href="#request-tracing" title="Permanent link">&para;</a></h2>
+<p>Every HTTP request receives a UUID v4 trace ID:</p>
+<ul>
+<li>Returned in the <code>X-Request-ID</code> response header</li>
+<li>Injected into all log records for that request</li>
+<li>Included in webhook payloads and audit log entries</li>
+</ul>
+<p>If the client sends an <code>X-Request-ID</code> header, the agent validates it against
+the pattern <code>[\x20-\x7E]{1,128}</code> (printable ASCII, max 128 characters). Valid
+values are preserved for distributed tracing; invalid or missing values are
+replaced with a generated UUID v4. This prevents header injection and log
+pollution from malformed trace IDs.</p>
+<hr />
+<h2 id="file-permissions">File Permissions<a class="headerlink" href="#file-permissions" title="Permanent link">&para;</a></h2>
+<h3 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Mode</th>
+<th>Owner</th>
+<th>Contains</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc/dawos-agent/agent.env</code></td>
+<td><code>0640</code></td>
+<td><code>root:dawos</code></td>
+<td>API key and all DAWOS_* settings</td>
+</tr>
+<tr>
+<td><code>/etc/sudoers.d/dawos-agent</code></td>
+<td><code>0440</code></td>
+<td><code>root:root</code></td>
+<td>Sudo rules (7 commands)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="accel-ppp-configuration">accel-ppp Configuration<a class="headerlink" href="#accel-ppp-configuration" title="Permanent link">&para;</a></h3>
+<p>The installer sets ownership of <code>/etc/accel-ppp.conf</code> and <code>/etc/accel-ppp.d/</code> to the <code>dawos</code> user. This is required for the config checkpoint and rollback system to function.</p>
+<p>If you install manually without the installer, set this ownership:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.conf
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.d/
+</code></pre></div>
+<p>Without correct ownership, config backup and rollback operations return HTTP 500.</p>
+<hr />
+<h2 id="network-isolation">Network Isolation<a class="headerlink" href="#network-isolation" title="Permanent link">&para;</a></h2>
+<h3 id="listen-address">Listen Address<a class="headerlink" href="#listen-address" title="Permanent link">&para;</a></h3>
+<p>By default, DawOS Agent listens on <code>0.0.0.0:8470</code> (all interfaces). In production, restrict this to the management network:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># In /etc/dawos-agent/agent.env</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">DAWOS_HOST</span><span class="o">=</span><span class="m">10</span>.0.0.1<span class="w">    </span><span class="c1"># management interface only</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># or</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nv">DAWOS_HOST</span><span class="o">=</span><span class="m">127</span>.0.0.1<span class="w">   </span><span class="c1"># localhost only (if using reverse proxy)</span>
+</code></pre></div>
+<h3 id="tls-termination">TLS Termination<a class="headerlink" href="#tls-termination" title="Permanent link">&para;</a></h3>
+<p>DawOS Agent does not handle TLS directly. Deploy it behind a reverse proxy for HTTPS:</p>
+<ul>
+<li><strong>nginx</strong> -- standard reverse proxy with <code>proxy_pass http://127.0.0.1:8470</code></li>
+<li><strong>Caddy</strong> -- automatic HTTPS with <code>reverse_proxy localhost:8470</code></li>
+</ul>
+<h3 id="firewall-rules">Firewall Rules<a class="headerlink" href="#firewall-rules" title="Permanent link">&para;</a></h3>
+<p>Restrict port 8470 to authorized management hosts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Allow only from management subnet</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>ip<span class="w"> </span>saddr<span class="w"> </span><span class="m">10</span>.0.0.0/24<span class="w"> </span>accept
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">8470</span><span class="w"> </span>drop
+</code></pre></div>
+<hr />
+<h2 id="csv-export-hardening">CSV Export Hardening<a class="headerlink" href="#csv-export-hardening" title="Permanent link">&para;</a></h2>
+<p>The CSV export endpoints (<code>GET /api/v1/export/sessions</code> and <code>GET /api/v1/export/history</code>) produce RFC 4180-compliant CSV files with additional security hardening against spreadsheet formula injection.</p>
+<h3 id="formula-injection-prevention">Formula Injection Prevention<a class="headerlink" href="#formula-injection-prevention" title="Permanent link">&para;</a></h3>
+<p>Spreadsheet applications (Microsoft Excel, LibreOffice Calc, Google Sheets) interpret cell values beginning with certain characters as formulas or commands. An attacker who can influence session usernames or other fields could inject payloads like <code>=HYPERLINK("http://evil.com")</code> or <code>=cmd|'/C calc'!A0</code>.</p>
+<p>DawOS Agent sanitises all CSV cell values before output:</p>
+<table>
+<thead>
+<tr>
+<th>Character</th>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>=</code></td>
+<td>Formula execution</td>
+<td>Prefixed with single-quote</td>
+</tr>
+<tr>
+<td><code>+</code></td>
+<td>Formula execution</td>
+<td>Prefixed with single-quote</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>Formula execution (negative number ambiguity)</td>
+<td>Prefixed with single-quote</td>
+</tr>
+<tr>
+<td><code>@</code></td>
+<td>External data reference</td>
+<td>Prefixed with single-quote</td>
+</tr>
+<tr>
+<td><code>\t</code> (tab)</td>
+<td>Field separator injection</td>
+<td>Prefixed with single-quote</td>
+</tr>
+<tr>
+<td><code>\r</code> (carriage return)</td>
+<td>Row injection</td>
+<td>Prefixed with single-quote</td>
+</tr>
+</tbody>
+</table>
+<p>The sanitisation function checks only the first character of each value. A leading single-quote (<code>'</code>) neutralises the formula trigger in all major spreadsheet applications without altering the data for non-spreadsheet consumers (databases, scripts, log aggregators).</p>
+<p>Additionally, all cell values are wrapped in double quotes via <code>csv.QUOTE_ALL</code>, which provides a secondary defense layer against delimiter injection.</p>
+<h3 id="export-size-limits">Export Size Limits<a class="headerlink" href="#export-size-limits" title="Permanent link">&para;</a></h3>
+<p>The history export endpoint clamps the <code>limit</code> parameter to the range <code>[1, 50000]</code> to prevent denial-of-service via excessively large database dumps. The default limit is 10,000 records.</p>
+<hr />
+<h2 id="session-history-database-security">Session History Database Security<a class="headerlink" href="#session-history-database-security" title="Permanent link">&para;</a></h2>
+<p>The session history feature stores snapshots of active PPPoE sessions in a local SQLite database. Several layers protect this data store.</p>
+<h3 id="sql-injection-prevention">SQL Injection Prevention<a class="headerlink" href="#sql-injection-prevention" title="Permanent link">&para;</a></h3>
+<p>All database queries use parameterised SQL with <code>?</code> placeholders. No user input is ever interpolated into SQL strings via f-strings, string concatenation, or <code>.format()</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># How queries are constructed (safe)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="s2">&quot;DELETE FROM session_history WHERE snapshot_at &lt; ?;&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="p">(</span><span class="n">before</span><span class="p">,),</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># What is NOT done (unsafe)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DELETE FROM session_history WHERE snapshot_at &lt; &#39;</span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">&#39;;&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>This pattern applies to all five SQL operations: insert (snapshot), select (query), count (pagination), delete (purge), and aggregate (stats).</p>
+<h3 id="database-configuration">Database Configuration<a class="headerlink" href="#database-configuration" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DAWOS_HISTORY_DB</code></td>
+<td><code>/var/lib/dawos-agent/history.db</code></td>
+<td>Filesystem path to the SQLite database file</td>
+</tr>
+</tbody>
+</table>
+<p>The database file is created automatically on first use. The parent directory is created if it does not exist. WAL (Write-Ahead Logging) mode is enabled for concurrent read performance.</p>
+<h3 id="access-control">Access Control<a class="headerlink" href="#access-control" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Auth Level</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/v1/sessions/history</code></td>
+<td>ViewerKey</td>
+<td>Read-only query</td>
+</tr>
+<tr>
+<td><code>POST /api/v1/sessions/history/snapshot</code></td>
+<td>ViewerKey</td>
+<td>Non-destructive capture</td>
+</tr>
+<tr>
+<td><code>DELETE /api/v1/sessions/history</code></td>
+<td>ApiKey</td>
+<td>Destructive bulk delete</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/sessions/history/stats</code></td>
+<td>ViewerKey</td>
+<td>Read-only aggregate</td>
+</tr>
+</tbody>
+</table>
+<p>The purge endpoint requires ApiKey (operator/admin) authentication because it permanently deletes data.</p>
+<hr />
+<h2 id="config-validator-safety">Config Validator Safety<a class="headerlink" href="#config-validator-safety" title="Permanent link">&para;</a></h2>
+<p>The config validation endpoint (<code>POST /api/v1/config/validate</code>) accepts raw accel-ppp configuration text and returns a list of structural issues.</p>
+<p>The validator is <strong>inherently safe by design</strong>:</p>
+<ul>
+<li>Pure Python implementation -- no shell commands, no subprocess calls</li>
+<li>No file system access -- does not read from or write to disk</li>
+<li>No network calls -- operates entirely in-memory</li>
+<li>No <code>eval()</code> or <code>exec()</code> -- uses only regex matching and string operations</li>
+<li>Input is treated as plain text data, never as executable code</li>
+</ul>
+<p>The validator checks:</p>
+<ul>
+<li>Section header syntax (<code>[section-name]</code>)</li>
+<li>Key-value pair format</li>
+<li>IP address and CIDR notation validity</li>
+<li>Port number ranges (1-65535)</li>
+<li>Bare-key sections (<code>[modules]</code> and <code>[ip-pool]</code>)</li>
+<li>Duplicate section detection</li>
+</ul>
+<p>Invalid input produces informational warnings rather than errors, making the endpoint safe for exploratory use.</p>
+<hr />
+<h2 id="radius-secret-protection">RADIUS Secret Protection<a class="headerlink" href="#radius-secret-protection" title="Permanent link">&para;</a></h2>
+<p>The RADIUS diagnostics endpoints (<code>GET /api/v1/radius/config</code>, <code>/status</code>, <code>/check</code>) provide visibility into RADIUS server configuration and connectivity without exposing sensitive credentials.</p>
+<p><strong>Shared secrets are never returned to API callers.</strong> The config parser regex intentionally captures only the server address and port fields from <code>server=</code>, <code>auth-server=</code>, and <code>acct-server=</code> directives. The shared secret (typically the second comma-separated field) is discarded during parsing.</p>
+<p>This is enforced at the service layer (<code>services/radius.py</code>), not at the router layer, so there is no code path that could accidentally leak a secret through response serialisation.</p>
+<hr />
+<h2 id="dependency-security">Dependency Security<a class="headerlink" href="#dependency-security" title="Permanent link">&para;</a></h2>
+<p>All Python dependencies are audited for known vulnerabilities:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>pip-audit
+</code></pre></div>
+<p>This check is part of the project's quality gates. New dependencies are only added after passing a <code>pip-audit</code> scan.</p>
+<p>Current dependencies with security relevance:</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+<th>Why It Is Needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fastapi</code></td>
+<td>Web framework</td>
+<td>HTTP request handling</td>
+</tr>
+<tr>
+<td><code>uvicorn</code></td>
+<td>ASGI server</td>
+<td>Production server</td>
+</tr>
+<tr>
+<td><code>pydantic</code></td>
+<td>Data validation</td>
+<td>Input sanitization</td>
+</tr>
+<tr>
+<td><code>slowapi</code></td>
+<td>Rate limiting</td>
+<td>Abuse prevention</td>
+</tr>
+<tr>
+<td><code>prometheus-client</code></td>
+<td>Metrics</td>
+<td>Observability</td>
+</tr>
+<tr>
+<td><code>python-json-logger</code></td>
+<td>Structured logging</td>
+<td>Audit trail</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="security-checklist-for-deployment">Security Checklist for Deployment<a class="headerlink" href="#security-checklist-for-deployment" title="Permanent link">&para;</a></h2>
+<p>Before putting DawOS Agent into production:</p>
+<ol>
+<li>Generate a strong API key (minimum 32 characters, <code>secrets.token_urlsafe</code>)</li>
+<li>Set file permissions: <code>agent.env</code> as <code>0640 root:dawos</code></li>
+<li>Bind to management interface only (not <code>0.0.0.0</code>)</li>
+<li>Deploy behind a TLS-terminating reverse proxy</li>
+<li>Firewall port 8470 to authorized hosts only</li>
+<li>Verify sudoers file is correct: <code>sudo visudo -cf /etc/sudoers.d/dawos-agent</code></li>
+<li>Enable rate limiting (default <code>120/minute</code> is a good starting point)</li>
+<li>Set up RBAC if multiple teams access the agent</li>
+<li>Enable webhook signing if using webhooks</li>
+<li>Set <code>DAWOS_LOG_FORMAT=json</code> for machine-parseable audit logs</li>
+<li>Run <code>pip-audit</code> to verify no known vulnerabilities</li>
+<li>Review <code>journalctl -u dawos-agent</code> for any startup warnings</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

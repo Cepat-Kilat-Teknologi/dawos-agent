@@ -1,0 +1,2891 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/getting-started/installation/">
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../configuration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Installation - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installation-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hardware-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hardware Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-for-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended for Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measured-resource-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measured Resource Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#software-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Software Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Software Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-line-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-Line Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from Source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-interactive-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Interactive Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-installer-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Installer Does
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the Installer Does">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Install
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Install">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-accel-ppp-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Install accel-ppp from source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-system-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create system user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-create-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-install-the-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Install the package
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generate-an-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generate an API key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-create-config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Create config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-install-sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Install sudoers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-install-conntrack-and-set-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Install conntrack and set permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-install-systemd-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Install systemd unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-installer-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With installer (recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstalling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Uninstalling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-installer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With installer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-cleanup-including-accel-ppp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full cleanup (including accel-ppp)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudoers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-config-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Config Ownership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemd-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/production-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/kernel-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hardware-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hardware Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-for-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended for Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measured-resource-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measured Resource Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#software-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Software Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Software Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-line-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-Line Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install from Source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-interactive-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Interactive Install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-installer-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the Installer Does
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the Installer Does">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Install
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Install">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-accel-ppp-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Install accel-ppp from source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-system-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create system user
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-create-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create directories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-install-the-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Install the package
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-generate-an-api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Generate an API key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-create-config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Create config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-install-sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Install sudoers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-install-conntrack-and-set-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Install conntrack and set permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-install-systemd-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Install systemd unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-installer-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With installer (recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uninstalling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Uninstalling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-installer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With installer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-cleanup-including-accel-ppp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full cleanup (including accel-ppp)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sudoers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sudoers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accel-ppp-config-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        accel-ppp Config Ownership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemd-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Systemd Hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h1>
+<p>Complete installation guide for <strong>DawOS Agent</strong> -- open-source broadband network gateway management daemon.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#hardware-requirements">Hardware Requirements</a></li>
+<li><a href="#software-prerequisites">Software Prerequisites</a></li>
+<li><a href="#one-line-install">One-Line Install</a></li>
+<li><a href="#install-from-source">Install from Source</a></li>
+<li><a href="#non-interactive-install">Non-Interactive Install</a></li>
+<li><a href="#what-the-installer-does">What the Installer Does</a></li>
+<li><a href="#manual-install">Manual Install</a></li>
+<li><a href="#verify-installation">Verify Installation</a></li>
+<li><a href="#upgrading">Upgrading</a></li>
+<li><a href="#uninstalling">Uninstalling</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#security-notes">Security Notes</a></li>
+</ul>
+<hr />
+<h2 id="hardware-requirements">Hardware Requirements<a class="headerlink" href="#hardware-requirements" title="Permanent link">&para;</a></h2>
+<h3 id="minimum">Minimum<a class="headerlink" href="#minimum" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Minimum</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU</strong></td>
+<td>1 vCPU (x86_64)</td>
+<td>ARM is not supported</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>512 MB</td>
+<td>Agent uses ~60 MB RSS, accel-ppp uses ~5 MB RSS at idle</td>
+</tr>
+<tr>
+<td><strong>Disk</strong></td>
+<td>2 GB free</td>
+<td>55 MB for agent venv, ~500 MB for build dependencies if compiling accel-ppp from source</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td>1 NIC</td>
+<td>Minimum for management access</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommended-for-production">Recommended for Production<a class="headerlink" href="#recommended-for-production" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Recommended</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU</strong></td>
+<td>2+ vCPU</td>
+<td>accel-ppp needs CPU headroom for PPP session handling</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>1 GB+</td>
+<td>Scale with number of concurrent PPPoE sessions</td>
+</tr>
+<tr>
+<td><strong>Disk</strong></td>
+<td>5 GB+</td>
+<td>Room for logs, config backups, and OS updates</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td>2+ NICs</td>
+<td>Separate management and subscriber-facing interfaces</td>
+</tr>
+</tbody>
+</table>
+<h3 id="measured-resource-usage">Measured Resource Usage<a class="headerlink" href="#measured-resource-usage" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th style="text-align: center;">Memory (RSS)</th>
+<th style="text-align: center;">Disk</th>
+<th style="text-align: center;">CPU at Idle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dawos-agent (Uvicorn + FastAPI)</td>
+<td style="text-align: center;">~60 MB</td>
+<td style="text-align: center;">55 MB</td>
+<td style="text-align: center;">&lt;1%</td>
+</tr>
+<tr>
+<td>accel-ppp daemon (0 sessions)</td>
+<td style="text-align: center;">~5 MB</td>
+<td style="text-align: center;">~2 MB</td>
+<td style="text-align: center;">&lt;1%</td>
+</tr>
+<tr>
+<td>Build dependencies (cmake, gcc, g++, libssl-dev)</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">~500 MB</td>
+<td style="text-align: center;">—</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Scaling note:</strong> These measurements are for the agent with zero PPPoE sessions. A production BNG serving thousands of subscribers needs significantly more RAM and CPU for accel-ppp. Consult the <a href="https://accel-ppp.readthedocs.io/">accel-ppp documentation</a> for BNG sizing.</p>
+</blockquote>
+<hr />
+<h2 id="software-prerequisites">Software Prerequisites<a class="headerlink" href="#software-prerequisites" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Minimum</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OS</strong></td>
+<td>Debian 11+ / Ubuntu 22.04+</td>
+<td>Other Linux distros may work but are untested</td>
+</tr>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.9+</td>
+<td><code>python3-venv</code> module required</td>
+</tr>
+<tr>
+<td><strong>Access</strong></td>
+<td>Root / sudo</td>
+<td>For system user, sudoers, systemd</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td>curl or git</td>
+<td>To download the source</td>
+</tr>
+</tbody>
+</table>
+<h3 id="accel-ppp">accel-ppp<a class="headerlink" href="#accel-ppp" title="Permanent link">&para;</a></h3>
+<p>The installer automatically detects whether accel-ppp is installed:</p>
+<ul>
+<li><strong>Found:</strong> Skips build, creates config and systemd unit if missing</li>
+<li><strong>Not found:</strong> Builds from source (~2–5 minutes on 2 vCPU)</li>
+</ul>
+<p>Build dependencies installed automatically:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>cmake gcc g++ make git libssl-dev libpcre3-dev liblua5.1-0-dev
+</code></pre></div>
+<h3 id="system-tools">System Tools<a class="headerlink" href="#system-tools" title="Permanent link">&para;</a></h3>
+<p>The agent uses <code>sudo</code> to call these tools for router management:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nft</code></td>
+<td>nftables</td>
+<td>Firewall and NAT rules</td>
+</tr>
+<tr>
+<td><code>ip</code></td>
+<td>iproute2</td>
+<td>Network interfaces and routes</td>
+</tr>
+<tr>
+<td><code>tc</code></td>
+<td>iproute2</td>
+<td>Traffic shaping / QoS</td>
+</tr>
+<tr>
+<td><code>vtysh</code></td>
+<td>frr</td>
+<td>FRR routing daemon (BGP, OSPF, RIP)</td>
+</tr>
+<tr>
+<td><code>sysctl</code></td>
+<td>procps</td>
+<td>Kernel parameter tuning</td>
+</tr>
+<tr>
+<td><code>tee</code></td>
+<td>coreutils</td>
+<td>Config file writes</td>
+</tr>
+<tr>
+<td><code>conntrack</code></td>
+<td>conntrack</td>
+<td>Conntrack table flush</td>
+</tr>
+</tbody>
+</table>
+<p>These are optional — the agent installs and runs without them, but related endpoints will return errors. The installer automatically installs <code>conntrack</code> if not present.</p>
+<hr />
+<h2 id="one-line-install">One-Line Install<a class="headerlink" href="#one-line-install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-sL<span class="w"> </span>https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash
+</code></pre></div>
+<p>The installer downloads the source from GitHub, builds accel-ppp if needed, creates a system user, installs the package in a virtualenv, sets up systemd and sudoers, then starts the service.</p>
+<p>For non-interactive (accepts all defaults):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-sL<span class="w"> </span>https://raw.githubusercontent.com/Cepat-Kilat-Teknologi/dawos-agent/main/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--yes
+</code></pre></div>
+<blockquote>
+<p>After install, get your API key:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>grep<span class="w"> </span>DAWOS_API_KEY<span class="w"> </span>/etc/dawos-agent/agent.env
+</code></pre></div></p>
+</blockquote>
+<hr />
+<h2 id="install-from-source">Install from Source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Cepat-Kilat-Teknologi/dawos-agent.git
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">cd</span><span class="w"> </span>dawos-agent
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>sudo<span class="w"> </span>bash<span class="w"> </span>install.sh
+</code></pre></div>
+<p>The installer detects local source and skips the download step.</p>
+<hr />
+<h2 id="non-interactive-install">Non-Interactive Install<a class="headerlink" href="#non-interactive-install" title="Permanent link">&para;</a></h2>
+<p>Use <code>--yes</code> to skip all prompts (good for automation/CI):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>bash<span class="w"> </span>install.sh<span class="w"> </span>--yes
+</code></pre></div>
+<p>Defaults:</p>
+<ul>
+<li>API key: randomly generated (43 characters, URL-safe base64)</li>
+<li>Listen: <code>0.0.0.0:8470</code></li>
+<li>Log level: <code>info</code></li>
+<li>Node name: system hostname</li>
+<li>accel-ppp paths: <code>/usr/bin/accel-cmd</code>, <code>/etc/accel-ppp.conf</code></li>
+</ul>
+<hr />
+<h2 id="what-the-installer-does">What the Installer Does<a class="headerlink" href="#what-the-installer-does" title="Permanent link">&para;</a></h2>
+<p>The installer (<code>install.sh</code> v2.0) performs these steps in order:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Preflight</strong></td>
+<td>Checks OS, Python, disk space, required tools</td>
+</tr>
+<tr>
+<td><strong>2. Configure</strong></td>
+<td>Prompts for API key, listen address, node name (or uses defaults with <code>--yes</code>)</td>
+</tr>
+<tr>
+<td><strong>3. System setup</strong></td>
+<td>Creates <code>dawos</code> system user, adds to <code>systemd-journal</code> group, creates directories (<code>/opt/dawos-agent</code>, <code>/etc/dawos-agent</code>, <code>/var/lib/dawos-agent</code>)</td>
+</tr>
+<tr>
+<td><strong>4. accel-ppp</strong></td>
+<td>Detects or builds accel-ppp from source, writes <code>/etc/accel-ppp.conf</code>, creates systemd unit</td>
+</tr>
+<tr>
+<td><strong>5. Download</strong></td>
+<td>Downloads dawos-agent source from GitHub (skipped if running from cloned repo)</td>
+</tr>
+<tr>
+<td><strong>6. Install</strong></td>
+<td>Creates Python venv, installs package with pip</td>
+</tr>
+<tr>
+<td><strong>7. Permissions</strong></td>
+<td>Sets ownership of <code>/etc/accel-ppp.conf</code> and <code>/etc/accel-ppp.d/</code> to the <code>dawos</code> user (required for config checkpoint/rollback)</td>
+</tr>
+<tr>
+<td><strong>8. Service</strong></td>
+<td>Installs sudoers rules, systemd unit with security hardening (<code>Restart=always</code>, <code>WatchdogSec=30</code>), enables and starts service</td>
+</tr>
+<tr>
+<td><strong>9. Verify</strong></td>
+<td>Runs health check to confirm the agent is responding</td>
+</tr>
+</tbody>
+</table>
+<h3 id="accel-ppp-configuration">accel-ppp Configuration<a class="headerlink" href="#accel-ppp-configuration" title="Permanent link">&para;</a></h3>
+<p>The installer creates a starter <code>/etc/accel-ppp.conf</code> with:</p>
+<ul>
+<li>PPPoE listener (disabled by default — edit interface name)</li>
+<li>Local IP pool (<code>10.0.0.1/24</code>)</li>
+<li>DNS servers (<code>8.8.8.8</code>, <code>8.8.4.4</code>)</li>
+<li>TCP CLI on port 2001 (required for <code>accel-cmd</code>)</li>
+<li>Log file at <code>/var/log/accel-ppp/accel-ppp.log</code></li>
+<li>pppd-compat hooks for event integration</li>
+</ul>
+<blockquote>
+<p><strong>Important:</strong> The config uses <code>tcp=</code> mode for the <code>[cli]</code> section, NOT <code>telnet=</code>. This is required for <code>accel-cmd</code> to connect.</p>
+</blockquote>
+<hr />
+<h2 id="manual-install">Manual Install<a class="headerlink" href="#manual-install" title="Permanent link">&para;</a></h2>
+<p>If you prefer <code>pip install</code> or want full control, follow these steps. The installer script above handles all of this automatically.</p>
+<h3 id="1-install-accel-ppp-from-source">1. Install accel-ppp from source<a class="headerlink" href="#1-install-accel-ppp-from-source" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>Skip this step if accel-ppp is already installed (<code>accel-pppd --version</code>).</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Install build dependencies</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>cmake<span class="w"> </span>gcc<span class="w"> </span>g++<span class="w"> </span>make<span class="w"> </span>git<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>libssl-dev<span class="w"> </span>libpcre3-dev<span class="w"> </span>liblua5.1-0-dev
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Clone and build</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="w"> </span><span class="m">1</span><span class="w"> </span>https://github.com/accel-ppp/accel-ppp.git<span class="w"> </span>/tmp/accel-ppp-build
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>mkdir<span class="w"> </span>/tmp/accel-ppp-build/build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/tmp/accel-ppp-build/build
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">      </span>-DKDIR<span class="o">=</span>/lib/modules/<span class="k">$(</span>uname<span class="w"> </span>-r<span class="k">)</span>/build<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">      </span>-DLUA<span class="o">=</span>TRUE<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">      </span>-DRADIUS<span class="o">=</span>TRUE<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">      </span>..
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>sudo<span class="w"> </span>make<span class="w"> </span>install
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="c1"># Verify</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>accel-pppd<span class="w"> </span>--version
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="c1"># Clean up build files</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>rm<span class="w"> </span>-rf<span class="w"> </span>/tmp/accel-ppp-build
+</code></pre></div>
+<h3 id="2-create-system-user">2. Create system user<a class="headerlink" href="#2-create-system-user" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>useradd<span class="w"> </span>--system<span class="w"> </span>--no-create-home<span class="w"> </span>--shell<span class="w"> </span>/usr/sbin/nologin<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span>--home-dir<span class="w"> </span>/opt/dawos-agent<span class="w"> </span>dawos
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>systemd-journal<span class="w"> </span>dawos
+</code></pre></div>
+<h3 id="3-create-directories">3. Create directories<a class="headerlink" href="#3-create-directories" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/dawos-agent<span class="w"> </span>/etc/dawos-agent<span class="w"> </span>/var/lib/dawos-agent
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/opt/dawos-agent
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/var/lib/dawos-agent
+</code></pre></div>
+<h3 id="4-install-the-package">4. Install the package<a class="headerlink" href="#4-install-the-package" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>/opt/dawos-agent/venv
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>/opt/dawos-agent/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># from cloned repo or downloaded source</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>sudo<span class="w"> </span>/opt/dawos-agent/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>.
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/opt/dawos-agent
+</code></pre></div>
+<h3 id="5-generate-an-api-key">5. Generate an API key<a class="headerlink" href="#5-generate-an-api-key" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_urlsafe(32))&quot;</span>
+</code></pre></div>
+<h3 id="6-create-config-file">6. Create config file<a class="headerlink" href="#6-create-config-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/dawos-agent/agent.env<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="s">DAWOS_API_KEY=&lt;your-generated-key&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="s">DAWOS_HOST=0.0.0.0</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="s">DAWOS_PORT=8470</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="s">DAWOS_NODE_NAME=&lt;your-hostname&gt;</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="s">DAWOS_LOG_LEVEL=info</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="s">ACCEL_CMD=/usr/bin/accel-cmd</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="s">ACCEL_CLI_PORT=2001</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="s">ACCEL_CONFIG_PATH=/etc/accel-ppp.conf</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="s">ACCEL_SERVICE_NAME=accel-ppp</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="s">EOF</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0640</span><span class="w"> </span>/etc/dawos-agent/agent.env
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>sudo<span class="w"> </span>chown<span class="w"> </span>root:dawos<span class="w"> </span>/etc/dawos-agent/agent.env
+</code></pre></div>
+<h3 id="7-install-sudoers">7. Install sudoers<a class="headerlink" href="#7-install-sudoers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sudoers.d/dawos-agent<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="s"># dawos-agent — passwordless sudo for router management</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/sbin/nft</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/sbin/ip</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/sbin/tc</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/bin/vtysh</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/sbin/sysctl</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/bin/tee</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="s">dawos ALL=(ALL) NOPASSWD: /usr/sbin/conntrack</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="s">EOF</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0440</span><span class="w"> </span>/etc/sudoers.d/dawos-agent
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>sudo<span class="w"> </span>visudo<span class="w"> </span>-cf<span class="w"> </span>/etc/sudoers.d/dawos-agent
+</code></pre></div>
+<h3 id="8-install-conntrack-and-set-permissions">8. Install conntrack and set permissions<a class="headerlink" href="#8-install-conntrack-and-set-permissions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Install conntrack tools (required for conntrack flush endpoint)</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>conntrack
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Set accel-ppp config ownership (required for config checkpoint/rollback)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.d/<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.conf
+</code></pre></div>
+<h3 id="9-install-systemd-unit">9. Install systemd unit<a class="headerlink" href="#9-install-systemd-unit" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo<span class="w"> </span>cp<span class="w"> </span>systemd/dawos-agent.service<span class="w"> </span>/etc/systemd/system/
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>dawos-agent
+</code></pre></div>
+<p>Or write it manually — see <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/systemd/dawos-agent.service">systemd/dawos-agent.service</a> for the full unit file.</p>
+<hr />
+<h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># service status</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>dawos-agent
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>accel-ppp
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="c1"># health check (no auth required)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:8470/health<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="c1"># authenticated call</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>curl<span class="w"> </span>-s<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;X-API-Key: &lt;your-key&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span>http://localhost:8470/api/v1/system/info<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="c1"># accel-cmd direct test</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>accel-cmd<span class="w"> </span>show<span class="w"> </span>version
+</code></pre></div>
+<p>API docs are available at:</p>
+<ul>
+<li><code>http://&lt;host&gt;:8470/docs</code> — Swagger UI</li>
+<li><code>http://&lt;host&gt;:8470/redoc</code> — ReDoc</li>
+</ul>
+<hr />
+<h2 id="upgrading">Upgrading<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h2>
+<h3 id="with-installer-recommended">With installer (recommended)<a class="headerlink" href="#with-installer-recommended" title="Permanent link">&para;</a></h3>
+<p>The installer detects existing installs and preserves config:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nb">cd</span><span class="w"> </span>dawos-agent
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>git<span class="w"> </span>pull
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>sudo<span class="w"> </span>bash<span class="w"> </span>install.sh
+</code></pre></div>
+<h3 id="manual">Manual<a class="headerlink" href="#manual" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nb">cd</span><span class="w"> </span>dawos-agent
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>git<span class="w"> </span>pull
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>sudo<span class="w"> </span>/opt/dawos-agent/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>.
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/opt/dawos-agent
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+</code></pre></div>
+<p>Check the new version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>curl<span class="w"> </span>-s<span class="w"> </span>http://localhost:8470/health<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>json.tool
+</code></pre></div>
+<hr />
+<h2 id="uninstalling">Uninstalling<a class="headerlink" href="#uninstalling" title="Permanent link">&para;</a></h2>
+<h3 id="with-installer">With installer<a class="headerlink" href="#with-installer" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>sudo<span class="w"> </span>bash<span class="w"> </span>install.sh<span class="w"> </span>--uninstall
+</code></pre></div>
+<p>This removes the dawos-agent service, user, directories, and sudoers. It does <strong>not</strong> remove accel-ppp or its configuration.</p>
+<h3 id="manual_1">Manual<a class="headerlink" href="#manual_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>dawos-agent
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>dawos-agent
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/systemd/system/dawos-agent.service
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/sudoers.d/dawos-agent
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/opt/dawos-agent
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/dawos-agent<span class="w">     </span><span class="c1"># optional — keeps config if you plan to reinstall</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>sudo<span class="w"> </span>userdel<span class="w"> </span>dawos<span class="w">               </span><span class="c1"># optional</span>
+</code></pre></div>
+<h3 id="full-cleanup-including-accel-ppp">Full cleanup (including accel-ppp)<a class="headerlink" href="#full-cleanup-including-accel-ppp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>accel-ppp
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>accel-ppp
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/systemd/system/accel-ppp.service
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/accel-ppp.conf
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/accel-ppp.d
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/log/accel-ppp
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/usr/sbin/accel-pppd<span class="w"> </span>/usr/bin/accel-cmd
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+</code></pre></div>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="check-logs">Check logs<a class="headerlink" href="#check-logs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>--no-pager<span class="w">   </span><span class="c1"># last 50 lines</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>dawos-agent<span class="w"> </span>-f<span class="w">                   </span><span class="c1"># follow live</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>journalctl<span class="w"> </span>-u<span class="w"> </span>accel-ppp<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>--no-pager<span class="w">      </span><span class="c1"># accel-ppp logs</span>
+</code></pre></div>
+<h3 id="common-issues">Common issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ModuleNotFoundError</code></td>
+<td>Broken venv</td>
+<td>Reinstall: <code>sudo /opt/dawos-agent/venv/bin/pip install .</code></td>
+</tr>
+<tr>
+<td><code>Address already in use</code></td>
+<td>Port conflict</td>
+<td><code>ss -tlnp \| grep 8470</code> — change <code>DAWOS_PORT</code></td>
+</tr>
+<tr>
+<td><code>Permission denied</code></td>
+<td>Wrong ownership</td>
+<td><code>sudo chown -R dawos:dawos /opt/dawos-agent</code></td>
+</tr>
+<tr>
+<td><code>sudo: a password is required</code></td>
+<td>Missing sudoers</td>
+<td>Check: <code>sudo visudo -cf /etc/sudoers.d/dawos-agent</code></td>
+</tr>
+<tr>
+<td><code>accel-cmd not found</code></td>
+<td>accel-ppp not installed</td>
+<td>Reinstall with <code>install.sh</code> to build from source</td>
+</tr>
+<tr>
+<td><code>Connection to localhost:2001 failed</code></td>
+<td>accel-ppp not running</td>
+<td><code>sudo systemctl start accel-ppp</code></td>
+</tr>
+<tr>
+<td><code>pppd_compat: ... No such file</code></td>
+<td>Inline comments in config</td>
+<td>Ensure no <code>#</code> comments on value lines in <code>/etc/accel-ppp.conf</code></td>
+</tr>
+<tr>
+<td><code>failed to load vlan_mon module</code></td>
+<td>Normal in VMs</td>
+<td>Harmless warning — vlan_mon requires physical NICs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python-version">Python version<a class="headerlink" href="#python-version" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>python3<span class="w"> </span>--version<span class="w">   </span><span class="c1"># need 3.9+</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="c1"># Debian 12+ / Ubuntu 22.04+</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3<span class="w"> </span>python3-venv
+</code></pre></div>
+<hr />
+<h2 id="security-notes">Security Notes<a class="headerlink" href="#security-notes" title="Permanent link">&para;</a></h2>
+<h3 id="api-key">API Key<a class="headerlink" href="#api-key" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The installer generates a strong 43-character URL-safe key automatically</li>
+<li>Generate a custom key: <code>python3 -c "import secrets; print(secrets.token_urlsafe(32))"</code></li>
+<li>Use HTTPS (reverse proxy) in production — the key travels in an HTTP header</li>
+</ul>
+<h3 id="file-permissions">File Permissions<a class="headerlink" href="#file-permissions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Mode</th>
+<th>Owner</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/etc/dawos-agent/agent.env</code></td>
+<td><code>0640</code></td>
+<td><code>root:dawos</code></td>
+<td>Contains API key</td>
+</tr>
+<tr>
+<td><code>/etc/sudoers.d/dawos-agent</code></td>
+<td><code>0440</code></td>
+<td><code>root:root</code></td>
+<td>Must be read-only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sudoers">Sudoers<a class="headerlink" href="#sudoers" title="Permanent link">&para;</a></h3>
+<p>Only 7 specific commands are allowed via sudo — no shell, no wildcards, no unrestricted access. See <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent/blob/main/deploy/dawos-agent.sudoers">deploy/dawos-agent.sudoers</a>.</p>
+<h3 id="accel-ppp-config-ownership">accel-ppp Config Ownership<a class="headerlink" href="#accel-ppp-config-ownership" title="Permanent link">&para;</a></h3>
+<p>The installer automatically sets ownership of <code>/etc/accel-ppp.conf</code> and <code>/etc/accel-ppp.d/</code> to the <code>dawos</code> user. This is required for config checkpoint and rollback to work.</p>
+<p>If you install manually, set this ownership yourself:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>sudo<span class="w"> </span>chown<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.conf
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>dawos:dawos<span class="w"> </span>/etc/accel-ppp.d/
+</code></pre></div>
+<p>Without correct ownership, config backup operations fail with HTTP 500.</p>
+<h3 id="systemd-hardening">Systemd Hardening<a class="headerlink" href="#systemd-hardening" title="Permanent link">&para;</a></h3>
+<p>The service runs with <code>ProtectSystem=strict</code>, <code>ProtectHome=true</code>, <code>PrivateTmp=true</code>, <code>WatchdogSec=30</code>, and <code>Restart=always</code>. Only explicitly listed paths are writable. See the <a href="../../development/security/">Security documentation</a> for the full list of directives.</p>
+<h3 id="network">Network<a class="headerlink" href="#network" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Default: listens on <code>0.0.0.0:8470</code> (all interfaces)</li>
+<li>Production: bind to management interface only (<code>DAWOS_HOST=10.0.0.1</code>)</li>
+<li>TLS: put behind nginx/Caddy reverse proxy</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

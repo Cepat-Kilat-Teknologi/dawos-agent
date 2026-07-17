@@ -1,0 +1,18 @@
+/* DawOS Agent — custom MkDocs Material overrides */
+
+/* Center the homepage logo banner */
+.md-content p:first-child {
+  text-align: center;
+}
+
+.md-content p:first-child img {
+  max-width: 480px;
+  width: 100%;
+  height: auto;
+}
+
+/* Navbar logo sizing */
+.md-header__button.md-logo img {
+  height: 28px;
+  width: auto;
+}

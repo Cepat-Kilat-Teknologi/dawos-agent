@@ -1,0 +1,4623 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Broadband management, simplified. REST API for accel-ppp BNG nodes">
+      
+      
+      
+        <link rel="canonical" href="https://cepat-kilat-teknologi.github.io/dawos-agent/guides/kernel-tuning/">
+      
+      
+        <link rel="prev" href="../production-hardening/">
+      
+      
+        <link rel="next" href="../../api/reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Kernel Tuning - DawOS Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kernel-tuning-for-bng" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="DawOS Agent" class="md-header__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DawOS Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Kernel Tuning
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="light-blue"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../troubleshooting/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/reference/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/test-report/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DawOS Agent" class="md-nav__button md-logo" aria-label="DawOS Agent" data-md-component="logo">
+      
+  <img src="../../assets/logo-icon.png" alt="logo">
+
+    </a>
+    DawOS Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Cepat-Kilat-Teknologi/dawos-agent" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Cepat-Kilat-Teknologi/dawos-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../production-hardening/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production Hardening
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Apply
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Apply">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#process-file-descriptor-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process File Descriptor Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameter Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#packet-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packet Forwarding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Packet Forwarding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4ip_forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.ip_forward
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallforwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.forwarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-path-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reverse Path Filtering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reverse Path Filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallrp_filter-netipv4confdefaultrp_filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.rp_filter / net.ipv4.conf.default.rp_filter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket-buffers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Socket Buffers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Socket Buffers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcorermem_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.rmem_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcorewmem_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.wmem_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-device-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Device Backlog
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Device Backlog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcorenetdev_max_backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.netdev_max_backlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket-connection-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Socket Connection Backlog
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Socket Connection Backlog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcoresomaxconn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.somaxconn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-descriptor-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Descriptor Limit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Descriptor Limit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fsfile-max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fs.file-max
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arp-table-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ARP Table Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ARP Table Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh3
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-tracking-conntrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Tracking (Conntrack)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Tracking (Conntrack)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_tcp_timeout_established" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_tcp_timeout_established
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_buckets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_buckets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_tcp_timeout_fin_wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_tcp_timeout_fin_wait
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_udp_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_udp_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_udp_timeout_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_udp_timeout_stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_icmp_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_icmp_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Security Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Security Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallsend_redirects-netipv4confdefaultsend_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.send_redirects / net.ipv4.conf.default.send_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confalllog_martians-netipv4confdefaultlog_martians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.log_martians / net.ipv4.conf.default.log_martians
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallaccept_redirects-netipv4confdefaultaccept_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.accept_redirects / net.ipv4.conf.default.accept_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallaccept_redirects-netipv6confdefaultaccept_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.accept_redirects / net.ipv6.conf.default.accept_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallsecure_redirects-netipv4confdefaultsecure_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.secure_redirects / net.ipv4.conf.default.secure_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallaccept_source_route-netipv4confdefaultaccept_source_route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.accept_source_route / net.ipv4.conf.default.accept_source_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallaccept_source_route-netipv6confdefaultaccept_source_route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.accept_source_route / net.ipv6.conf.default.accept_source_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_syncookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_syncookies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4icmp_echo_ignore_broadcasts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.icmp_echo_ignore_broadcasts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4icmp_ignore_bogus_error_responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.icmp_ignore_bogus_error_responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcoredefault_qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.default_qdisc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tcp-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TCP Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TCP Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_fin_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_fin_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_tw_reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_tw_reuse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_no_metrics_save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_no_metrics_save
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_congestion_control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_congestion_control
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vmmin_free_kbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vm.min_free_kbytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process-file-descriptor-limits_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process File Descriptor Limits
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process File Descriptor Limits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-process-nofile-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-process nofile limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scaling-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scaling Guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-via-dawos-agent-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring via DawOS Agent API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-production-bng-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference: Production BNG Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference: Production BNG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld99-accel-pppconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/99-accel-ppp.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld10-network-securityconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/10-network-security.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld10-bufferbloatconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/10-bufferbloat.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-additions-for-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Additions for Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/validation-rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Input Validation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/integration-test-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Test Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Apply
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Apply">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#process-file-descriptor-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process File Descriptor Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameter Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#packet-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Packet Forwarding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Packet Forwarding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4ip_forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.ip_forward
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallforwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.forwarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-path-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reverse Path Filtering
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reverse Path Filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallrp_filter-netipv4confdefaultrp_filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.rp_filter / net.ipv4.conf.default.rp_filter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket-buffers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Socket Buffers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Socket Buffers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcorermem_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.rmem_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcorewmem_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.wmem_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-device-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Device Backlog
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Device Backlog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcorenetdev_max_backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.netdev_max_backlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#socket-connection-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Socket Connection Backlog
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Socket Connection Backlog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netcoresomaxconn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.somaxconn
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-descriptor-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Descriptor Limit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="File Descriptor Limit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fsfile-max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fs.file-max
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arp-table-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ARP Table Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ARP Table Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh1
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4neighdefaultgc_thresh3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.neigh.default.gc_thresh3
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-tracking-conntrack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Tracking (Conntrack)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Tracking (Conntrack)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_max" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_max
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_tcp_timeout_established" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_tcp_timeout_established
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_buckets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_buckets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_tcp_timeout_fin_wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_tcp_timeout_fin_wait
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_udp_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_udp_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_udp_timeout_stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_udp_timeout_stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netnetfilternf_conntrack_icmp_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.netfilter.nf_conntrack_icmp_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Security Hardening
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Security Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallsend_redirects-netipv4confdefaultsend_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.send_redirects / net.ipv4.conf.default.send_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confalllog_martians-netipv4confdefaultlog_martians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.log_martians / net.ipv4.conf.default.log_martians
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallaccept_redirects-netipv4confdefaultaccept_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.accept_redirects / net.ipv4.conf.default.accept_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallaccept_redirects-netipv6confdefaultaccept_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.accept_redirects / net.ipv6.conf.default.accept_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallsecure_redirects-netipv4confdefaultsecure_redirects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.secure_redirects / net.ipv4.conf.default.secure_redirects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4confallaccept_source_route-netipv4confdefaultaccept_source_route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.conf.all.accept_source_route / net.ipv4.conf.default.accept_source_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv6confallaccept_source_route-netipv6confdefaultaccept_source_route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv6.conf.all.accept_source_route / net.ipv6.conf.default.accept_source_route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_syncookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_syncookies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4icmp_echo_ignore_broadcasts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.icmp_echo_ignore_broadcasts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4icmp_ignore_bogus_error_responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.icmp_ignore_bogus_error_responses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netcoredefault_qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.core.default_qdisc
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tcp-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TCP Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TCP Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_fin_timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_fin_timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_tw_reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_tw_reuse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_no_metrics_save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_no_metrics_save
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netipv4tcp_congestion_control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        net.ipv4.tcp_congestion_control
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Memory Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vmmin_free_kbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vm.min_free_kbytes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process-file-descriptor-limits_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process File Descriptor Limits
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process File Descriptor Limits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-process-nofile-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-process nofile limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scaling-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scaling Guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-via-dawos-agent-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring via DawOS Agent API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-production-bng-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference: Production BNG Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference: Production BNG Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld99-accel-pppconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/99-accel-ppp.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld10-network-securityconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/10-network-security.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etcsysctld10-bufferbloatconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /etc/sysctl.d/10-bufferbloat.conf
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-additions-for-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Additions for Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="kernel-tuning-for-bng">Kernel Tuning for BNG<a class="headerlink" href="#kernel-tuning-for-bng" title="Permanent link">&para;</a></h1>
+<p>A Linux-based BNG (Broadband Network Gateway) running accel-ppp behaves as a high-throughput router with thousands of point-to-point interfaces. The default kernel settings are designed for general-purpose servers and desktops, not for a device that terminates thousands of PPPoE sessions, performs NAT on every packet, and maintains tens of thousands of concurrent connections.</p>
+<p>This guide documents every kernel parameter that should be tuned on a production BNG node, explains <strong>why</strong> each one matters, and provides ready-to-use configuration files.</p>
+<div class="admonition warning">
+<p class="admonition-title">Production impact</p>
+<p>These settings are applied live with <code>sysctl -p</code>. They do <strong>not</strong> require a reboot or restart of accel-ppp. Existing PPPoE sessions are unaffected. However, incorrect values (especially <code>rp_filter=0</code>) can open security holes. Always review before applying.</p>
+</div>
+<hr />
+<h2 id="quick-apply">Quick Apply<a class="headerlink" href="#quick-apply" title="Permanent link">&para;</a></h2>
+<p>If you used the installer script (<code>install.sh</code>), these files are <strong>not</strong> created automatically -- the installer only sets up dawos-agent, not kernel tuning. Apply them manually:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Create all four config files</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sysctl.d/99-accel-ppp.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="s"># === BNG / BRAS kernel tuning for accel-ppp ===</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="s"># See: https://cepat-kilat-teknologi.github.io/dawos-agent/guides/kernel-tuning/</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="s"># -- Packet forwarding (required for PPPoE routing) --</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="s">net.ipv4.ip_forward=1</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="s">net.ipv6.conf.all.forwarding=1</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="s"># -- Reverse path filtering (loose mode for asymmetric routing) --</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="s">net.ipv4.conf.all.rp_filter=2</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="s">net.ipv4.conf.default.rp_filter=2</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="s"># -- Socket buffers (16 MB each, up from 208 KB default) --</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="s">net.core.rmem_max=16777216</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="s">net.core.wmem_max=16777216</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="s"># -- Network device backlog (250k, up from 1000 default) --</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="s">net.core.netdev_max_backlog=250000</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="s"># -- Socket listen backlog --</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="s">net.core.somaxconn=4096</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="s"># -- File descriptor limit (1M, up from ~100k default) --</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="s">fs.file-max=1000000</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="s"># -- ARP table sizing (for thousands of directly-connected PPPoE hosts) --</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="s">net.ipv4.neigh.default.gc_thresh1=8192</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="s">net.ipv4.neigh.default.gc_thresh2=32768</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="s">net.ipv4.neigh.default.gc_thresh3=65536</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="s"># -- Connection tracking (1M entries, optimized timeouts) --</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="s">net.netfilter.nf_conntrack_max=1048576</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="s">net.netfilter.nf_conntrack_buckets=262144</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="s">net.netfilter.nf_conntrack_tcp_timeout_established=43200</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="s">net.netfilter.nf_conntrack_tcp_timeout_fin_wait=30</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="s">net.netfilter.nf_conntrack_udp_timeout=10</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="s">net.netfilter.nf_conntrack_udp_timeout_stream=60</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="s">net.netfilter.nf_conntrack_icmp_timeout=10</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="s"># -- TCP performance (NAT-aware, BNG-optimized) --</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="s">net.ipv4.tcp_fin_timeout=30</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="s">net.ipv4.tcp_tw_reuse=1</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="s">net.ipv4.tcp_no_metrics_save=1</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="s">net.ipv4.tcp_congestion_control=bbr</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="s"># -- Memory pressure reserve (128 MB minimum free) --</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="s">vm.min_free_kbytes=131072</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="s">EOF</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sysctl.d/10-network-security.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="s"># === BNG edge security hardening ===</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="s"># Reverse path filtering (loose mode)</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="s">net.ipv4.conf.default.rp_filter=2</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a><span class="s">net.ipv4.conf.all.rp_filter=2</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="s"># Do not send ICMP redirects (BNG is the only gateway)</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a><span class="s">net.ipv4.conf.all.send_redirects=0</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a><span class="s">net.ipv4.conf.default.send_redirects=0</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a><span class="s"># Do not accept ICMP redirects (prevent routing table manipulation)</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a><span class="s">net.ipv4.conf.all.accept_redirects=0</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a><span class="s">net.ipv4.conf.default.accept_redirects=0</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a><span class="s">net.ipv4.conf.all.secure_redirects=0</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a><span class="s">net.ipv4.conf.default.secure_redirects=0</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a><span class="s">net.ipv6.conf.all.accept_redirects=0</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a><span class="s">net.ipv6.conf.default.accept_redirects=0</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a><span class="s"># Reject source-routed packets (prevent firewall bypass)</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a><span class="s">net.ipv4.conf.all.accept_source_route=0</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a><span class="s">net.ipv4.conf.default.accept_source_route=0</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a><span class="s">net.ipv6.conf.all.accept_source_route=0</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a><span class="s">net.ipv6.conf.default.accept_source_route=0</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a><span class="s"># Log packets with impossible source addresses (spoofing detection)</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a><span class="s">net.ipv4.conf.all.log_martians=1</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a><span class="s">net.ipv4.conf.default.log_martians=1</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>
+<a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a><span class="s"># SYN flood protection</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81" href="#__codelineno-0-81"></a><span class="s">net.ipv4.tcp_syncookies=1</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82" href="#__codelineno-0-82"></a>
+<a id="__codelineno-0-83" name="__codelineno-0-83" href="#__codelineno-0-83"></a><span class="s"># ICMP hardening (anti-Smurf, ignore bogus errors)</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84" href="#__codelineno-0-84"></a><span class="s">net.ipv4.icmp_echo_ignore_broadcasts=1</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85" href="#__codelineno-0-85"></a><span class="s">net.ipv4.icmp_ignore_bogus_error_responses=1</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86" href="#__codelineno-0-86"></a><span class="s">EOF</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87" href="#__codelineno-0-87"></a>
+<a id="__codelineno-0-88" name="__codelineno-0-88" href="#__codelineno-0-88"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/sysctl.d/10-bufferbloat.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89" href="#__codelineno-0-89"></a><span class="s"># === Anti-bufferbloat: Fair Queue CoDel as default qdisc ===</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90" href="#__codelineno-0-90"></a><span class="s">net.core.default_qdisc = fq_codel</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91" href="#__codelineno-0-91"></a><span class="s">EOF</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92" href="#__codelineno-0-92"></a>
+<a id="__codelineno-0-93" name="__codelineno-0-93" href="#__codelineno-0-93"></a><span class="c1"># Apply all at once</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94" href="#__codelineno-0-94"></a>sudo<span class="w"> </span>sysctl<span class="w"> </span>--system
+<a id="__codelineno-0-95" name="__codelineno-0-95" href="#__codelineno-0-95"></a>
+<a id="__codelineno-0-96" name="__codelineno-0-96" href="#__codelineno-0-96"></a><span class="c1"># Verify key values</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97" href="#__codelineno-0-97"></a>sysctl<span class="w"> </span>net.ipv4.ip_forward<span class="w"> </span>net.netfilter.nf_conntrack_max<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98" href="#__codelineno-0-98"></a><span class="w">       </span>net.ipv4.tcp_syncookies<span class="w"> </span>net.ipv4.tcp_congestion_control<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99" href="#__codelineno-0-99"></a><span class="w">       </span>net.core.default_qdisc
+</code></pre></div>
+<h3 id="process-file-descriptor-limits">Process File Descriptor Limits<a class="headerlink" href="#process-file-descriptor-limits" title="Permanent link">&para;</a></h3>
+<p>The <code>fs.file-max</code> sysctl sets the <strong>system-wide</strong> limit, but each process also has its own per-process limit (default: 1024). Both must be raised.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Per-process limits for the dawos user</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/security/limits.d/dawos.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="s">dawos    soft    nofile    65536</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="s">dawos    hard    nofile    65536</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="s">EOF</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Also set in the systemd unit (overrides limits.conf for services)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/systemd/system/dawos-agent.service.d
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/system/dawos-agent.service.d/limits.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="s">[Service]</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="s">LimitNOFILE=65536</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="s">EOF</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/systemd/system/accel-ppp.service.d
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/system/accel-ppp.service.d/limits.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="s">[Service]</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s">LimitNOFILE=65536</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="s">EOF</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dawos-agent
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>accel-ppp
+</code></pre></div>
+<hr />
+<h2 id="parameter-reference">Parameter Reference<a class="headerlink" href="#parameter-reference" title="Permanent link">&para;</a></h2>
+<h3 id="packet-forwarding">Packet Forwarding<a class="headerlink" href="#packet-forwarding" title="Permanent link">&para;</a></h3>
+<p>These are the most fundamental settings. Without IP forwarding, the BNG cannot route packets between subscriber PPP interfaces and the uplink -- it would act as an endpoint, not a router.</p>
+<h4 id="netipv4ip_forward"><code>net.ipv4.ip_forward</code><a class="headerlink" href="#netipv4ip_forward" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Enables the kernel to forward IPv4 packets between network interfaces.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG is a router. Packets arrive on <code>ppp0</code>..<code>pppN</code> interfaces from subscribers and must be forwarded to the uplink (<code>ens18</code>, <code>ens19</code>, etc.) and vice versa. Without this, subscribers cannot reach the internet.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>Subscribers connect (PPPoE session establishes) but cannot send or receive any traffic. Ping, web, everything fails.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv6confallforwarding"><code>net.ipv6.conf.all.forwarding</code><a class="headerlink" href="#netipv6confallforwarding" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Enables IPv6 packet forwarding across all interfaces.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Required if you assign IPv6 prefixes to subscribers (dual-stack PPPoE). Even if you only use IPv4 today, enabling it now avoids a service disruption when you add IPv6 later.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>IPv6 traffic from subscribers is silently dropped at the BNG. IPv4 continues to work.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="reverse-path-filtering">Reverse Path Filtering<a class="headerlink" href="#reverse-path-filtering" title="Permanent link">&para;</a></h3>
+<h4 id="netipv4confallrp_filter-netipv4confdefaultrp_filter"><code>net.ipv4.conf.all.rp_filter</code> / <code>net.ipv4.conf.default.rp_filter</code><a class="headerlink" href="#netipv4confallrp_filter-netipv4confdefaultrp_filter" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Controls how the kernel validates the source address of incoming packets. Three modes: <code>0</code> = disabled (no check), <code>1</code> = strict (packet must arrive on the interface the kernel would use to reach that source), <code>2</code> = loose (any route to the source address must exist in the routing table).</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>2</code> (loose) on Ubuntu 22.04+</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>2</code> (loose)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td><strong>Strict mode (<code>1</code>) breaks PPPoE.</strong> A subscriber's source IP (e.g. <code>10.90.16.31</code>) arrives on <code>ppp1</code>, but the kernel's route for that IP might point to a different <code>ppp</code> interface during brief routing transitions, or the route might be a blackhole aggregate (<code>blackhole 10.90.16.0/24</code>). Strict RPF drops these packets. Loose mode only checks that <em>some</em> route exists -- safe for a BNG with dynamic PPP interfaces.</td>
+</tr>
+<tr>
+<td><strong>What happens if set to 1 (strict)</strong></td>
+<td>Intermittent packet drops for subscribers, especially during session reconnects. Some subscribers work, others randomly lose connectivity. Very difficult to diagnose.</td>
+</tr>
+<tr>
+<td><strong>What happens if set to 0 (disabled)</strong></td>
+<td>No source address validation at all. A compromised subscriber device could spoof any source IP and the BNG would forward it. <strong>Never use 0 on a BNG facing untrusted users.</strong></td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code> and <code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Never use <code>rp_filter=0</code> on a BNG</p>
+<p>Disabling reverse path filtering on subscriber-facing interfaces allows IP spoofing. A single compromised CPE could impersonate any IP address on the internet. Loose mode (<code>2</code>) provides the right balance: it validates routes exist without breaking PPPoE's dynamic interface model.</p>
+</div>
+<hr />
+<h3 id="socket-buffers">Socket Buffers<a class="headerlink" href="#socket-buffers" title="Permanent link">&para;</a></h3>
+<p>These control the maximum size of kernel send/receive buffers for network sockets. They affect every network application on the system, including accel-ppp's RADIUS client, the PPPoE kernel module, and dawos-agent's HTTP server.</p>
+<h4 id="netcorermem_max"><code>net.core.rmem_max</code><a class="headerlink" href="#netcorermem_max" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum receive socket buffer size (in bytes) that any application can request with <code>setsockopt(SO_RCVBUF)</code>.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>212992</code> (208 KB)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>16777216</code> (16 MB)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG handles traffic from hundreds or thousands of subscribers simultaneously. Each RADIUS accounting packet, each PPPoE control message, and each management API request uses a socket buffer. With the 208 KB default, high-traffic bursts cause buffer overflows, leading to dropped packets and retransmissions. 16 MB provides headroom for burst absorption.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>Under load, RADIUS accounting packets are dropped (the <code>acct lost</code> counter in <code>accel-cmd show stat</code> increases). Subscribers may fail to authenticate during traffic spikes.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netcorewmem_max"><code>net.core.wmem_max</code><a class="headerlink" href="#netcorewmem_max" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum send socket buffer size (in bytes).</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>212992</code> (208 KB)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>16777216</code> (16 MB)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Same reasoning as <code>rmem_max</code> but for outgoing data. Affects RADIUS request throughput and bulk API responses.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Memory impact</p>
+<p>Setting <code>rmem_max</code> and <code>wmem_max</code> to 16 MB does <strong>not</strong> allocate 16 MB per socket. It sets the <em>maximum</em> a socket can request. Most sockets use much smaller buffers (typically 16-256 KB). The actual memory consumption depends on how many sockets are active and what buffer sizes they request. On a typical BNG with 500 sessions, expect ~10-50 MB total socket buffer usage.</p>
+</div>
+<hr />
+<h3 id="network-device-backlog">Network Device Backlog<a class="headerlink" href="#network-device-backlog" title="Permanent link">&para;</a></h3>
+<h4 id="netcorenetdev_max_backlog"><code>net.core.netdev_max_backlog</code><a class="headerlink" href="#netcorenetdev_max_backlog" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum number of packets that can be queued at the network device driver level, waiting for the kernel to process them. When packets arrive faster than the kernel can process them, they queue here.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1000</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>250000</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG with hundreds of subscribers generates far more packets per second than a typical server. The default backlog of 1000 packets is exhausted in milliseconds under load. When the backlog overflows, packets are silently dropped at the driver level -- they never reach the kernel's network stack, so there are no ICMP errors or log messages. The only symptom is increased latency and packet loss for subscribers.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>Under moderate load (200+ active subscribers), packet drops at the device level. <code>ethtool -S &lt;iface&gt;</code> shows increasing <code>rx_dropped</code> counters. Subscribers experience intermittent slowness that is very hard to diagnose because the drops happen before any firewall or routing.</td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>cat /proc/net/softnet_stat</code> -- the second column shows backlog overflow counts per CPU. Non-zero values mean you need a larger backlog.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="socket-connection-backlog">Socket Connection Backlog<a class="headerlink" href="#socket-connection-backlog" title="Permanent link">&para;</a></h3>
+<h4 id="netcoresomaxconn"><code>net.core.somaxconn</code><a class="headerlink" href="#netcoresomaxconn" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum number of pending connections in the listen queue for any TCP socket.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>4096</code> (modern kernels) or <code>128</code> (older kernels)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>4096</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Affects the dawos-agent HTTP server (Uvicorn) and any management tools connecting to the BNG. If many API clients connect simultaneously (e.g., a monitoring system polling health endpoints from multiple dashboards), a small backlog causes connection refusals.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="file-descriptor-limit">File Descriptor Limit<a class="headerlink" href="#file-descriptor-limit" title="Permanent link">&para;</a></h3>
+<h4 id="fsfile-max"><code>fs.file-max</code><a class="headerlink" href="#fsfile-max" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>System-wide maximum number of open file descriptors. Every open file, socket, pipe, and network interface consumes a file descriptor.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td>Varies (~100,000 - 200,000 depending on RAM)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1000000</code> (1 million)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Each PPPoE session uses several file descriptors: the PPP interface, the PPPoE socket, RADIUS sockets, and internal pipes. At 1,000 subscribers, accel-ppp alone may use 5,000+ file descriptors. Add RADIUS connections, nftables sockets, dawos-agent's HTTP server, and system services -- the default can be exhausted on a large BNG.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>When the limit is reached, new PPPoE sessions fail to establish (<code>accept: Too many open files</code> in logs). Existing sessions continue but new subscribers cannot connect. The dawos-agent API also stops responding because it cannot open new sockets.</td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>cat /proc/sys/fs/file-nr</code> -- shows <code>allocated / unused / maximum</code>. If <code>allocated</code> approaches <code>maximum</code>, increase the limit.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="arp-table-sizing">ARP Table Sizing<a class="headerlink" href="#arp-table-sizing" title="Permanent link">&para;</a></h3>
+<p>A BNG has a unique network topology: every subscriber is a directly-connected host on a point-to-point interface. The kernel's ARP (neighbor) table must hold an entry for each one. The default table sizes are designed for a machine with a handful of neighbors, not thousands.</p>
+<h4 id="netipv4neighdefaultgc_thresh1"><code>net.ipv4.neigh.default.gc_thresh1</code><a class="headerlink" href="#netipv4neighdefaultgc_thresh1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Minimum number of ARP entries the kernel keeps without triggering garbage collection. Below this threshold, the GC does not run.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>128</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>With the default of 128, the kernel runs ARP garbage collection constantly on a BNG with hundreds of subscribers, consuming CPU and occasionally evicting valid entries. Setting it to 8192 tells the kernel "don't bother cleaning up until we have at least 8192 entries."</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4neighdefaultgc_thresh2"><code>net.ipv4.neigh.default.gc_thresh2</code><a class="headerlink" href="#netipv4neighdefaultgc_thresh2" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Soft maximum for ARP entries. Above this, the kernel aggressively garbage-collects entries older than 5 seconds.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>512</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>32768</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG with 1,000 subscribers easily exceeds 512 ARP entries. With the default, the kernel constantly evicts and re-learns ARP entries, causing brief connectivity interruptions and unnecessary ARP broadcast storms.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4neighdefaultgc_thresh3"><code>net.ipv4.neigh.default.gc_thresh3</code><a class="headerlink" href="#netipv4neighdefaultgc_thresh3" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Hard maximum for ARP entries. The kernel <strong>refuses</strong> to add new entries above this limit, even if the host is reachable.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1024</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>65536</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>This is the most critical ARP parameter. When the hard limit is reached, the kernel logs <code>neighbour table overflow</code> and <strong>drops packets</strong> to new destinations. On a BNG, this means new subscribers cannot be reached even though their PPPoE session is established.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>At ~1,000 subscribers, <code>dmesg</code> fills with <code>neighbour table overflow</code> errors. New sessions establish but cannot pass traffic. Existing sessions may also lose connectivity as their ARP entries expire and cannot be renewed. <strong>This is a production-breaking issue.</strong></td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>ip -s neigh show \| wc -l</code> shows the current ARP table size. <code>dmesg \| grep "neighbour table overflow"</code> shows if the limit has been hit.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Scaling ARP limits</p>
+<p>Set <code>gc_thresh3</code> to at least 2x your maximum expected subscriber count. For 5,000 subscribers, use <code>gc_thresh3=16384</code> minimum. The 65,536 value provides headroom up to ~30,000 subscribers.</p>
+</div>
+<hr />
+<h3 id="connection-tracking-conntrack">Connection Tracking (Conntrack)<a class="headerlink" href="#connection-tracking-conntrack" title="Permanent link">&para;</a></h3>
+<p>If your BNG performs NAT (SNAT/masquerade for subscriber traffic), every connection passing through nftables is tracked in the conntrack table. This is how the kernel knows which return packets belong to which subscriber.</p>
+<h4 id="netnetfilternf_conntrack_max"><code>net.netfilter.nf_conntrack_max</code><a class="headerlink" href="#netnetfilternf_conntrack_max" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum number of concurrent connection tracking entries. Each TCP connection, UDP flow, ICMP exchange, and DNS query consumes one entry.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>65536</code> (65k)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1048576</code> (1 million)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A single subscriber browsing the web typically has 50-200 concurrent connections (HTTP/2 multiplexing, CDN connections, background requests, DNS queries). At 500 subscribers, you need 25,000-100,000 conntrack entries just for web browsing. Add streaming video, gaming, and background app traffic, and 65k is exhausted quickly. When the conntrack table is full, <strong>new connections are dropped silently</strong> -- the kernel cannot create a tracking entry for them.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>Subscribers report "internet is slow" or "some websites don't load." <code>dmesg</code> shows <code>nf_conntrack: table full, dropping packet</code>. The issue is intermittent because it depends on how many subscribers are active at once. Often misdiagnosed as an upstream bandwidth problem.</td>
+</tr>
+<tr>
+<td><strong>Memory impact</strong></td>
+<td>Each conntrack entry uses ~320 bytes of kernel memory. 1 million entries = ~320 MB. On a 2 GB RAM system, this is significant -- size it to your actual needs. For 500 subscribers, 262144 (256k) is usually sufficient. For 2,000+, use 1M.</td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>cat /proc/sys/net/netfilter/nf_conntrack_count</code> shows current entries. <code>cat /proc/sys/net/netfilter/nf_conntrack_max</code> shows the limit. When <code>count</code> approaches <code>max</code>, increase the limit or reduce timeouts. The DawOS Agent endpoint <code>GET /api/v1/conntrack/status</code> exposes both values via the API.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netnetfilternf_conntrack_tcp_timeout_established"><code>net.netfilter.nf_conntrack_tcp_timeout_established</code><a class="headerlink" href="#netnetfilternf_conntrack_tcp_timeout_established" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to keep an established TCP connection in the conntrack table after the last packet.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>432000</code> (5 days)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>43200</code> (12 hours)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>The default of 5 days is designed for firewalls protecting a small number of servers with long-lived connections. On a BNG doing NAT for hundreds of subscribers, stale entries from connections that were never properly closed (client crashed, network timeout, mobile device switched to cellular) accumulate for 5 days before being reclaimed. This wastes conntrack slots. 12 hours is long enough for any legitimate persistent connection (websockets, SSH, VPN) and short enough to reclaim stale entries efficiently.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>The conntrack table fills up faster than necessary because dead connections occupy slots for 5 days. Combined with a low <code>nf_conntrack_max</code>, this causes the "table full, dropping packet" issue described above.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netnetfilternf_conntrack_buckets"><code>net.netfilter.nf_conntrack_buckets</code><a class="headerlink" href="#netnetfilternf_conntrack_buckets" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Size of the hash table used to index conntrack entries. Each "bucket" is a linked list of entries that hash to the same slot. More buckets = shorter lists = faster lookups.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>nf_conntrack_max / 8</code> (e.g., 8192 when max is 65536)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>262144</code> (nf_conntrack_max / 4)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>When a packet arrives, the kernel must look up its conntrack entry by hashing the 5-tuple (src IP, dst IP, src port, dst port, protocol). If the hash table is too small, many entries collide into the same bucket, turning the lookup into a linear scan through a long linked list. At 1 million conntrack entries with only 8192 buckets, each bucket averages 122 entries — every packet traverses a list of 122 entries to find its match. With 262144 buckets, each bucket averages only 4 entries.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>High CPU usage in the <code>nf_conntrack</code> kernel path under load. <code>perf top</code> shows <code>__nf_conntrack_find_get</code> consuming significant CPU. Subscribers experience increased latency because every packet must walk a long hash chain.</td>
+</tr>
+<tr>
+<td><strong>How to set</strong></td>
+<td>On some kernels, this parameter is read-only via sysctl and must be set via the module parameter: <code>echo 262144 &gt; /sys/module/nf_conntrack/parameters/hashsize</code>. To make it persistent, add <code>options nf_conntrack hashsize=262144</code> to <code>/etc/modprobe.d/nf_conntrack.conf</code>.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code> (if writable) or <code>/etc/modprobe.d/nf_conntrack.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Hash table sizing rule</p>
+<p>Use <code>nf_conntrack_buckets = nf_conntrack_max / 4</code> for optimal performance. Each bucket uses 8 bytes, so 262144 buckets = 2 MB — negligible compared to the conntrack entries themselves.</p>
+</div>
+<h4 id="netnetfilternf_conntrack_tcp_timeout_fin_wait"><code>net.netfilter.nf_conntrack_tcp_timeout_fin_wait</code><a class="headerlink" href="#netnetfilternf_conntrack_tcp_timeout_fin_wait" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to keep a TCP connection in FIN_WAIT state in the conntrack table. This state occurs when one side has sent a FIN but the other side hasn't acknowledged the close yet.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>120</code> (2 minutes)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>When a subscriber disconnects abruptly (CPE reboot, cable pulled, power loss), the TCP connections on the BNG's NAT table enter FIN_WAIT and sit there for 2 minutes. With hundreds of subscribers reconnecting after a power outage, thousands of stale FIN_WAIT entries accumulate. Reducing to 30 seconds reclaims these entries 4x faster.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netnetfilternf_conntrack_udp_timeout"><code>net.netfilter.nf_conntrack_udp_timeout</code><a class="headerlink" href="#netnetfilternf_conntrack_udp_timeout" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to keep a single-packet UDP flow in the conntrack table. A "single-packet" flow is one where only one packet has been seen (e.g., a DNS query before the response arrives).</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Every DNS query from every subscriber creates a conntrack entry. A typical subscriber generates 10-50 DNS queries per minute. With 500 subscribers, that's 5,000-25,000 DNS conntrack entries, each living for 30 seconds. Reducing to 10 seconds is still far longer than any DNS response time (&lt;1 second) and reclaims entries 3x faster. This is especially important on BNGs that also act as DNS forwarders (dnsmasq).</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netnetfilternf_conntrack_udp_timeout_stream"><code>net.netfilter.nf_conntrack_udp_timeout_stream</code><a class="headerlink" href="#netnetfilternf_conntrack_udp_timeout_stream" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to keep a bidirectional UDP stream (where packets have been seen in both directions) in the conntrack table. Applies to streaming media, VoIP, gaming, and any established UDP session.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>120</code> (2 minutes)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>60</code> (1 minute)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Bidirectional UDP flows include VoIP calls (SIP/RTP), online gaming, and video streaming. These are active sessions where 60 seconds of inactivity genuinely means the flow has ended. The default 120 seconds keeps dead flows around twice as long as necessary, wasting conntrack entries.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netnetfilternf_conntrack_icmp_timeout"><code>net.netfilter.nf_conntrack_icmp_timeout</code><a class="headerlink" href="#netnetfilternf_conntrack_icmp_timeout" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to keep an ICMP flow (ping request/reply pair) in the conntrack table.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>ICMP exchanges (ping) complete in milliseconds. The default 30-second timeout keeps the conntrack entry alive for thousands of times longer than the actual exchange. On a BNG where subscribers and monitoring systems send continuous pings, this wastes conntrack entries. 10 seconds provides ample time for even high-latency ping responses.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Flushing conntrack</p>
+<p>DawOS Agent provides <code>POST /api/v1/conntrack/flush</code> to clear the entire conntrack table. This is useful during maintenance or when the table is nearly full. Active connections are re-tracked automatically on the next packet -- subscribers experience a brief (~1 second) interruption as NAT state is rebuilt.</p>
+</div>
+<hr />
+<h3 id="network-security-hardening">Network Security Hardening<a class="headerlink" href="#network-security-hardening" title="Permanent link">&para;</a></h3>
+<p>These parameters harden the BNG against network-layer attacks. They are placed in a separate file (<code>10-network-security.conf</code>) for visibility -- security auditors can review them independently of performance tuning.</p>
+<h4 id="netipv4confallsend_redirects-netipv4confdefaultsend_redirects"><code>net.ipv4.conf.all.send_redirects</code> / <code>net.ipv4.conf.default.send_redirects</code><a class="headerlink" href="#netipv4confallsend_redirects-netipv4confdefaultsend_redirects" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Controls whether the kernel sends ICMP Redirect messages when it routes a packet out the same interface it arrived on.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>ICMP redirects tell a host "there's a better route -- send future packets to this other gateway instead." On a BNG, this is never appropriate: the BNG <strong>is</strong> the only gateway for all subscribers. Sending redirects could cause a subscriber's CPE to cache a redirect to another subscriber's PPP IP, causing traffic to be misrouted. More importantly, ICMP redirects are a well-known MITM attack vector -- an attacker could craft redirect messages to divert traffic through a malicious host.</td>
+</tr>
+<tr>
+<td><strong>What happens without this</strong></td>
+<td>Normally harmless on point-to-point PPP interfaces (redirects are rarely triggered on them), but the kernel may send redirects on the management or uplink interfaces. Disabling it is a defense-in-depth measure and a common CIS benchmark requirement.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4confalllog_martians-netipv4confdefaultlog_martians"><code>net.ipv4.conf.all.log_martians</code> / <code>net.ipv4.conf.default.log_martians</code><a class="headerlink" href="#netipv4confalllog_martians-netipv4confdefaultlog_martians" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Logs packets with impossible source addresses (martian packets) to the kernel log. A "martian" is a packet whose source address is reserved (0.0.0.0, 127.x.x.x, 224.x.x.x) or has no valid route back.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>On a BNG, martian packets from subscriber-facing interfaces indicate either: (a) a misconfigured CPE, (b) a compromised device attempting IP spoofing, or (c) a routing loop. Logging them provides early warning of security issues and misconfigurations. Without logging, these packets are silently dropped and the operator has no visibility into what's happening.</td>
+</tr>
+<tr>
+<td><strong>Log output</strong></td>
+<td>Martians appear in <code>dmesg</code> and <code>journalctl -k</code> as: <code>IPv4: martian source X.X.X.X from Y.Y.Y.Y, on dev pppN</code>.</td>
+</tr>
+<tr>
+<td><strong>Caution</strong></td>
+<td>On a large BNG with many misconfigured CPEs, martian logging can generate significant log volume. Monitor <code>/var/log</code> disk usage after enabling. If log volume is excessive, consider disabling martian logging on the subscriber-facing interfaces only: <code>net.ipv4.conf.ppp*.log_martians=0</code>.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4confallaccept_redirects-netipv4confdefaultaccept_redirects"><code>net.ipv4.conf.all.accept_redirects</code> / <code>net.ipv4.conf.default.accept_redirects</code><a class="headerlink" href="#netipv4confallaccept_redirects-netipv4confdefaultaccept_redirects" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Controls whether the kernel accepts ICMP Redirect messages and updates its routing table accordingly.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>We already disable <em>sending</em> redirects, but the BNG must also refuse to <em>accept</em> them. A compromised subscriber device could send crafted ICMP Redirect messages to the BNG, telling it "route traffic for IP X.X.X.X through me instead." If accepted, the BNG would redirect other subscribers' traffic through the attacker — a classic man-in-the-middle attack. On a BNG, the routing table is authoritative and should never be modified by ICMP messages from untrusted networks.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>An attacker on the subscriber network could manipulate the BNG's routing table, causing traffic destined for one subscriber to be routed through another subscriber's device. This is a <strong>critical security vulnerability</strong>.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv6confallaccept_redirects-netipv6confdefaultaccept_redirects"><code>net.ipv6.conf.all.accept_redirects</code> / <code>net.ipv6.conf.default.accept_redirects</code><a class="headerlink" href="#netipv6confallaccept_redirects-netipv6confdefaultaccept_redirects" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Same as the IPv4 variant but for ICMPv6 Redirect messages.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>IPv6 Neighbor Discovery Protocol (NDP) uses ICMPv6 redirects. The same man-in-the-middle risk applies. On a dual-stack BNG, both IPv4 and IPv6 redirect acceptance must be disabled.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4confallsecure_redirects-netipv4confdefaultsecure_redirects"><code>net.ipv4.conf.all.secure_redirects</code> / <code>net.ipv4.conf.default.secure_redirects</code><a class="headerlink" href="#netipv4confallsecure_redirects-netipv4confdefaultsecure_redirects" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>When <code>accept_redirects=1</code>, this further restricts accepted redirects to only those from the default gateway. "Secure" means the redirect source must be a known gateway — but this still allows a compromised gateway to redirect traffic.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Even "secure" redirects from the default gateway should not modify the BNG's routing table. The BNG's routes are set by the operator (static routes, OSPF, BGP via FRR). No ICMP message should override them. Setting this to <code>0</code> alongside <code>accept_redirects=0</code> provides defense-in-depth.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4confallaccept_source_route-netipv4confdefaultaccept_source_route"><code>net.ipv4.conf.all.accept_source_route</code> / <code>net.ipv4.conf.default.accept_source_route</code><a class="headerlink" href="#netipv4confallaccept_source_route-netipv4confdefaultaccept_source_route" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Controls whether the kernel accepts IP packets with the Source Route option set. Source routing allows the sender to specify the exact path a packet should take through the network, overriding normal routing decisions.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (disabled on most modern distros)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Source-routed packets are a classic firewall bypass technique. An attacker can craft a packet that routes through a specific path, potentially bypassing ACLs and firewall rules that only apply to certain interfaces. On a BNG, subscriber traffic should always follow the BNG's routing table — never a path dictated by the subscriber's device. While most modern distributions disable this by default, explicitly setting it ensures it stays disabled even after OS upgrades.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv6confallaccept_source_route-netipv6confdefaultaccept_source_route"><code>net.ipv6.conf.all.accept_source_route</code> / <code>net.ipv6.conf.default.accept_source_route</code><a class="headerlink" href="#netipv6confallaccept_source_route-netipv6confdefaultaccept_source_route" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Same as IPv4 variant but for IPv6 Routing Header Type 0 (RH0), which allows source routing in IPv6.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (disabled on most modern distros)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>0</code> (disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>IPv6 RH0 was deprecated in RFC 5095 due to amplification attack risks. A single packet with a routing header can be bounced between two nodes, amplifying traffic. Explicitly disabling it on the BNG prevents any RH0 packets from being processed.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4tcp_syncookies"><code>net.ipv4.tcp_syncookies</code><a class="headerlink" href="#netipv4tcp_syncookies" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Enables TCP SYN cookies as a fallback when the SYN backlog queue is full. Instead of allocating memory for half-open connections, the kernel encodes connection state in the SYN-ACK sequence number.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled on most modern distros)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG faces thousands of subscriber devices, some of which may be compromised and used to launch SYN flood attacks against the BNG's management interface (port 8470) or against other subscribers' services behind NAT. Without SYN cookies, a SYN flood exhausts the SYN backlog and prevents legitimate TCP connections — the dawos-agent API becomes unreachable. With SYN cookies, the kernel handles SYN floods without allocating per-connection memory, maintaining service availability.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>During a SYN flood, <code>ss -s</code> shows thousands of <code>SYN-RECV</code> sockets. New legitimate connections (including dawos-agent API requests and SSH) are refused. The BNG is still forwarding subscriber traffic, but the operator cannot manage it remotely.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">SYN cookies trade-off</p>
+<p>SYN cookies sacrifice TCP options negotiation (window scaling, selective ACK, timestamps) during a flood. This slightly reduces throughput for connections established while under attack. Once the flood stops, new connections negotiate full TCP options normally. The protection benefit far outweighs this minor trade-off.</p>
+</div>
+<h4 id="netipv4icmp_echo_ignore_broadcasts"><code>net.ipv4.icmp_echo_ignore_broadcasts</code><a class="headerlink" href="#netipv4icmp_echo_ignore_broadcasts" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>When enabled, the kernel does not respond to ICMP echo requests (pings) sent to broadcast or multicast addresses.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled on most modern distros)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A <strong>Smurf attack</strong> works by sending ICMP echo requests to a broadcast address with a spoofed source IP (the victim's IP). Every host on the broadcast domain responds, flooding the victim with echo replies. A BNG connected to multiple subnets could amplify such an attack massively. Ignoring broadcast pings eliminates the BNG as a Smurf amplifier.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4icmp_ignore_bogus_error_responses"><code>net.ipv4.icmp_ignore_bogus_error_responses</code><a class="headerlink" href="#netipv4icmp_ignore_bogus_error_responses" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>When enabled, the kernel ignores ICMP error responses that violate RFC 1122 (e.g., ICMP responses to broadcast addresses, ICMP errors about ICMP errors).</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1</code> (enabled on most modern distros)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Many consumer CPE devices (cheap routers, ONTs) send malformed ICMP error messages. Without this setting, each bogus ICMP error is logged to the kernel log, consuming disk I/O and potentially filling the log partition. On a BNG with hundreds of CPEs, this can generate thousands of bogus error log entries per day. Enabling this setting silently ignores them.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-network-security.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netcoredefault_qdisc"><code>net.core.default_qdisc</code><a class="headerlink" href="#netcoredefault_qdisc" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Sets the default packet scheduler (queueing discipline) for all network interfaces. The packet scheduler determines how outgoing packets are queued and which packets are sent first when the link is congested.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>pfifo_fast</code> (simple FIFO with 3 priority bands)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>fq_codel</code> (Fair Queue Controlled Delay)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td><code>pfifo_fast</code> is a simple first-in-first-out queue. When a link is congested, it fills up and every flow suffers equally. A single subscriber downloading a large file can cause latency spikes for all other subscribers sharing the same uplink. <strong>Bufferbloat</strong> is the phenomenon where large buffers in the network path absorb packets during congestion, causing latency to spike from milliseconds to seconds.</td>
+</tr>
+<tr>
+<td><strong>What <code>fq_codel</code> does</strong></td>
+<td>Two things: (1) <strong>Fair Queuing</strong> -- creates a separate queue per flow (identified by source/destination IP+port). A heavy downloader gets its own queue and cannot starve a VoIP call or a gaming session. (2) <strong>CoDel</strong> (Controlled Delay) -- monitors queue residence time. If packets sit in the queue too long (indicating congestion), CoDel probabilistically drops packets to signal the sender to slow down, keeping latency low.</td>
+</tr>
+<tr>
+<td><strong>Real-world impact</strong></td>
+<td>Without <code>fq_codel</code>: a subscriber downloading at full speed causes 200-500ms latency for other subscribers. With <code>fq_codel</code>: latency stays under 10-20ms even during congestion. Gaming and VoIP remain usable while downloads proceed at full speed.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/10-bufferbloat.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Per-subscriber rate limiting</p>
+<p><code>fq_codel</code> handles fairness between flows on a single interface. For per-subscriber bandwidth limits, accel-ppp uses <code>tc</code> (traffic control) with <code>tbf</code> (token bucket filter) or <code>htb</code> (hierarchical token bucket) qdiscs on each <code>ppp</code> interface. DawOS Agent manages these via the <code>GET /api/v1/traffic/ratelimits</code> and <code>POST /api/v1/traffic/ratelimit</code> endpoints.</p>
+</div>
+<hr />
+<h3 id="tcp-performance">TCP Performance<a class="headerlink" href="#tcp-performance" title="Permanent link">&para;</a></h3>
+<p>These parameters optimize TCP behavior for a BNG that performs NAT on behalf of hundreds or thousands of subscribers. They reduce resource consumption from stale connections and improve throughput on lossy subscriber links.</p>
+<h4 id="netipv4tcp_fin_timeout"><code>net.ipv4.tcp_fin_timeout</code><a class="headerlink" href="#netipv4tcp_fin_timeout" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>How many seconds to wait for a final FIN-ACK after the local side has closed a TCP connection. During this time, the socket remains in <code>FIN_WAIT_2</code> state, consuming a conntrack entry and kernel memory.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>60</code> (1 minute)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>30</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>When a subscriber disconnects (CPE reboot, cable pull, power loss), their TCP connections on the BNG's NAT table enter <code>FIN_WAIT_2</code> — the BNG sent a FIN but the subscriber's device never responded. With the default 60-second timeout, each dead connection occupies a conntrack slot for a full minute. During a mass reconnection event (power outage recovery), hundreds of subscribers disconnect simultaneously, creating thousands of stale <code>FIN_WAIT_2</code> entries. Reducing to 30 seconds reclaims these entries twice as fast.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4tcp_tw_reuse"><code>net.ipv4.tcp_tw_reuse</code><a class="headerlink" href="#netipv4tcp_tw_reuse" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Allows the kernel to reuse sockets in <code>TIME_WAIT</code> state for new outgoing connections, provided the TCP timestamp is newer than the last packet on the old connection.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>2</code> (enabled for loopback only, kernel 5.17+) or <code>0</code> (disabled, older kernels)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (enabled for all connections)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>When a BNG performs SNAT (masquerade) for subscriber traffic, it assigns a source port from the ephemeral port range (32768-60999 = ~28,000 ports) for each outgoing connection. When a connection closes, the source port enters <code>TIME_WAIT</code> for 60 seconds and cannot be reused. If many subscribers connect to the same destination (e.g., YouTube, Netflix, Google), the BNG can exhaust available source ports. With <code>tcp_tw_reuse=1</code>, ports in <code>TIME_WAIT</code> can be immediately reused for new connections to the same destination, preventing source port exhaustion.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>Under heavy NAT load, <code>ss -s</code> shows thousands of <code>TIME_WAIT</code> sockets. New outgoing connections fail with <code>EADDRNOTAVAIL</code> (no available source ports). Subscribers see "connection refused" or timeouts when accessing popular websites.</td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>ss -s | grep TIME-WAIT</code> — if the count exceeds 20,000, you need <code>tcp_tw_reuse=1</code> or a larger ephemeral port range.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">tcp_tw_reuse vs tcp_tw_recycle</p>
+<p><code>tcp_tw_recycle</code> was removed from the kernel in version 4.12 because it broke connections behind NAT. <strong>Never</strong> use <code>tcp_tw_recycle</code>. Only <code>tcp_tw_reuse</code> is safe — it uses TCP timestamps to ensure the reused port doesn't cause packet confusion.</p>
+</div>
+<h4 id="netipv4tcp_no_metrics_save"><code>net.ipv4.tcp_no_metrics_save</code><a class="headerlink" href="#netipv4tcp_no_metrics_save" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>When disabled (<code>0</code>, default), the kernel caches TCP performance metrics (RTT, CWND, SSTHRESH) per destination IP. When a new connection is established to the same destination, it inherits the cached metrics. When enabled (<code>1</code>), each connection starts fresh with default TCP parameters.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>0</code> (caching enabled)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>1</code> (caching disabled)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>On a BNG, the kernel sees traffic from hundreds of subscriber IPs to the same destination (e.g., many subscribers accessing <code>8.8.8.8</code>). If one subscriber's connection experiences packet loss, the kernel caches a low congestion window for that destination. When the next subscriber connects to the same destination through NAT, it inherits the degraded metrics — even though this subscriber's link is perfectly fine. This "metric poisoning" causes unexplained slowness for random subscribers. Disabling metric caching ensures each connection performs its own TCP slow start and congestion control independently.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="netipv4tcp_congestion_control"><code>net.ipv4.tcp_congestion_control</code><a class="headerlink" href="#netipv4tcp_congestion_control" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Selects the TCP congestion control algorithm used for all TCP connections. The congestion control algorithm determines how fast TCP ramps up its sending rate and how it responds to packet loss.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>cubic</code></td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>bbr</code></td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td><strong>CUBIC</strong> (the default) is loss-based: it increases throughput until a packet is lost, then backs off dramatically. On a BNG where subscriber links may have 0.1-1% natural packet loss (DSL, wireless CPE, long copper runs), CUBIC interprets every lost packet as congestion and throttles throughput unnecessarily. <strong>BBR</strong> (Bottleneck Bandwidth and Round-trip time), developed by Google, is model-based: it continuously estimates the bottleneck bandwidth and minimum RTT, adjusting sending rate to match the actual link capacity without relying on packet loss as a congestion signal.</td>
+</tr>
+<tr>
+<td><strong>Real-world impact</strong></td>
+<td>On a subscriber link with 0.5% packet loss: CUBIC achieves ~30% of link capacity, BBR achieves ~95%. Google reports 2-25x throughput improvement on lossy links after deploying BBR. For ISP subscribers on imperfect last-mile connections, BBR can significantly improve download speeds.</td>
+</tr>
+<tr>
+<td><strong>Prerequisite</strong></td>
+<td>BBR requires the <code>fq</code> or <code>fq_codel</code> qdisc (already set via <code>net.core.default_qdisc=fq_codel</code>). To verify: <code>tc qdisc show dev ens18 | grep fq</code>.</td>
+</tr>
+<tr>
+<td><strong>How to enable</strong></td>
+<td><code>modprobe tcp_bbr &amp;&amp; sysctl net.ipv4.tcp_congestion_control=bbr</code>. To verify: <code>sysctl net.ipv4.tcp_congestion_control</code> should show <code>bbr</code>.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">BBR affects BNG-originated traffic only</p>
+<p>The TCP congestion control setting affects connections <strong>originated by the BNG</strong> (dawos-agent API responses, RADIUS packets, management SSH sessions) and connections <strong>terminated at the BNG</strong> (if running local services). It does <strong>not</strong> affect subscriber-to-internet traffic that the BNG merely forwards/NATs — that traffic uses the congestion control algorithm of the subscriber's device and the remote server.</p>
+</div>
+<hr />
+<h3 id="memory-management">Memory Management<a class="headerlink" href="#memory-management" title="Permanent link">&para;</a></h3>
+<h4 id="vmmin_free_kbytes"><code>vm.min_free_kbytes</code><a class="headerlink" href="#vmmin_free_kbytes" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Minimum amount of memory (in KB) the kernel keeps free at all times. When free memory drops below this threshold, the kernel starts reclaiming memory more aggressively from page cache and other sources.</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td>Calculated based on total RAM (~67 MB on a 2 GB system)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>131072</code> (128 MB)</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>A BNG handles burst traffic patterns: when many subscribers come online simultaneously (morning, after a power outage), the kernel must allocate thousands of <code>sk_buff</code> structures (socket buffers) for incoming packets. Each <code>sk_buff</code> is ~240 bytes plus the packet data. A burst of 10,000 packets requires ~4 MB of immediately-available memory. If the kernel's free memory is too low, it must invoke the OOM (Out of Memory) killer to free memory — and the OOM killer may choose to kill accel-ppp or dawos-agent, causing a service outage. Setting <code>min_free_kbytes=131072</code> ensures 128 MB is always available for burst allocation.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>During traffic bursts, <code>dmesg</code> shows <code>page allocation failure</code> or <code>Out of memory: Kill process</code>. The OOM killer selects the process using the most memory — which is often accel-ppp (the process you least want killed). All PPPoE sessions drop simultaneously.</td>
+</tr>
+<tr>
+<td><strong>Memory cost</strong></td>
+<td>The 128 MB is not wasted — it's held as free pages that the kernel uses for network buffers, file system cache, and other transient allocations. It simply prevents the kernel from using this memory for page cache that would need to be reclaimed under pressure.</td>
+</tr>
+<tr>
+<td><strong>How to monitor</strong></td>
+<td><code>cat /proc/meminfo | grep MemFree</code> — should always be above <code>min_free_kbytes</code>. If it frequently drops to exactly <code>min_free_kbytes</code>, the system is under memory pressure and may need more RAM.</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>/etc/sysctl.d/99-accel-ppp.conf</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="process-file-descriptor-limits_1">Process File Descriptor Limits<a class="headerlink" href="#process-file-descriptor-limits_1" title="Permanent link">&para;</a></h3>
+<p>The <code>fs.file-max</code> sysctl sets the <strong>system-wide</strong> file descriptor limit, but each process also has its own per-process limit controlled by <code>ulimit</code> and systemd's <code>LimitNOFILE</code>. Both must be raised for a BNG.</p>
+<h4 id="per-process-nofile-limit">Per-process <code>nofile</code> limit<a class="headerlink" href="#per-process-nofile-limit" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What it does</strong></td>
+<td>Maximum number of file descriptors a single process can open. Controlled by <code>/etc/security/limits.conf</code> (for login sessions) and systemd's <code>LimitNOFILE</code> (for services).</td>
+</tr>
+<tr>
+<td><strong>Default</strong></td>
+<td><code>1024</code> (soft) / <code>1048576</code> (hard, kernel 5.10+)</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><code>65536</code> for both soft and hard limits</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>Even though <code>fs.file-max</code> allows 1 million file descriptors system-wide, each process is individually limited to 1024 by default. accel-ppp with 500 sessions may need 2,000+ file descriptors (2 per PPP session + RADIUS sockets + internal pipes). dawos-agent needs file descriptors for its HTTP server, subprocess pipes, and log files. At the default 1024 limit, both processes can hit <code>Too many open files</code> errors.</td>
+</tr>
+<tr>
+<td><strong>What happens without it</strong></td>
+<td>accel-ppp logs <code>accept: Too many open files</code> and refuses new PPPoE sessions. dawos-agent returns HTTP 500 for requests that need subprocess execution. The system-wide <code>fs.file-max</code> is nowhere near exhausted, making this confusing to diagnose.</td>
+</tr>
+<tr>
+<td><strong>How to configure</strong></td>
+<td>See the <a href="#quick-apply">Quick Apply</a> section for the complete setup. Both <code>/etc/security/limits.d/dawos.conf</code> and systemd service overrides are needed — <code>limits.conf</code> does not apply to systemd-managed services.</td>
+</tr>
+<tr>
+<td><strong>How to verify</strong></td>
+<td>For dawos-agent: <code>cat /proc/$(pgrep -f dawos)/limits | grep "Max open files"</code>. For accel-ppp: <code>cat /proc/$(pgrep accel-pppd)/limits | grep "Max open files"</code>. Both should show <code>65536</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="scaling-guide">Scaling Guide<a class="headerlink" href="#scaling-guide" title="Permanent link">&para;</a></h2>
+<p>The recommended values above are optimized for a BNG with <strong>500-2,000 subscribers</strong>. For smaller or larger deployments, adjust accordingly:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th style="text-align: center;">&lt; 200 subs</th>
+<th style="text-align: center;">500-2,000 subs</th>
+<th style="text-align: center;">2,000-10,000 subs</th>
+<th style="text-align: center;">10,000+ subs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nf_conntrack_max</code></td>
+<td style="text-align: center;">262144</td>
+<td style="text-align: center;">1048576</td>
+<td style="text-align: center;">2097152</td>
+<td style="text-align: center;">4194304</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_buckets</code></td>
+<td style="text-align: center;">65536</td>
+<td style="text-align: center;">262144</td>
+<td style="text-align: center;">524288</td>
+<td style="text-align: center;">1048576</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_tcp_timeout_established</code></td>
+<td style="text-align: center;">43200</td>
+<td style="text-align: center;">43200</td>
+<td style="text-align: center;">21600</td>
+<td style="text-align: center;">10800</td>
+</tr>
+<tr>
+<td><code>neigh.gc_thresh3</code></td>
+<td style="text-align: center;">16384</td>
+<td style="text-align: center;">65536</td>
+<td style="text-align: center;">131072</td>
+<td style="text-align: center;">262144</td>
+</tr>
+<tr>
+<td><code>netdev_max_backlog</code></td>
+<td style="text-align: center;">100000</td>
+<td style="text-align: center;">250000</td>
+<td style="text-align: center;">500000</td>
+<td style="text-align: center;">1000000</td>
+</tr>
+<tr>
+<td><code>rmem_max</code> / <code>wmem_max</code></td>
+<td style="text-align: center;">8388608</td>
+<td style="text-align: center;">16777216</td>
+<td style="text-align: center;">33554432</td>
+<td style="text-align: center;">67108864</td>
+</tr>
+<tr>
+<td><code>file-max</code></td>
+<td style="text-align: center;">500000</td>
+<td style="text-align: center;">1000000</td>
+<td style="text-align: center;">2000000</td>
+<td style="text-align: center;">4000000</td>
+</tr>
+<tr>
+<td><code>vm.min_free_kbytes</code></td>
+<td style="text-align: center;">65536</td>
+<td style="text-align: center;">131072</td>
+<td style="text-align: center;">262144</td>
+<td style="text-align: center;">524288</td>
+</tr>
+<tr>
+<td><code>LimitNOFILE</code></td>
+<td style="text-align: center;">32768</td>
+<td style="text-align: center;">65536</td>
+<td style="text-align: center;">131072</td>
+<td style="text-align: center;">262144</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Memory impact of conntrack sizing:</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"><code>nf_conntrack_max</code></th>
+<th style="text-align: center;">Entries</th>
+<th style="text-align: center;">Kernel memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">262144</td>
+<td style="text-align: center;">256k</td>
+<td style="text-align: center;">~80 MB</td>
+</tr>
+<tr>
+<td style="text-align: center;">1048576</td>
+<td style="text-align: center;">1M</td>
+<td style="text-align: center;">~320 MB</td>
+</tr>
+<tr>
+<td style="text-align: center;">2097152</td>
+<td style="text-align: center;">2M</td>
+<td style="text-align: center;">~640 MB</td>
+</tr>
+<tr>
+<td style="text-align: center;">4194304</td>
+<td style="text-align: center;">4M</td>
+<td style="text-align: center;">~1.3 GB</td>
+</tr>
+</tbody>
+</table>
+<p>For large deployments (10,000+ subscribers), ensure the BNG has at least 8 GB RAM to accommodate the conntrack table, ARP table, and per-session state.</p>
+<hr />
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
+<p>After applying the kernel tuning, verify all values are active:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="ch">#!/usr/bin/env bash</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># verify-kernel-tuning.sh — Check all BNG kernel parameters</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Packet Forwarding ===&quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>sysctl<span class="w"> </span>net.ipv4.ip_forward
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>sysctl<span class="w"> </span>net.ipv6.conf.all.forwarding
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Reverse Path Filtering ===&quot;</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.rp_filter
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>sysctl<span class="w"> </span>net.ipv4.conf.default.rp_filter
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Socket Buffers ===&quot;</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>sysctl<span class="w"> </span>net.core.rmem_max
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>sysctl<span class="w"> </span>net.core.wmem_max
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Network Backlog ===&quot;</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>sysctl<span class="w"> </span>net.core.netdev_max_backlog
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>sysctl<span class="w"> </span>net.core.somaxconn
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== File Descriptors ===&quot;</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>sysctl<span class="w"> </span>fs.file-max
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>cat<span class="w"> </span>/proc/sys/fs/file-nr<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{printf &quot;  allocated/max: %s/%s (%.1f%% used)\n&quot;, $1, $3, ($1/$3)*100}&#39;</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== ARP Table ===&quot;</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>sysctl<span class="w"> </span>net.ipv4.neigh.default.gc_thresh1
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>sysctl<span class="w"> </span>net.ipv4.neigh.default.gc_thresh2
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>sysctl<span class="w"> </span>net.ipv4.neigh.default.gc_thresh3
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  current ARP entries: </span><span class="k">$(</span>ip<span class="w"> </span>-s<span class="w"> </span>neigh<span class="w"> </span>show<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Connection Tracking ===&quot;</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_max
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_buckets<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  buckets (module param): </span><span class="k">$(</span>cat<span class="w"> </span>/sys/module/nf_conntrack/parameters/hashsize<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_tcp_timeout_established
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_tcp_timeout_fin_wait<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_udp_timeout
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_udp_timeout_stream
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>sysctl<span class="w"> </span>net.netfilter.nf_conntrack_icmp_timeout
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="nv">COUNT</span><span class="o">=</span><span class="k">$(</span>cat<span class="w"> </span>/proc/sys/net/netfilter/nf_conntrack_count<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="k">)</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="nv">MAX</span><span class="o">=</span><span class="k">$(</span>cat<span class="w"> </span>/proc/sys/net/netfilter/nf_conntrack_max<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;N/A&quot;</span><span class="k">)</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  current entries: </span><span class="si">${</span><span class="nv">COUNT</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">MAX</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== TCP Performance ===&quot;</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>sysctl<span class="w"> </span>net.ipv4.tcp_fin_timeout
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>sysctl<span class="w"> </span>net.ipv4.tcp_tw_reuse
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>sysctl<span class="w"> </span>net.ipv4.tcp_no_metrics_save
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>sysctl<span class="w"> </span>net.ipv4.tcp_congestion_control
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  TIME_WAIT count: </span><span class="k">$(</span>ss<span class="w"> </span>-s<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-oP<span class="w"> </span><span class="s1">&#39;timewait \K[0-9]+&#39;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;N/A&#39;</span><span class="k">)</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Security Hardening ===&quot;</span>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.send_redirects
+<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.accept_redirects
+<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.secure_redirects
+<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.accept_source_route
+<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>sysctl<span class="w"> </span>net.ipv6.conf.all.accept_redirects
+<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>sysctl<span class="w"> </span>net.ipv6.conf.all.accept_source_route
+<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a>sysctl<span class="w"> </span>net.ipv4.conf.all.log_martians
+<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>sysctl<span class="w"> </span>net.ipv4.tcp_syncookies
+<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>sysctl<span class="w"> </span>net.ipv4.icmp_echo_ignore_broadcasts
+<a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a>sysctl<span class="w"> </span>net.ipv4.icmp_ignore_bogus_error_responses
+<a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>
+<a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-71" name="__codelineno-2-71" href="#__codelineno-2-71"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Packet Scheduler ===&quot;</span>
+<a id="__codelineno-2-72" name="__codelineno-2-72" href="#__codelineno-2-72"></a>sysctl<span class="w"> </span>net.core.default_qdisc
+<a id="__codelineno-2-73" name="__codelineno-2-73" href="#__codelineno-2-73"></a>
+<a id="__codelineno-2-74" name="__codelineno-2-74" href="#__codelineno-2-74"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-75" name="__codelineno-2-75" href="#__codelineno-2-75"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Memory Management ===&quot;</span>
+<a id="__codelineno-2-76" name="__codelineno-2-76" href="#__codelineno-2-76"></a>sysctl<span class="w"> </span>vm.min_free_kbytes
+<a id="__codelineno-2-77" name="__codelineno-2-77" href="#__codelineno-2-77"></a><span class="nv">FREE_KB</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>MemFree<span class="w"> </span>/proc/meminfo<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
+<a id="__codelineno-2-78" name="__codelineno-2-78" href="#__codelineno-2-78"></a><span class="nv">MIN_KB</span><span class="o">=</span><span class="k">$(</span>sysctl<span class="w"> </span>-n<span class="w"> </span>vm.min_free_kbytes<span class="k">)</span>
+<a id="__codelineno-2-79" name="__codelineno-2-79" href="#__codelineno-2-79"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  current free: </span><span class="si">${</span><span class="nv">FREE_KB</span><span class="si">}</span><span class="s2"> KB (min: </span><span class="si">${</span><span class="nv">MIN_KB</span><span class="si">}</span><span class="s2"> KB)&quot;</span>
+<a id="__codelineno-2-80" name="__codelineno-2-80" href="#__codelineno-2-80"></a>
+<a id="__codelineno-2-81" name="__codelineno-2-81" href="#__codelineno-2-81"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-82" name="__codelineno-2-82" href="#__codelineno-2-82"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Process Limits ===&quot;</span>
+<a id="__codelineno-2-83" name="__codelineno-2-83" href="#__codelineno-2-83"></a><span class="nv">DAWOS_PID</span><span class="o">=</span><span class="k">$(</span>pgrep<span class="w"> </span>-f<span class="w"> </span>dawos<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+<a id="__codelineno-2-84" name="__codelineno-2-84" href="#__codelineno-2-84"></a><span class="nv">ACCEL_PID</span><span class="o">=</span><span class="k">$(</span>pgrep<span class="w"> </span>accel-pppd<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+<a id="__codelineno-2-85" name="__codelineno-2-85" href="#__codelineno-2-85"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$DAWOS_PID</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-2-86" name="__codelineno-2-86" href="#__codelineno-2-86"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  dawos-agent (PID </span><span class="si">${</span><span class="nv">DAWOS_PID</span><span class="si">}</span><span class="s2">):&quot;</span>
+<a id="__codelineno-2-87" name="__codelineno-2-87" href="#__codelineno-2-87"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">&quot;Max open files&quot;</span><span class="w"> </span>/proc/<span class="si">${</span><span class="nv">DAWOS_PID</span><span class="si">}</span>/limits<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{printf &quot;    nofile: soft=%s hard=%s\n&quot;, $4, $5}&#39;</span>
+<a id="__codelineno-2-88" name="__codelineno-2-88" href="#__codelineno-2-88"></a><span class="k">fi</span>
+<a id="__codelineno-2-89" name="__codelineno-2-89" href="#__codelineno-2-89"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ACCEL_PID</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<a id="__codelineno-2-90" name="__codelineno-2-90" href="#__codelineno-2-90"></a><span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;  accel-ppp (PID </span><span class="si">${</span><span class="nv">ACCEL_PID</span><span class="si">}</span><span class="s2">):&quot;</span>
+<a id="__codelineno-2-91" name="__codelineno-2-91" href="#__codelineno-2-91"></a><span class="w">  </span>grep<span class="w"> </span><span class="s2">&quot;Max open files&quot;</span><span class="w"> </span>/proc/<span class="si">${</span><span class="nv">ACCEL_PID</span><span class="si">}</span>/limits<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{printf &quot;    nofile: soft=%s hard=%s\n&quot;, $4, $5}&#39;</span>
+<a id="__codelineno-2-92" name="__codelineno-2-92" href="#__codelineno-2-92"></a><span class="k">fi</span>
+<a id="__codelineno-2-93" name="__codelineno-2-93" href="#__codelineno-2-93"></a>
+<a id="__codelineno-2-94" name="__codelineno-2-94" href="#__codelineno-2-94"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-2-95" name="__codelineno-2-95" href="#__codelineno-2-95"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Softnet Backlog Drops (should be 0) ===&quot;</span>
+<a id="__codelineno-2-96" name="__codelineno-2-96" href="#__codelineno-2-96"></a>awk<span class="w"> </span><span class="s1">&#39;{print &quot;  CPU&quot; NR-1 &quot;: dropped=&quot; $2 &quot; time_squeeze=&quot; $3}&#39;</span><span class="w"> </span>/proc/net/softnet_stat<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-4
+</code></pre></div>
+<h3 id="expected-output">Expected Output<a class="headerlink" href="#expected-output" title="Permanent link">&para;</a></h3>
+<p>All values should match the recommended settings. Key things to watch:</p>
+<ul>
+<li><code>ip_forward = 1</code> -- if <code>0</code>, subscribers cannot reach the internet</li>
+<li><code>nf_conntrack_count</code> should be well below <code>nf_conntrack_max</code> -- if it's above 80%, increase the limit or reduce timeouts</li>
+<li><code>tcp_syncookies = 1</code> -- if <code>0</code>, the BNG is vulnerable to SYN flood attacks</li>
+<li><code>accept_redirects = 0</code> and <code>accept_source_route = 0</code> -- if <code>1</code>, the BNG is vulnerable to routing manipulation</li>
+<li><code>tcp_congestion_control = bbr</code> -- if <code>cubic</code>, throughput may be suboptimal on lossy subscriber links</li>
+<li><code>TIME_WAIT count</code> should be under 20,000 -- if higher, ensure <code>tcp_tw_reuse=1</code> is active</li>
+<li><code>softnet_stat</code> dropped column should be <code>0</code> -- non-zero means <code>netdev_max_backlog</code> needs to be larger</li>
+<li><code>file-nr</code> usage should be below 50% -- if it's above 80%, increase <code>file-max</code></li>
+<li>Process <code>nofile</code> limits should show <code>65536</code> -- if <code>1024</code>, the systemd override is not applied</li>
+</ul>
+<hr />
+<h2 id="monitoring-via-dawos-agent-api">Monitoring via DawOS Agent API<a class="headerlink" href="#monitoring-via-dawos-agent-api" title="Permanent link">&para;</a></h2>
+<p>Several DawOS Agent endpoints expose kernel tuning-related information:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/v1/conntrack/status</code></td>
+<td>Current conntrack count, max, and usage percentage</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/conntrack/timeouts</code></td>
+<td>Active conntrack timeout values (TCP, UDP, ICMP)</td>
+</tr>
+<tr>
+<td><code>POST /api/v1/conntrack/flush</code></td>
+<td>Flush the conntrack table (emergency use)</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/firewall/sysctl</code></td>
+<td>All active sysctl values related to networking</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/sessions/stats</code></td>
+<td>Active session count (correlates with ARP table size)</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/network/throughput</code></td>
+<td>Per-interface traffic (high throughput = need larger buffers)</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/diagnostics</code></td>
+<td>System health check including kernel parameter validation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="reference-production-bng-configuration">Reference: Production BNG Configuration<a class="headerlink" href="#reference-production-bng-configuration" title="Permanent link">&para;</a></h2>
+<p>These are the actual kernel tuning files deployed on a production BNG (accel-2, <code>192.168.212.226</code>) serving real ISP subscribers since June 2024.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gap analysis</p>
+<p>The production configuration below covers the <strong>essential</strong> BNG tuning but is missing several parameters recommended in this guide. See <a href="#recommended-additions-for-production">Recommended Additions</a> below for what should be added.</p>
+</div>
+<h3 id="etcsysctld99-accel-pppconf"><code>/etc/sysctl.d/99-accel-ppp.conf</code><a class="headerlink" href="#etcsysctld99-accel-pppconf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="na">net.ipv4.ip_forward</span><span class="o">=</span><span class="s">1</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="na">net.ipv6.conf.all.forwarding</span><span class="o">=</span><span class="s">1</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="na">net.ipv4.conf.all.rp_filter</span><span class="o">=</span><span class="s">2</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="na">net.ipv4.conf.default.rp_filter</span><span class="o">=</span><span class="s">2</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="na">net.core.rmem_max</span><span class="o">=</span><span class="s">16777216</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="na">net.core.wmem_max</span><span class="o">=</span><span class="s">16777216</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="na">net.core.netdev_max_backlog</span><span class="o">=</span><span class="s">250000</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="na">net.core.somaxconn</span><span class="o">=</span><span class="s">4096</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="na">fs.file-max</span><span class="o">=</span><span class="s">1000000</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="na">net.ipv4.neigh.default.gc_thresh1</span><span class="o">=</span><span class="s">8192</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="na">net.ipv4.neigh.default.gc_thresh2</span><span class="o">=</span><span class="s">32768</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="na">net.ipv4.neigh.default.gc_thresh3</span><span class="o">=</span><span class="s">65536</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="na">net.netfilter.nf_conntrack_max</span><span class="o">=</span><span class="s">1048576</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="na">net.netfilter.nf_conntrack_tcp_timeout_established</span><span class="o">=</span><span class="s">43200</span>
+</code></pre></div>
+<h3 id="etcsysctld10-network-securityconf"><code>/etc/sysctl.d/10-network-security.conf</code><a class="headerlink" href="#etcsysctld10-network-securityconf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="na">net.ipv4.conf.default.rp_filter</span><span class="o">=</span><span class="s">2</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="na">net.ipv4.conf.all.rp_filter</span><span class="o">=</span><span class="s">2</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="na">net.ipv4.conf.all.send_redirects</span><span class="o">=</span><span class="s">0</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="na">net.ipv4.conf.default.send_redirects</span><span class="o">=</span><span class="s">0</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="na">net.ipv4.conf.all.log_martians</span><span class="o">=</span><span class="s">1</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="na">net.ipv4.conf.default.log_martians</span><span class="o">=</span><span class="s">1</span>
+</code></pre></div>
+<h3 id="etcsysctld10-bufferbloatconf"><code>/etc/sysctl.d/10-bufferbloat.conf</code><a class="headerlink" href="#etcsysctld10-bufferbloatconf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="na">net.core.default_qdisc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">fq_codel</span>
+</code></pre></div>
+<h3 id="recommended-additions-for-production">Recommended Additions for Production<a class="headerlink" href="#recommended-additions-for-production" title="Permanent link">&para;</a></h3>
+<p>These parameters are documented in this guide but <strong>not yet deployed</strong> on the production BNG. They should be added during the next maintenance window:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Category</th>
+<th>Risk if missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nf_conntrack_buckets</code></td>
+<td><code>262144</code></td>
+<td>Performance</td>
+<td>Slow conntrack lookup under heavy NAT load</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_tcp_timeout_fin_wait</code></td>
+<td><code>30</code></td>
+<td>Performance</td>
+<td>Stale FIN_WAIT entries waste conntrack slots</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_udp_timeout</code></td>
+<td><code>10</code></td>
+<td>Performance</td>
+<td>DNS conntrack entries live 3x longer than needed</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_udp_timeout_stream</code></td>
+<td><code>60</code></td>
+<td>Performance</td>
+<td>Dead UDP streams waste conntrack slots</td>
+</tr>
+<tr>
+<td><code>nf_conntrack_icmp_timeout</code></td>
+<td><code>10</code></td>
+<td>Performance</td>
+<td>Ping conntrack entries live 3x longer than needed</td>
+</tr>
+<tr>
+<td><code>tcp_fin_timeout</code></td>
+<td><code>30</code></td>
+<td>Performance</td>
+<td>Dead TCP connections in FIN_WAIT_2 for 60s</td>
+</tr>
+<tr>
+<td><code>tcp_tw_reuse</code></td>
+<td><code>1</code></td>
+<td>Performance</td>
+<td>Source port exhaustion under heavy NAT</td>
+</tr>
+<tr>
+<td><code>tcp_no_metrics_save</code></td>
+<td><code>1</code></td>
+<td>Performance</td>
+<td>Subscriber metric poisoning via cached TCP state</td>
+</tr>
+<tr>
+<td><code>tcp_congestion_control</code></td>
+<td><code>bbr</code></td>
+<td>Performance</td>
+<td>Suboptimal throughput on lossy subscriber links</td>
+</tr>
+<tr>
+<td><code>vm.min_free_kbytes</code></td>
+<td><code>131072</code></td>
+<td>Stability</td>
+<td>OOM killer during traffic bursts</td>
+</tr>
+<tr>
+<td><code>accept_redirects</code></td>
+<td><code>0</code></td>
+<td><strong>Security</strong></td>
+<td>Routing table manipulation from subscriber network</td>
+</tr>
+<tr>
+<td><code>secure_redirects</code></td>
+<td><code>0</code></td>
+<td><strong>Security</strong></td>
+<td>Gateway-sourced redirect attacks</td>
+</tr>
+<tr>
+<td><code>accept_source_route</code></td>
+<td><code>0</code></td>
+<td><strong>Security</strong></td>
+<td>Firewall bypass via source-routed packets</td>
+</tr>
+<tr>
+<td><code>tcp_syncookies</code></td>
+<td><code>1</code></td>
+<td><strong>Security</strong></td>
+<td>SYN flood denial of service</td>
+</tr>
+<tr>
+<td><code>icmp_echo_ignore_broadcasts</code></td>
+<td><code>1</code></td>
+<td><strong>Security</strong></td>
+<td>Smurf DDoS amplification</td>
+</tr>
+<tr>
+<td><code>icmp_ignore_bogus_error_responses</code></td>
+<td><code>1</code></td>
+<td><strong>Security</strong></td>
+<td>Log spam from malformed CPE ICMP errors</td>
+</tr>
+<tr>
+<td><code>LimitNOFILE</code></td>
+<td><code>65536</code></td>
+<td>Stability</td>
+<td>Per-process FD limit too low (default 1024)</td>
+</tr>
+</tbody>
+</table>
+<p>To apply all recommended additions at once, use the complete config files in the <a href="#quick-apply">Quick Apply</a> section — they include both the existing production values and all recommended additions.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "content.code.copy", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
